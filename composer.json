@@ -1,0 +1,26 @@
+{
+    "name": "vrok/vrok-lib",
+    "description": "Vrok Library",
+    "license": "private",
+    "homepage": "http://www.vrok.de/",
+
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4",
+        "doctrine/doctrine-module": "0.8.*",
+        "doctrine/doctrine-orm-module": "0.8.*@dev",
+        "gedmo/doctrine-extensions": "2.3.*",
+        "zendframework/zendframework": "2.3.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Vrok": "src/"
+        },
+        "classmap": [
+            "./Module.php"
+        ]
+    },
+    "bin": [
+        "bin/schema-update.sh"
+    ]
+}
