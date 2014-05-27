@@ -122,7 +122,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     /**
      * Returns a InputFilter specification to use with the InputFilter factory
      * to validate & filter all the fields.
-     * Uses the custom {@link getInputSpecification}.
+     * Uses the custom {@see getInputSpecification}.
      *
      * @return array
      */
@@ -136,6 +136,17 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
             $spec[$associationName] = $this->getInputSpecification($associationName);
         }
         return $spec;
+    }
+
+    /**
+     * Retrieve a configured InputFilter instance with all entity fields.
+     *
+     * @return \Zend\InputFilter\InputFilter
+     */
+    public function getInputFilter()
+    {
+        $factory = new \Zend\InputFilter\Factory();
+        return $factory->createInputFilter($this->getInputFilterSpecification());
     }
 
     /**

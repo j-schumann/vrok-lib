@@ -28,4 +28,16 @@ trait AutoincrementId
     {
         return $this->id;
     }
+
+    /**
+     * Just to support some interfaces/hydrators
+     *
+     * @param int $id
+     * @return self
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+        return $this;
+    }
 }

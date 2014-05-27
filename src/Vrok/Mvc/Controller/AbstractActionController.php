@@ -30,8 +30,8 @@ abstract class AbstractActionController extends ZendController
     public function createViewModel(array $variables = array())
     {
         // we want to inject the flashMessenger instance into the view
-        // as the helper would create a new instance and old messages would
-        // be load if we added new messages in the current action
+        // as the view helper would create a new instance (and old messages
+        // would not be shown if we added new messages in the current action)
         $variables['flashMessenger'] = $this->flashMessenger();
         return new ViewModel($variables);
     }
