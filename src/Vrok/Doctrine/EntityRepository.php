@@ -171,13 +171,24 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      *
      * @param Entity $instance
      * @param array $formData
+     * @return Entity
      */
     public function updateInstance(Entity $instance, array $formData)
     {
         $hydrator = new \DoctrineModule\Stdlib\Hydrator\DoctrineObject(
                 $this->getEntityManager());
-        $hydrator->hydrate($formData, $instance);
-        $this->getEntityManager()->persist($instance);
+        $object = $hydrator->hydrate($formData, $instance);
+
+        $this->getEntityManager()->persist($object);
+
+        // in rare cases when we create a new instance and set the same
+        // identifiers as an already existing record uses. The hdydrator will
+        // return a new instance (the existing record) updated with the data and
+        // leave the given $instance unchanged.
+        // For this case we return the existing record here to keep the
+        // code working, if it's not intended to update the object, the code
+        // should check for objectExists etc via validators before.
+        return $object;
     }
 
     /**
