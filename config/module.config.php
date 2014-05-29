@@ -47,7 +47,7 @@ return array(
         // add some short names that hopefully don't conflict
         'aliases' => array(
             'ClientInfo'        => 'Vrok\Client\Info',
-            'OwnerService'      => 'Vrok\Doctrine\OwnerService',
+            'OwnerService'      => 'Vrok\Owner\OwnerService',
             'UserManager'       => 'Vrok\User\Manager',
             'ValidationManager' => 'Vrok\Validation\Manager',
         ),
@@ -57,9 +57,9 @@ return array(
             'Vrok\Service\Email' => 'Vrok\Service\Email',
         ),
         'factories' => array(
-            'Vrok\Doctrine\OwnerService' => function($sm) {
+            'Vrok\Owner\OwnerService' => function($sm) {
                 $config = $sm->get('Config');
-                $service = new \Vrok\Doctrine\OwnerService();
+                $service = new \Vrok\Owner\OwnerService();
                 if (!empty($config['owner_service']['allowed_owners'])) {
                     $allowedOwners = $config['owner_service']['allowed_owners'];
                     $service->setAllowedOwners($allowedOwners);
