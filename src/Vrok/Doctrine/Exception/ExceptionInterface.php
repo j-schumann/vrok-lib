@@ -5,9 +5,7 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Validation;
+namespace Vrok\Doctrine\Exception;
 
-interface StrategyInterface
-{
-    public function __construct(\Vrok\Entity\Validation $validation);
-}
+interface ExceptionInterface
+{}

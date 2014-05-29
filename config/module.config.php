@@ -21,6 +21,18 @@ return array(
     ),
 
     'doctrine' => array(
+        'driver' => array(
+            'vrok_entities' => array(
+                'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
+                'cache' => 'array',
+                'paths' => array(__DIR__ . '/../src/Vrok/Entity')
+            ),
+            'orm_default' => array(
+                'drivers' => array(
+                    'Vrok\Entity' => 'vrok_entities'
+                ),
+            ),
+        ),
         'eventmanager' => array(
             'orm_default' => array(
                 'subscribers' => array(
@@ -32,11 +44,44 @@ return array(
     ),
 
     'service_manager' => array(
+        // add some short names that hopefully don't conflict
+        'aliases' => array(
+            'ClientInfo'        => 'Vrok\Client\Info',
+            'OwnerService'      => 'Vrok\Doctrine\OwnerService',
+            'UserManager'       => 'Vrok\User\Manager',
+            'ValidationManager' => 'Vrok\Validation\Manager',
+        ),
+        // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
-            'ClientInfo' => 'Vrok\Client\Info',
+            'Vrok\Client\Info'   => 'Vrok\Client\Info',
             'Vrok\Service\Email' => 'Vrok\Service\Email',
         ),
         'factories' => array(
+            'Vrok\Doctrine\OwnerService' => function($sm) {
+                $config = $sm->get('Config');
+                $service = new \Vrok\Doctrine\OwnerService();
+                if (!empty($config['owner_service']['allowed_owners'])) {
+                    $allowedOwners = $config['owner_service']['allowed_owners'];
+                    $service->setAllowedOwners($allowedOwners);
+                }
+                return $service;
+            },
+            'Vrok\User\Manager' => function($sm) {
+                $config = $sm->get('Config');
+                $manager = new \Vrok\User\Manager();
+                if (!empty($config['user_manager'])) {
+                    $manager->setConfig($config['user_manager']);
+                }
+                return $manager;
+            },
+            'Vrok\Validation\Manager' => function($sm) {
+                $config = $sm->get('Config');
+                $manager = new \Vrok\Validation\Manager();
+                if (!empty($config['validation_manager']['timeouts'])) {
+                    $manager->setTimeouts($config['validation_manager']['timeouts']);
+                }
+                return $manager;
+            },
             // replace the default translator with our custom implementation
             'Zend\I18n\Translator\TranslatorInterface'
                 => 'Vrok\I18n\Translator\TranslatorServiceFactory',

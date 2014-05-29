@@ -7,13 +7,16 @@
 
 namespace Vrok;
 
+use Zend\EventManager\EventInterface;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 
 /**
  * Module bootstrapping.
  */
-class Module implements AutoloaderProviderInterface, ConfigProviderInterface
+class Module implements AutoloaderProviderInterface, BootstrapListenerInterface,
+        ConfigProviderInterface
 {
     /**
      * Returns the modules default configuration.
@@ -23,6 +26,22 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
+    }
+
+    /**
+     * Attach some listeners to the shared eventmanager.
+     *
+     * @param EventInterface $e
+     */
+    public function onBootstrap(EventInterface $e)
+    {
+        $application = $e->getApplication();
+        $sharedEvents = $application->getEventManager()->getSharedManager();
+
+        // we want to lazy load the strategy object only when needed to we use a static
+        // function here
+        $sharedEvents->attach('OwnerService', 'getOwnerStrategy',
+                array('\Vrok\Owner\UserStrategy', 'onGetOwnerStrategy'));
     }
 
     /**

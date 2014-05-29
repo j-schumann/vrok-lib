@@ -5,7 +5,8 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Form\Exception;
+namespace Vrok\Doctrine\Exception;
 
-interface ExceptionInterface
+class InvalidArgumentException extends \InvalidArgumentException
+    implements ExceptionInterface
 {}

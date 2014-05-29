@@ -80,6 +80,19 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     }
 
     /**
+     * Removes the given entity from the database.
+     * (Should be used to remove entities from this repository only, but
+     * works for all entities in the assigned EntityManager.)
+     * Convenience function because getEntityManager is protected.
+     *
+     * @param object $entity
+     */
+    public function remove($entity)
+    {
+        $this->getEntityManager()->remove($entity);
+    }
+
+    /**
      * Returns true if the entity has a field with the given name, else false.
      *
      * @param string $fieldName

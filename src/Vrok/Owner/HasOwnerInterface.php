@@ -1,40 +1,44 @@
 <?php
+/**
+ * @copyright   (c) 2014, Vrok
+ * @license     http://customlicense CustomLicense
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
 
 namespace Vrok\Owner;
 
 /**
- * General interface for any entities that can be assigned to an owner.
- * If there are polymorphic owners the implementing class should be subclassed
- * for each owner type or use the strategy pattern.
+ * General interface for entities that can be assigned to polymorphic owners.
  */
 interface HasOwnerInterface
 {
     /**
-     * Returns the owner of this object.
-     *
-     * @return object
-     */
-    public function getOwner();
-
-    /**
-     * Sets the owner of this object.
-     *
-     * @param object $owner
-     */
-    public function setOwner($owner);
-
-    /**
-     * Returns the URL to which the XHR with the pattern to search for owners is
-     * sent to, The action must return the result in uniform format for all types.
+     * Returns the class of the owner of this object.
      *
      * @return string
      */
-    public function getOwnerSearchUrl();
+    public function getOwnerClass();
 
     /**
-     * Returns the URL to the admin page to view or edit the owner of the current model.
+     * Sets the owner class of this object.
      *
-     * @return string
+     * @param string $class
+     * @return self
      */
-    public function getOwnerAdminUrl();
+    public function setOwnerClass($class);
+
+    /**
+     * Returns the value that identifies to owner of this object.
+     *
+     * @return mixed
+     */
+    public function getOwnerIdentifier();
+
+    /**
+     * Sets the owner identifier.
+     *
+     * @param mixed $identifier
+     * return self
+     */
+    public function setOwnerIdentifier($identifier);
 }

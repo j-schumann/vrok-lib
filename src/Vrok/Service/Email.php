@@ -13,6 +13,9 @@ use Zend\Mail\Transport;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
+/**
+ * Service for easy composing and sending of emails.
+ */
 class Email implements ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
@@ -26,12 +29,12 @@ class Email implements ServiceLocatorAwareInterface
     public function createMail()
     {
         $mail = new Message($this->getServiceLocator()->get('translator'));
-        $mail->setFrom('ellie@vrok.de');
+        $mail->setFrom('info@ellievantgrey.com');
         return $mail;
     }
 
     /**
-     * Sends the given email.
+     * Sends the given email using the default transport.
      *
      * @param ZendMessage $mail
      */

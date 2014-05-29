@@ -5,9 +5,12 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Owner;
+namespace Vrok\Doctrine;
 
-interface StrategyInterface
+/**
+ * Describes the functionality a strategy to represent an owner type has to implement.
+ */
+interface OwnerStrategyInterface
 {
     /**
      * Returns the owner instance.
@@ -18,12 +21,13 @@ interface StrategyInterface
     public function getOwner($ownerIdentifier);
 
     /**
-     * Checks if the given instance is a valid owner for the entity.
+     * Returns the identifier to use in the owned entity.
+     * Only scalars are allowed, type should match the column type for the
+     * ownerIdentifier in the owned entity. Composite identifiers aren't supported.
      *
      * @param object $owner
-     * @return bool     true if valid, else false
      */
-    public function isValidOwner($owner);
+    public function getOwnerIdentifier($owner);
 
     /**
      * Returns the URL to which the XHR with the pattern to search for owners is
@@ -36,7 +40,25 @@ interface StrategyInterface
     /**
      * Returns the URL to the admin page to view or edit the owner.
      *
+     * @param object $owner
      * @return string
      */
-    public function getOwnerAdminUrl();
+    public function getOwnerAdminUrl($owner);
+
+    /**
+     * Returns a string with identifying information about the owner object,
+     * e.g. username + email; account number etc.
+     *
+     * @param object $owner
+     * @return object
+     */
+    public function getOwnerPresentation($owner);
+
+    /**
+     * Checks if the given object is a valid owner supported by this strategy.
+     *
+     * @param object $owner
+     * @return bool
+     */
+    public function isValidOwner($owner);
 }
