@@ -53,8 +53,9 @@ return array(
         ),
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
-            'Vrok\Client\Info'   => 'Vrok\Client\Info',
-            'Vrok\Service\Email' => 'Vrok\Service\Email',
+            'Vrok\Authentication\Adapter\Doctrine' => 'Vrok\Authentication\Adapter\Doctrine',
+            'Vrok\Client\Info'                     => 'Vrok\Client\Info',
+            'Vrok\Service\Email'                   => 'Vrok\Service\Email',
         ),
         'factories' => array(
             'Vrok\Owner\OwnerService' => function($sm) {

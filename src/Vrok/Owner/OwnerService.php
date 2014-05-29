@@ -23,6 +23,14 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
     const EVENT_GET_OWNER_STRATEGY = 'getOwnerStrategy';
 
     /**
+     * Do not only trigger under the identifier \Vrok\Owner\OwnerService but also
+     * use the short name used as serviceManager alias.
+     *
+     * @var string
+     */
+    protected $eventIdentifier = 'OwnerService';
+
+    /**
      * Hash of all registered entities that may have an owner and the possible owning
      * classes.
      *
@@ -139,6 +147,15 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
             return $this->strategies[$ownerClass];
         }
 
+        // check for exists or class_parents will trigger a warning
+        if (!class_exists($ownerClass)) {
+            if ($throwException) {
+                throw new Exception\RuntimeException("Class $ownerClass does not exist!");
+            }
+
+            return null;
+        }
+
         $classes = class_parents($ownerClass);
         $classes[] = $ownerClass;
 
@@ -157,6 +174,7 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
             foreach ($classes as $class) {
                 $this->strategies[$class] = $results->last();
             }
+
             return $this->strategies[$ownerClass];
         }
 
