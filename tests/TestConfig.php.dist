@@ -3,9 +3,6 @@ return array(
     'modules' => array(
         'DoctrineModule',
         'DoctrineORMModule',
-        'ZfcBase',
-        'ZfcUser',
-        'ZfcUserDoctrineORM',
         'Vrok',
     ),
     'module_listener_options' => array(

@@ -11,6 +11,7 @@
         "doctrine/doctrine-orm-module": "0.8.*@dev",
         "gedmo/doctrine-extensions": "2.3.*",
         "zendframework/zendframework": "2.3.*"
+        "zf-commons/zfc-user-doctrine-orm": "0.1.*",
     },
     "autoload": {
         "psr-0": {

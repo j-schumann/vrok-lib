@@ -20,4 +20,10 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
         $service = $serviceManager->get('OwnerService');
         $this->assertInstanceOf('\Vrok\Owner\OwnerService', $service);
     }
+
+    public function testUserStrategyIsAvailable()
+    {
+        $strategy = $this->ownerService->getOwnerStrategy('\Vrok\Entity\User');
+        $this->assertInstanceOf('\Vrok\Owner\UserStrategy', $strategy);
+    }
 }
