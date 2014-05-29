@@ -41,7 +41,7 @@ class Module implements AutoloaderProviderInterface, BootstrapListenerInterface,
         // we want to lazy load the strategy object only when needed to we use a static
         // function here
         $sharedEvents->attach('OwnerService', 'getOwnerStrategy',
-                array('\Vrok\Owner\UserStrategy', 'onGetOwnerStrategy'));
+                array('Vrok\Owner\UserStrategy', 'onGetOwnerStrategy'));
     }
 
     /**

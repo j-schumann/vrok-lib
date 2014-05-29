@@ -10,6 +10,9 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
+        // ensure Module::onBootstrap is called
+        \Zend\Mvc\Application::init(Bootstrap::getConfig());
+
         $serviceManager = Bootstrap::getServiceManager();
         $this->ownerService = $serviceManager->get('Vrok\Owner\OwnerService');
     }
@@ -18,25 +21,18 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
     {
         $serviceManager = Bootstrap::getServiceManager();
         $service = $serviceManager->get('OwnerService');
-        $this->assertInstanceOf('\Vrok\Owner\OwnerService', $service);
+        $this->assertInstanceOf('Vrok\Owner\OwnerService', $service);
     }
 
     public function testStrategyEventIsTriggered()
     {
-        $serviceManager = Bootstrap::getServiceManager();
-        $em = $serviceManager->get('EventManager');
-        $sm = $em->getSharedManager();
+        $em = $this->ownerService->getEventManager();
         $triggered = false;
-        $sm->attach('Vrok\Owner\OwnerService', 'getOwnerStrategy', function() use(&$triggered) {
+        $em->attach('getOwnerStrategy', function() use(&$triggered) {
             $triggered = true;
         });
+        $this->ownerService->getOwnerStrategy(__CLASS__);
 
         $this->assertTrue($triggered);
-    }
-
-    public function testUserStrategyIsAvailable()
-    {
-        $strategy = $this->ownerService->getOwnerStrategy('\Vrok\Entity\User');
-        $this->assertInstanceOf('\Vrok\Owner\UserStrategy', $strategy);
     }
 }
