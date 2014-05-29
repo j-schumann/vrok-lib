@@ -57,9 +57,10 @@ class UserStrategy implements StrategyInterface
      * Only scalars are allowed, type should match the column type for the
      * ownerIdentifier in the owned entity. Composite identifiers aren't supported.
      *
+     * @todo validate $owner
      * @param User $owner
      */
-    public function getOwnerIdentifier(User $owner)
+    public function getOwnerIdentifier(/*User*/ $owner)
     {
         return $owner->getId();
     }
@@ -78,10 +79,11 @@ class UserStrategy implements StrategyInterface
     /**
      * Returns the URL to the admin page to view or edit the owner.
      *
+     * @todo validate $owner
      * @param User $owner
      * @return string
      */
-    public function getOwnerAdminUrl(User $owner)
+    public function getOwnerAdminUrl(/*User*/ $owner)
     {
         return $this->manager->getUserAdminUrl($owner->getId());
     }
@@ -90,10 +92,11 @@ class UserStrategy implements StrategyInterface
      * Returns a string with identifying information about the owner object,
      * e.g. username + email; account number etc.
      *
+     * @todo validate $owner
      * @param User $owner
      * @return object
      */
-    public function getOwnerPresentation(User $owner)
+    public function getOwnerPresentation(/*User*/ $owner)
     {
         $name = $owner->getUsername();
         $email = $owner->getEmail();

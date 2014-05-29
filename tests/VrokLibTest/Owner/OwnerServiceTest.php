@@ -21,6 +21,19 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Vrok\Owner\OwnerService', $service);
     }
 
+    public function testStrategyEventIsTriggered()
+    {
+        $serviceManager = Bootstrap::getServiceManager();
+        $em = $serviceManager->get('EventManager');
+        $sm = $em->getSharedManager();
+        $triggered = false;
+        $sm->attach('Vrok\Owner\OwnerService', 'getOwnerStrategy', function() use(&$triggered) {
+            $triggered = true;
+        });
+
+        $this->assertTrue($triggered);
+    }
+
     public function testUserStrategyIsAvailable()
     {
         $strategy = $this->ownerService->getOwnerStrategy('\Vrok\Entity\User');

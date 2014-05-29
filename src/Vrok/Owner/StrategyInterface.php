@@ -5,12 +5,12 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Doctrine;
+namespace Vrok\Owner;
 
 /**
  * Describes the functionality a strategy to represent an owner type has to implement.
  */
-interface OwnerStrategyInterface
+interface StrategyInterface
 {
     /**
      * Returns the owner instance.

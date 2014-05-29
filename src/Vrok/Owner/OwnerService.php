@@ -130,7 +130,7 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
      * @triggers getOwnerStrategy
      * @param string $ownerClass
      * @param bool $throwException
-     * @return OwnerStrategyInterface   or null if none found
+     * @return StrategyInterface   or null if none found
      * @throws Exception\RuntimeException if no strategy was found and throwException is true
      */
     public function getOwnerStrategy($ownerClass, $throwException = false)
@@ -149,7 +149,7 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
             $this,
             array('classes' => $classes),
             function($result) {
-                return $result instanceof OwnerStrategyInterface;
+                return $result instanceof StrategyInterface;
             }
         );
 
