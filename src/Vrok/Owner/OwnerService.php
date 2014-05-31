@@ -81,6 +81,26 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
     }
 
     /**
+     * Adds the where clauses to filter for the given owner to the provided queryBuilder.
+     *
+     * @param \Doctrine\ORM\QueryBuilder $qb
+     * @param object $owner
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    public function getByOwner(\Doctrine\ORM\QueryBuilder $qb, $owner)
+    {
+        // @link http://stackoverflow.com/a/16422221/1341762
+        $alias = current($qb->getDQLPart('from'))->getAlias();
+
+        $qb->andWere($qb->expr()->eq("$alias.ownerIdentifier",
+                $this->getOwnerIdentifier($owner)));
+        $qb->andWere($qb->expr()->eq("$alias.ownerClass",
+                get_class($owner)));
+
+        return $qb;
+    }
+
+    /**
      * Retrieve the scalar identifier for the given owner entity.
      *
      * @param object $owner

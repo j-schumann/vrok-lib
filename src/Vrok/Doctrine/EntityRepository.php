@@ -80,9 +80,18 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     }
 
     /**
+     * Persists the given entity.
+     * Convenience function because getEntityManager is protected.
+     *
+     * @param object $entity
+     */
+    public function persist($entity)
+    {
+        $this->getEntityManager()->persist($entity);
+    }
+
+    /**
      * Removes the given entity from the database.
-     * (Should be used to remove entities from this repository only, but
-     * works for all entities in the assigned EntityManager.)
      * Convenience function because getEntityManager is protected.
      *
      * @param object $entity

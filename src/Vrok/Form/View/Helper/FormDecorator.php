@@ -1,4 +1,9 @@
 <?php
+/**
+ * @copyright   (c) 2014, Vrok
+ * @license     http://customlicense CustomLicense
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
 
 namespace Vrok\Form\View\Helper;
 
@@ -9,6 +14,9 @@ use Zend\Form\View\Helper\AbstractHelper;
 use Zend\Form\View\Helper\Form;
 use Zend\Form\View\Helper\FormCollection;
 
+/**
+ * Implements a view helper similar to ZF1 that renders a complete form at once.
+ */
 class FormDecorator extends AbstractHelper
 {
     /**

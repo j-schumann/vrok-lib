@@ -19,7 +19,8 @@ class AjaxForm extends Form
     /**
      * Prevents accidentally submitting the form via enter key.
      *
-     * @inheritdoc
+     * @todo don't use inline script but add listeners via jQuery
+     * {@inheritdoc}
      */
     public function __construct($name = null, $options = array())
     {

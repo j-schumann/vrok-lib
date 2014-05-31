@@ -142,7 +142,9 @@ class FormHelper implements InputFilterProviderInterface
                 // one that is automatically selected
                 'display_empty_item' => true,
             ),
-            'attributes' => array(),
+            'attributes' => array(
+                'multiple' => $this->associationIsMultiple($association),
+            ),
         );
 
         if ($this->associationIsRequired($association)) {
@@ -153,6 +155,22 @@ class FormHelper implements InputFilterProviderInterface
     }
 
     /**
+     * Checks if the association allows multiple elements.
+     *
+     * @param array $association
+     * @return bool
+     */
+    protected function associationIsMultiple($association)
+    {
+        $multiple = array(
+            \Doctrine\ORM\Mapping\ClassMetadata::ONE_TO_MANY,
+            \Doctrine\ORM\Mapping\ClassMetadata::MANY_TO_MANY,
+        );
+
+        return in_array($association['type'], $multiple);
+    }
+
+    /**
      * Checks if the relation defined by the given association is required.
      *
      * @param array $association
@@ -160,7 +178,7 @@ class FormHelper implements InputFilterProviderInterface
      */
     protected function associationIsRequired($association)
     {
-        if ($association['type'] === \Doctrine\ORM\Mapping\ClassMetadata::MANY_TO_ONE) {
+        if ($association['type'] == \Doctrine\ORM\Mapping\ClassMetadata::MANY_TO_ONE) {
             // @todo does MANY_TO_ONE always have joinColumns?
             foreach($association['joinColumns'] as $joinColumn) {
                 if ($joinColumn['nullable'] === true) {
@@ -214,7 +232,7 @@ class FormHelper implements InputFilterProviderInterface
      */
     protected function getLabel($fieldName)
     {
-        return \Vrok\Doctrine\Common::getEntityTranslationString(
+        return Common::getEntityTranslationString(
                 $this->metadata->getName(), $fieldName).'.label';
     }
 
@@ -230,6 +248,10 @@ class FormHelper implements InputFilterProviderInterface
 
         if ($this->elementIsRequired($mapping)) {
             $attributes['required'] = 'required';
+        }
+
+        if (isset($mapping['options']['default'])) {
+            $attributes['value'] = $mapping['options']['default'];
         }
 
         switch($mapping['type'])

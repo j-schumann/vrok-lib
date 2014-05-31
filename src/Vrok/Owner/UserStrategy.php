@@ -125,7 +125,7 @@ class UserStrategy implements StrategyInterface
      */
     public static function onGetOwnerStrategy(EventInterface $e)
     {
-        $classes = $e->getParam('classes');var_dump($classes);exit;
+        $classes = $e->getParam('classes');
         if (!in_array('Vrok\Entity\User', $classes)) {
             return null;
         }

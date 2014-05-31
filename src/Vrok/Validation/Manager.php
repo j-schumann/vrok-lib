@@ -25,18 +25,38 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     const EVENT_VALIDATION_SUCCESSFUL = 'validationSuccessful';
 
     /**
+     * Do not only trigger under the identifier \Vrok\Validation\Manager but also
+     * use the short name used as serviceManager alias.
+     *
+     * @var string
+     */
+    protected $eventIdentifier = 'ValidationManager';
+
+    /**
      * List of timeouts in seconds until the validations of a type expire.
      *
      * @var int[]   array(type => timeout, ...)
      */
     protected $timeouts = array();
 
-    public function createValidation($owner, $type)
+    /**
+     * Creates a new validation of the given type for the given owner.
+     *
+     * @param string $type
+     * @param object $owner
+     * @return ValidationEntity
+     */
+    public function createValidation($type, $owner)
     {
         $validation = new ValidationEntity();
+        $validation->setType($type);
+        $validation->setRandomToken();
 
         $ownerService = $this->getServiceLocator()->get('OwnerService');
         $ownerService->setOwner($validation, $owner);
+
+        $this->getValidationRepository()->persist($validation);
+        return $validation;
     }
 
     /**
@@ -50,7 +70,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      * @triggers validationSuccessful
      * @param int $id
      * @param string $token
-     * @return mixed    false|Result
+     * @return mixed    false|Response
      */
     public function confirmValidation($id, $token)
     {
@@ -59,12 +79,16 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
 
         // this will cause a failed validation event to be logged but this would
         // also be the case if the validation was already purged by the cron job
-        if ($this->isExpiredValidation($validation)) {
+        if ($validation && $this->isExpiredValidation($validation)) {
             $repository->remove($validation);
             $validation = null;
         }
 
         if (!$validation || $validation->getToken() != $token) {
+            $this->getServiceLocator()->get('ControllerPluginManager')
+                    ->get('flashMessenger')
+                    ->addErrorMessage('message.validation.noMatchingValidation');
+
             // allow logging and setting of flash messages but leave everything else
             // to the controller -> return false
             $this->getEventManager()->trigger(
@@ -84,9 +108,34 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $repository->remove($validation);
         $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->flush();
 
-        // return the event result, the controller action should return it again
-        // to allow redirects
+        // return the event result, the controller action returns it again if it is
+        // an instance of Zend\Http\Response to allow redirects
         return $results->last();
+    }
+
+    /**
+     * Queries the database for all validations matching the given owner and/or the
+     * given type.
+     *
+     * @param object $owner
+     * @param string $type
+     * @return array
+     */
+    public function getValidations($owner = null, $type = null)
+    {
+        $repository = $this->getValidationRepository();
+        $qb = $repository->createQueryBuilder('v');
+
+        if ($owner) {
+            $ownerService = $this->getServiceLocator()->get('OwnerService');
+            $ownerService->getByOwner($qb, $owner);
+        }
+
+        if ($type) {
+            $qb->where($qb->expr()->eq('v.type', $type));
+        }
+
+        return $qb->getQuery()->execute();
     }
 
     /**

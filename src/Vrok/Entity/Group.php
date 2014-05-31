@@ -7,6 +7,7 @@
 
 namespace Vrok\Entity;
 
+use BjyAuthorize\Acl\HierarchicalRoleInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,7 +19,7 @@ use Vrok\Doctrine\Entity;
  * @ORM\Entity(repositoryClass="Vrok\Entity\GroupRepository")
  * @ORM\Table(name="groups")
  */
-class Group extends Entity
+class Group extends Entity implements HierarchicalRoleInterface
 {
     use \Vrok\Doctrine\Traits\AutoincrementId;
 
@@ -29,6 +30,14 @@ class Group extends Entity
     {
         $this->members = new ArrayCollection();
         $this->children = new ArrayCollection();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRoleId()
+    {
+        return $this->getName();
     }
 
 // <editor-fold defaultstate="collapsed" desc="name">
@@ -94,7 +103,7 @@ class Group extends Entity
 // <editor-fold defaultstate="collapsed" desc="parent">
     /**
      * @ORM\ManyToOne(targetEntity="Group", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="RESTRICT")
      */
     protected $parent;
 
@@ -178,7 +187,7 @@ class Group extends Entity
      *
      * @param Collection $children
      */
-    public function addChildren($children)
+    public function addChildren(Collection $children)
     {
         foreach($children as $child) {
             $this->addChild($child);
@@ -190,7 +199,7 @@ class Group extends Entity
      *
      * @param Collection $children
      */
-    public function removeChildren($children)
+    public function removeChildren(Collection $children)
     {
         foreach($children as $child) {
             $this->removeChild($child);
@@ -199,7 +208,7 @@ class Group extends Entity
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="members">
     /**
-     * @ORM\ManyToMany(targetEntity="User", inversedBy="groups")
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="groups", cascade={"persist"})
      * @ORM\JoinTable(name="groups_users")
      **/
     protected $members;
@@ -240,6 +249,10 @@ class Group extends Entity
      */
     public function removeMember(User $user)
     {
+        if (!$this->members->contains($user)) {
+            return false;
+        }
+
         $user->removeGroup($this); // synchronously updating inverse side
         return $this->members->removeElement($user);
     }
@@ -249,7 +262,7 @@ class Group extends Entity
      *
      * @param Collection $members
      */
-    public function addMembers($members)
+    public function addMembers(Collection $members)
     {
         foreach($members as $member) {
             $this->addMember($member);
@@ -261,7 +274,7 @@ class Group extends Entity
      *
      * @param Collection $members
      */
-    public function removeMembers($members)
+    public function removeMembers(Collection $members)
     {
         foreach($members as $member) {
             $this->removeMember($member);

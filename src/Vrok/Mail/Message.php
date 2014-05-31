@@ -7,7 +7,7 @@
 
 namespace Vrok\Mail;
 
-use Zend\I18n\Translator\Translator;
+use Zend\I18n\Translator\TranslatorInterface;
 use Zend\I18n\Translator\TranslatorAwareInterface;
 use Zend\I18n\Translator\TranslatorAwareTrait;
 use Zend\Mail\Message as ZendMessage;
@@ -23,7 +23,7 @@ class Message extends ZendMessage implements TranslatorAwareInterface
 {
     use TranslatorAwareTrait;
 
-    public function __construct(Translator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->setTranslator($translator);
         $this->setEncoding('UTF-8');

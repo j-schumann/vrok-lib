@@ -60,7 +60,7 @@ class GroupRepository extends EntityRepository
     public function getPotentialParents($groupId)
     {
         $em = $this->getEntityManager();
-        $query = $em->createQuery('SELECT g FROM Ellie\Entity\Group g'
+        $query = $em->createQuery('SELECT g FROM Vrok\Entity\Group g'
             . ' WHERE g.id <> :id AND (g.parent <> :parent OR g.parent IS NULL)'
             . ' ORDER BY g.name ASC');
         $query->setParameters(array(

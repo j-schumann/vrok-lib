@@ -43,6 +43,14 @@ return array(
         ),
     ),
 
+    'owner_service' => array(
+        'allowed_owners' => array(
+            'Vrok\Entity\Validation' => array(
+                'Vrok\Entity\User',
+            ),
+        ),
+    ),
+
     'service_manager' => array(
         // add some short names that hopefully don't conflict
         'aliases' => array(
@@ -86,6 +94,12 @@ return array(
             // replace the default translator with our custom implementation
             'Zend\I18n\Translator\TranslatorInterface'
                 => 'Vrok\I18n\Translator\TranslatorServiceFactory',
+        ),
+    ),
+
+    'validation_manager' => array(
+        'timeouts' => array(
+            'password' => 172800, //48*60*60
         ),
     ),
 

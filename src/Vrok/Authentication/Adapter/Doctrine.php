@@ -37,7 +37,7 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
     public function authenticate()
     {
         $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-        $repository = $em->getRepository('Ellie\Entity\User');
+        $repository = $em->getRepository('Vrok\Entity\User');
 
         $user = $repository->findOneBy(array('username' => $this->identity));
         /* @var $user UserEntity */

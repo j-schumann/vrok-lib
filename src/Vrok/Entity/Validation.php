@@ -10,7 +10,7 @@ namespace Vrok\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Vrok\Doctrine\Entity as VrokEntity;
-use Vrok\Doctrine\HasOwnerInterface;
+use Vrok\Owner\HasOwnerInterface;
 
 /**
  * Validation object for confirming changes/action etc. via a token sent by
@@ -19,28 +19,26 @@ use Vrok\Doctrine\HasOwnerInterface;
  * @ORM\Entity
  * @ORM\Table(name="validations")
  * @ORM\Entity(repositoryClass="Vrok\Entity\ValidationRepository")
+ * @ORM\AttributeOverrides({
+ *      @ORM\AttributeOverride(name="ownerClass",
+ *          column=@ORM\Column(
+ *              type="string",
+ *              nullable = false
+ *          )
+ *      ),
+ *      @ORM\AttributeOverride(name="ownerIdentifier",
+ *          column=@ORM\Column(
+ *              type="integer",
+ *              nullable = false
+ *          )
+ *      )
+ * })
  */
 class Validation extends VrokEntity implements HasOwnerInterface
 {
     use \Vrok\Doctrine\Traits\AutoincrementId;
     use \Vrok\Doctrine\Traits\CreationDate;
-    use \Vrok\Doctrine\Traits\HasOwner;
-
-    /**
-     * Overwrite the trait to enforce an owner.
-     *
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     */
-    protected $ownerClass = null;
-
-    /**
-     * Overwrite the trait to enforce an owner.
-     *
-     * @var integer
-     * @ORM\Column(type="integer", nullable=false)
-     */
-    protected $ownerIdentifier = null;
+    use \Vrok\Owner\HasOwnerTrait;
 
 // <editor-fold defaultstate="collapsed" desc="type">
     /**

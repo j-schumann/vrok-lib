@@ -24,6 +24,10 @@ class UserRepository extends EntityRepository
         $spec = parent::getFormElementDefinition($fieldName);
 
         switch ($fieldName) {
+            case 'id':
+                $spec['type'] = 'Zend\Form\Element\Hidden';
+                break;
+
             case 'email':
                 $spec['type'] = 'Zend\Form\Element\Email';
                 break;
@@ -55,6 +59,10 @@ class UserRepository extends EntityRepository
             case 'email':
                 $spec['validators']['email'] =
                     $this->getFormHelper()->getEmailValidatorSpecification();
+                break;
+
+            case 'username':
+                // @todo validate [a-z@\.]
                 break;
         }
 

@@ -7,6 +7,7 @@
 
 namespace Vrok\Entity;
 
+use BjyAuthorize\Provider\Role\ProviderInterface as RoleProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,7 +21,7 @@ use ZfcUser\Entity\UserInterface;
  * @ORM\Entity(repositoryClass="Vrok\Entity\UserRepository")
  * @ORM\Table(name="users")
  */
-class User extends Entity implements UserInterface
+class User extends Entity implements RoleProviderInterface, UserInterface
 {
     use \Vrok\Doctrine\Traits\AutoincrementId;
     use \Vrok\Doctrine\Traits\CreationDate;
@@ -84,10 +85,19 @@ class User extends Entity implements UserInterface
     {
         // password_verify implemented by ircmaxell/password-compat or natively
         // on PHP >= 5.5.0
-        if (!password_verify($password, $this->password)) {
-            return false;
-        }
-        return true;
+        return password_verify($password, $this->password);
+    }
+
+    /**
+     * All user records have the role "user" and their additional groups.
+     *
+     * @return \Zend\Permissions\Acl\Role\RoleInterface[]
+     */
+    public function getRoles()
+    {
+        $roles = $this->groups->toArray();
+        $roles[] = new \Zend\Permissions\Acl\Role\GenericRole('user');
+        return $roles;
     }
 
     /**
@@ -135,15 +145,7 @@ class User extends Entity implements UserInterface
      */
     public function setUsername($username)
     {
-        if ($this->displayName === $this->username) {
-            $this->displayName = null;
-        }
         $this->username = (string) $username;
-
-        // displayname defaults to the username
-        if (!$this->displayName) {
-            $this->setDisplayName($username);
-        }
         return $this;
     }
 // </editor-fold>
@@ -201,16 +203,7 @@ class User extends Entity implements UserInterface
      */
     public function setEmail($email)
     {
-        if ($this->username === $this->email) {
-            $this->username = null;
-        }
         $this->email = (string) $email;
-
-        // an username is required, default to the mail address
-        if (!$this->username) {
-            $this->setUsername($email);
-        }
-
         return $this;
     }
 // </editor-fold>
@@ -424,7 +417,7 @@ class User extends Entity implements UserInterface
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="groups">
     /**
-     * @ORM\ManyToMany(targetEntity="Group", mappedBy="members")
+     * @ORM\ManyToMany(targetEntity="Group", mappedBy="members", cascade={"persist"})
      **/
     protected $groups;
 
@@ -442,7 +435,7 @@ class User extends Entity implements UserInterface
      * Adds the user as member of the given group.
      * Called by $group->addMember to keep the collection consistent.
      *
-     * @param \Ellie\Entity\Group $group
+     * @param \Vrok\Entity\Group $group
      * @return boolean  false if the user was already a member of the group, else true
      */
     public function addGroup(Group $group)
@@ -452,6 +445,7 @@ class User extends Entity implements UserInterface
         }
 
         $this->groups[] = $group;
+        $group->addMember($this);
         return true;
     }
 
@@ -465,7 +459,37 @@ class User extends Entity implements UserInterface
      */
     public function removeGroup(Group $group)
     {
-        return $this->groups->removeElement($group);
+        if (!$this->groups->contains($group)) {
+            return false;
+        }
+
+        $this->groups->removeElement($group);
+        $group->removeMember($this);
+        return true;
+    }
+
+    /**
+     * Proxies to addGroup for multiple elements.
+     *
+     * @param Collection $groups
+     */
+    public function addGroups(Collection $groups)
+    {
+        foreach($groups as $group) {
+            $this->addGroup($group);
+        }
+    }
+
+    /**
+     * Proxies to removeGroup for multiple elements.
+     *
+     * @param Collection $groups
+     */
+    public function removeGroups(Collection $groups)
+    {
+        foreach($groups as $group) {
+            $this->removeGroup($group);
+        }
     }
 // </editor-fold>
 }

@@ -29,6 +29,14 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     const EVENT_CREATE_USER_POST = 'createUser.post';
 
     /**
+     * Do not only trigger under the identifier \Vrok\User\Manager but also
+     * use the short name used as serviceManager alias.
+     *
+     * @var string
+     */
+    protected $eventIdentifier = 'UserManager';
+
+    /**
      * Name of the route where an user may be inspected/edited.
      *
      * @var string
@@ -43,7 +51,6 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     protected $userSearchRoute = 'user/search';
 
-
     /**
      * Creates a new UserEntity instance and sets the provided fields.
      *
@@ -53,6 +60,25 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     public function createUser($data)
     {
         $repository = $this->getUserRepository();
+
+        // the username defaults to the email address,
+        // the InputFilter requires the field to be set
+        if (!$data['username']) {
+            $data['username'] = $data['email'];
+        }
+
+        // the displayName defaults to the username
+        if (!$data['displayName']) {
+            $data['displayName'] = $data['username'];
+        }
+
+        // set a default password for the InputFilter to pass, necessary when a random
+        // password should be set
+        if (!$data['password']) {
+            // don't use "empty" etc as we are not sure if the random password
+            // is really set afterwards, maybe no DB transaction is used
+            $data['password'] = uniqid().microtime(true);
+        }
 
         $filter = $repository->getInputFilter();
         $filter->setData($data);
@@ -88,11 +114,28 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $objectManager = $this->getEntityManager();
 
         $group = new GroupEntity();
-        $groupRepository = $objectManager->getRepository('Ellie\Entity\Group');
+        $groupRepository = $objectManager->getRepository('Vrok\Entity\Group');
         $groupRepository->updateInstance($group, $formData);
         $objectManager->flush();
 
         return $group;
+    }
+
+    /**
+     * Tries to find a user whos username or email equals the given identity.
+     *
+     * @param string $identity
+     * @return UserEntity   or null if none found
+     */
+    public function getUserByIdentity($identity)
+    {
+        $repository = $this->getUserRepository();
+        $user = $repository->findOneBy(array('username' => $identity));
+        if ($user) {
+            return $user;
+        }
+
+        return $repository->findOneBy(array('email' => $identity));
     }
 
     /**
@@ -112,6 +155,38 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         // event?
         $authService->clearIdentity();
         return true;
+    }
+
+    /**
+     * Sets a new random password for the given user and sends it in an email.
+     *
+     * @param UserEntity $user
+     */
+    public function sendRandomPassword(UserEntity $user)
+    {
+        $password = $user->setRandomPassword();
+
+        $emailService = $this->getServiceLocator()->get('Vrok\Service\Email');
+        $mail = $emailService->createMail();
+        $mail->setSubject('mail.user.randomPassword.subject');
+
+        $viewHelperManager = $this->getServiceLocator()->get('viewhelpermanager');
+        $urlHelper = $viewHelperManager->get('noAliasUrl');
+        $fullUrlHelper = $viewHelperManager->get('FullUrl');
+        $url = $urlHelper('account/login');
+
+        $mail->setBodyHtml('mail.user.randomPassword.body', true, array(
+            'displayName' => $user->getDisplayName(),
+            'password'    => $password,
+            'loginUrl'    => $fullUrlHelper('https').$url,
+        ));
+
+        $mail->addTo($user->getEmail(), $user->getDisplayName());
+        $emailService->sendMail($mail);
+
+        // push the random password to the database only after sending the mail,
+        // maybe there was an exception or other error...
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -143,6 +218,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     public function getAuthValidator()
     {
         $validator = new AuthValidator();
+        $validator->setTranslator($this->getServiceLocator()->get('translator'));
         $validator->setIdentity('username');
         $validator->setCredential('password');
         $validator->setAdapter($this->getAuthAdapter());

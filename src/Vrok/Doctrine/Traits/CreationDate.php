@@ -36,9 +36,14 @@ trait CreationDate
      * @param  \DateTime $createdAt
      * @return self
      */
-    public function setCreatedAt(\DateTime $createdAt)
+    public function setCreatedAt(\DateTime $createdAt = null)
     {
-        $this->createdAt = $createdAt;
+        // we allow NULL for the DoctrineHydrator as he calls this although the
+        // value is not set in the data, simply ignore it, the creationDate can't be
+        // resetted
+        if ($createdAt) {
+            $this->createdAt = $createdAt;
+        }
         return $this;
     }
 }

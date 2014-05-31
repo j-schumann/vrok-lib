@@ -17,17 +17,7 @@ class ConfirmationForm extends Form
      */
     public function init()
     {
-        $this->add(array(
-            'type'    => 'Zend\Form\Element\Csrf',
-            'name'    => 'csrfConfirm',
-            'options' => array(
-                'csrf_options' => array(
-                    'messages' => array(
-                        \Zend\Validator\Csrf::NOT_SAME => 'validate.form.csrfInvalid',
-                    ),
-                ),
-            ),
-        ));
+        $this->addCsrfElement('csrfConfirm');
 
         $this->add(array(
             'name'       => 'confirm',
@@ -44,20 +34,8 @@ class ConfirmationForm extends Form
      *
      * @param string|array $message
      */
-    public function setMessage($message)
+    public function setConfirmationMessage($message)
     {
         $this->get('confirm')->setOptions(array('description' => $message));
-    }
-
-    /**
-     * Validate only the csrf element.
-     *
-     * @return array
-     */
-    public function getInputFilterSpecification()
-    {
-        return array(
-            $this->get('csrfConfirm')->getInputSpecification(),
-        );
     }
 }
