@@ -101,6 +101,23 @@ class User extends Entity implements RoleProviderInterface, UserInterface
     }
 
     /**
+     * Returns true if the user is in the group given by name, else false.
+     *
+     * @param string $groupName
+     * @return boolean
+     */
+    public function inGroup($groupName)
+    {
+        foreach($this->getGroups() as $group) {
+            if ($group->getName() === $groupName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Required for ZfcUserInterface.
      * @return int
      */
@@ -417,7 +434,7 @@ class User extends Entity implements RoleProviderInterface, UserInterface
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="groups">
     /**
-     * @ORM\ManyToMany(targetEntity="Group", mappedBy="members", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="Group", mappedBy="members", cascade={"persist"}, fetch="EXTRA_LAZY")
      **/
     protected $groups;
 

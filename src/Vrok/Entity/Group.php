@@ -139,8 +139,8 @@ class Group extends Entity implements HierarchicalRoleInterface
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="children">
     /**
-     * @ORM\OneToMany(targetEntity="Group", mappedBy="parent")
-     * */
+     * @ORM\OneToMany(targetEntity="Group", mappedBy="parent", fetch="EXTRA_LAZY")
+     */
     protected $children;
 
     /**
@@ -208,7 +208,7 @@ class Group extends Entity implements HierarchicalRoleInterface
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="members">
     /**
-     * @ORM\ManyToMany(targetEntity="User", inversedBy="groups", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="groups", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @ORM\JoinTable(name="groups_users")
      **/
     protected $members;

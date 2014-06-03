@@ -13,6 +13,30 @@ namespace Vrok\Doctrine\Traits;
 trait AddressInformation
 {
     /**
+     * Retrieve the address as a single string (e.g. for geocoding).
+     *
+     * @return string
+     */
+    public function getAddress()
+    {
+        $address = $this->street;
+        if ($this->street && $this->houseNumber) {
+            $address .= ' '.$this->houseNumber;
+        }
+        if ($this->postalCode || $this->city) {
+            $address .= ',';
+        }
+        if ($this->postalCode) {
+            $address .= ' '.$this->postalCode;
+        }
+        if ($this->city) {
+            $address .= ' '.$this->city;
+        }
+
+        return trim($address, ', ');
+    }
+
+    /**
      * @var string
      * @ORM\Column(type="string", length=70, nullable=true)
      */

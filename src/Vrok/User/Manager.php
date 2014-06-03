@@ -63,18 +63,18 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
 
         // the username defaults to the email address,
         // the InputFilter requires the field to be set
-        if (!$data['username']) {
+        if (empty($data['username'])) {
             $data['username'] = $data['email'];
         }
 
         // the displayName defaults to the username
-        if (!$data['displayName']) {
+        if (empty($data['displayName'])) {
             $data['displayName'] = $data['username'];
         }
 
         // set a default password for the InputFilter to pass, necessary when a random
         // password should be set
-        if (!$data['password']) {
+        if (empty($data['password'])) {
             // don't use "empty" etc as we are not sure if the random password
             // is really set afterwards, maybe no DB transaction is used
             $data['password'] = uniqid().microtime(true);
