@@ -7,9 +7,6 @@
 
 namespace Vrok\Doctrine\Traits;
 
-// required in the using class:
-//use Doctrine\ORM\Mapping as ORM;
-
 trait AddressInformation
 {
     /**
@@ -38,43 +35,43 @@ trait AddressInformation
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=70, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=70, nullable=true)
      */
     protected $street;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=5, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=5, nullable=true)
      */
     protected $houseNumber;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=70, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=70, nullable=true)
      */
     protected $addressInfo;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=15, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=15, nullable=true)
      */
     protected $postalCode;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=50, nullable=true)
      */
     protected $city;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=50, nullable=true)
      */
     protected $district;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="string", length=50, nullable=true)
      */
     protected $country;
 

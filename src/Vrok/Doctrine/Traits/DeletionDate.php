@@ -7,15 +7,11 @@
 
 namespace Vrok\Doctrine\Traits;
 
-// required in the using class:
-//use Doctrine\ORM\Mapping as ORM;
-//use Gedmo\Mapping\Annotation as Gedmo;
-
 trait DeletionDate
 {
     /**
      * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="datetime", nullable=true)
      */
     protected $deletedAt;
 

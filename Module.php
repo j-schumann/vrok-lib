@@ -15,9 +15,28 @@ use Zend\ModuleManager\Feature\ConfigProviderInterface;
 /**
  * Module bootstrapping.
  */
-class Module implements AutoloaderProviderInterface, BootstrapListenerInterface,
-        ConfigProviderInterface
+class Module implements
+    AutoloaderProviderInterface,
+    BootstrapListenerInterface,
+    ConfigProviderInterface
 {
+
+    /**
+     * Returns the autoloader definiton to use to load classes within this module.
+     *
+     * @return array
+     */
+    public function getAutoloaderConfig()
+    {
+        return array(
+            'Zend\Loader\StandardAutoloader' => array(
+                'namespaces' => array(
+                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
+                ),
+            ),
+        );
+    }
+
     /**
      * Returns the modules default configuration.
      *
@@ -38,25 +57,9 @@ class Module implements AutoloaderProviderInterface, BootstrapListenerInterface,
         $application = $e->getApplication();
         $sharedEvents = $application->getEventManager()->getSharedManager();
 
-        // we want to lazy load the strategy object only when needed to we use a static
+        // we want to lazy load the strategy object only when needed so we use a static
         // function here
         $sharedEvents->attach('OwnerService', 'getOwnerStrategy',
                 array('Vrok\Owner\UserStrategy', 'onGetOwnerStrategy'));
-    }
-
-    /**
-     * Returns the autoloader definiton to use to load classes within this module.
-     *
-     * @return array
-     */
-    public function getAutoloaderConfig()
-    {
-        return array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
-                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                ),
-            ),
-        );
     }
 }

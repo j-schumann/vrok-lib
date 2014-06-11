@@ -108,8 +108,8 @@ class Translator extends ZendTranslator
         if ($this->isEventManagerEnabled()) {
             $results = $this->getEventManager()->trigger(
                 self::EVENT_LOAD_MESSAGES, $this, array(
-                    'locale'      => $locale,
-                    'text_domain' => $textDomain,
+                    'locale'     => $locale,
+                    'textDomain' => $textDomain,
             ));
 
             // no listener should stop the event: if the event is stopped all

@@ -59,38 +59,68 @@ return array(
             'UserManager'       => 'Vrok\User\Manager',
             'ValidationManager' => 'Vrok\Validation\Manager',
         ),
+
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
             'Vrok\Authentication\Adapter\Doctrine' => 'Vrok\Authentication\Adapter\Doctrine',
             'Vrok\Client\Info'                     => 'Vrok\Client\Info',
-            'Vrok\Service\Email'                   => 'Vrok\Service\Email',
         ),
+
         'factories' => array(
             'Vrok\Owner\OwnerService' => function($sm) {
-                $config = $sm->get('Config');
                 $service = new \Vrok\Owner\OwnerService();
+
+                $config = $sm->get('Config');
                 if (!empty($config['owner_service']['allowed_owners'])) {
                     $allowedOwners = $config['owner_service']['allowed_owners'];
                     $service->setAllowedOwners($allowedOwners);
                 }
                 return $service;
             },
-            'Vrok\User\Manager' => function($sm) {
+            'Vrok\Service\Email' => function($sm) {
+                $service = new \Vrok\Service\Email();
+
                 $config = $sm->get('Config');
+                if (!empty($config['email_service']['default_sender_address'])) {
+                    $service->setDefaultSenderAddress(
+                            $config['email_service']['default_sender_address']);
+                }
+                if (!empty($config['email_service']['default_sender_name'])) {
+                    $service->setDefaultSenderName(
+                            $config['email_service']['default_sender_name']);
+                }
+
+                return $service;
+            },
+            'Vrok\Service\Meta' => function($sm) {
+                $em = $sm->get('Doctrine\ORM\EntityManager');
+                $service = new \Vrok\Service\Meta($em);
+
+                $config = $sm->get('Config');
+                if (!empty($config['meta_service']['defaults'])) {
+                    $service->setDefaults($config['meta_service']['defaults']);
+                }
+                return $service;
+            },
+            'Vrok\User\Manager' => function($sm) {
                 $manager = new \Vrok\User\Manager();
+
+                $config = $sm->get('Config');
                 if (!empty($config['user_manager'])) {
                     $manager->setConfig($config['user_manager']);
                 }
                 return $manager;
             },
             'Vrok\Validation\Manager' => function($sm) {
-                $config = $sm->get('Config');
                 $manager = new \Vrok\Validation\Manager();
+
+                $config = $sm->get('Config');
                 if (!empty($config['validation_manager']['timeouts'])) {
                     $manager->setTimeouts($config['validation_manager']['timeouts']);
                 }
                 return $manager;
             },
+
             // replace the default translator with our custom implementation
             'Zend\I18n\Translator\TranslatorInterface'
                 => 'Vrok\I18n\Translator\TranslatorServiceFactory',

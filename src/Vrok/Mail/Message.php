@@ -23,6 +23,11 @@ class Message extends ZendMessage implements TranslatorAwareInterface
 {
     use TranslatorAwareTrait;
 
+    /**
+     * Sets the translator instance and defaults to UTF8 encoding.
+     *
+     * @param TranslatorInterface $translator
+     */
     public function __construct(TranslatorInterface $translator)
     {
         $this->setTranslator($translator);
@@ -33,31 +38,38 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      * Translates and sets the subject.
      *
      * @param string $subject
-     * @param array $params
+     * @param bool $translate   will try to translate the $html if true
      * @param string $locale
      * @return self
      */
-    public function setSubject($subject, array $params = array(), $locale = null)
+    public function setSubject($subject, $translate = true, $locale = null)
     {
-        return parent::setSubject($this->translate($subject, $params, $locale));
+        return parent::setSubject($translate
+            ? $this->translate($subject, $locale)
+            : $subject
+        );
     }
 
     /*
      * Translates the given text, replaces the parameters and sets the mime
      * message as body.
      *
-     * @param string $text
+     * @param string|array $text    the HTML body, may be a an array consisting of a
+     *     translation-string and the params to replace within the translation
      * @param bool $appendSignature
-     * @param array $params
+     * @param bool $translate   will try to translate the $html if true
      * @param string $locale
      * @return self
      */
-    public function setBodyText($text, $appendSignature, array $params = array(), $locale = null)
+    public function setBodyText($text, $appendSignature = true, $translate = true, $locale = null)
     {
-        if (!is_string($text)) {
-            throw new InvalidArgumentException('$text must be a string');
+        if (!is_string($text) && !is_array($text)) {
+            throw new Exception\InvalidArgumentException('$text must be a string or array');
         }
-        $text = $this->translate($text, $params, $locale);
+
+        if ($translate) {
+            $text = $this->translate($text, $locale);
+        }
         if ($appendSignature) {
             $text .= $this->getSignature('text');
         }
@@ -75,18 +87,22 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      * Translates the given html, replaces the parameters and sets the mime
      * message as body.
      *
-     * @param string $text
+     * @param string|array $html    the HTML body, may be a an array consisting of a
+     *     translation-string and the params to replace within the translation
      * @param bool $appendSignature
-     * @param array $params
+     * @param bool $translate   will try to translate the $html if true
      * @param string $locale
      * @return self
      */
-    public function setBodyHtml($html, $appendSignature, array $params = array(), $locale = null)
+    public function setBodyHtml($html, $appendSignature = true, $translate = true, $locale = null)
     {
-        if (!is_string($html)) {
-            throw new InvalidArgumentException('$html must be a string');
+        if (!is_string($html) && !is_array($html)) {
+            throw new InvalidArgumentException('$html must be a string or array');
         }
-        $html = $this->translate($html, $params, $locale);
+
+        if ($translate) {
+            $html = $this->translate($html, $locale);
+        }
         if ($appendSignature) {
             $html .= $this->getSignature('html');
         }
@@ -104,18 +120,17 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      * Translates the given message, replacing placeholders with the given
      * parameters.
      *
-     * @param string $message
-     * @param array $params
+     * @param string|array $message
      * @param string $locale
      * @return string
      */
-    protected function translate($message, array $params = array(), $locale = null)
+    protected function translate($message, $locale = null)
     {
         $translator = $this->getTranslator();
         return $translator->translate(
-                array($message, $params),
-                $this->getTranslatorTextDomain(),
-                $locale
+            $message,
+            $this->getTranslatorTextDomain(),
+            $locale
         );
     }
 
@@ -125,7 +140,7 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      * @param string $type
      * @return string
      */
-    protected function getSignature($type = 'text')
+    public function getSignature($type = 'text')
     {
         switch ($type) {
             case 'html':

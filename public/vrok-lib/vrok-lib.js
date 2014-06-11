@@ -72,7 +72,10 @@
         }
         else if (typeof(element) === 'string') {
             // assume element is the Id of the DOMNode of the form to submit
-            form = $('#'+element);
+            var result = $('#'+element);
+            if (result.length) {
+                form = $(result[0]);
+            }
         }
 
         if (!form) {
@@ -98,12 +101,12 @@
         // fetch the data before setting the loading animation as this disables
         // all elements and disabled elements aren't serialized...
         var data = form.serialize();
-        form.loading();
 
         // the result container, the form itself or the DOM node given via id
         var $container = container
             ? $('#'+container)
             : $(form.context.parentNode);
+        $container.loading();
 
         var request = {
             type: "POST",

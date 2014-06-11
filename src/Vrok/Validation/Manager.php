@@ -39,6 +39,14 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     protected $timeouts = array();
 
+
+    /**
+     * Name of the route where an user may confirm a validation.
+     *
+     * @var string
+     */
+    protected $confirmationRoute = 'validation/confirm';
+
     /**
      * Creates a new validation of the given type for the given owner.
      *
@@ -101,8 +109,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
 
         $results = $this->getEventManager()->trigger(
             self::EVENT_VALIDATION_SUCCESSFUL,
-            $this,
-            array('validation' => $validation,)
+            $validation
         );
 
         $repository->remove($validation);
@@ -111,6 +118,22 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         // return the event result, the controller action returns it again if it is
         // an instance of Zend\Http\Response to allow redirects
         return $results->last();
+    }
+
+    /**
+     * Retrieve the URL where the given validation can be confirmed.
+     * If no validation is given the base URL to the validation form is returned.
+     *
+     * @param ValidationEntity $validation
+     * @return string
+     */
+    public function getConfirmationUrl(ValidationEntity $validation = null)
+    {
+        $url = $this->getServiceLocator()->get('viewhelpermanager')->get('noAliasUrl');
+        return $url($this->confirmationRoute, array(
+            'id'    => $validation ? $validation->getId() : null,
+            'token' => $validation ? $validation->getToken() : null,
+        ));
     }
 
     /**
@@ -203,7 +226,6 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
             ? $this->timeouts[$type]
             : null;
     }
-
 
     /**
      * Sets the time in seconds validations of the given type are valid.

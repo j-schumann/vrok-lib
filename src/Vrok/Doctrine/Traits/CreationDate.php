@@ -7,16 +7,12 @@
 
 namespace Vrok\Doctrine\Traits;
 
-// required in the using class:
-//use Doctrine\ORM\Mapping as ORM;
-//use Gedmo\Mapping\Annotation as Gedmo;
-
 trait CreationDate
 {
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime")
+     * @Gedmo\Mapping\Annotation\Timestampable(on="create")
+     * @Doctrine\ORM\Mapping\Column(type="datetime")
      */
     protected $createdAt;
 

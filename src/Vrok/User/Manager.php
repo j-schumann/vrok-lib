@@ -25,8 +25,10 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
 
-    const EVENT_CREATE_USER      = 'createUser';
-    const EVENT_CREATE_USER_POST = 'createUser.post';
+    const EVENT_CREATE_GROUP_POST = 'createGroup.post';
+    const EVENT_CREATE_USER       = 'createUser';
+    const EVENT_CREATE_USER_POST  = 'createUser.post';
+    const EVENT_LOGOUT            = 'logout';
 
     /**
      * Do not only trigger under the identifier \Vrok\User\Manager but also
@@ -113,10 +115,10 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     {
         $objectManager = $this->getEntityManager();
 
-        $group = new GroupEntity();
         $groupRepository = $objectManager->getRepository('Vrok\Entity\Group');
-        $groupRepository->updateInstance($group, $formData);
+        $group = $groupRepository->updateInstance(new GroupEntity(), $formData);
         $objectManager->flush();
+        $this->getEventManager()->trigger(self::EVENT_CREATE_GROUP_POST, $group);
 
         return $group;
     }
@@ -149,11 +151,11 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         if (!$authService->hasIdentity()) {
             return false;
         }
+
         $user = $authService->getIdentity();
-        // @todo
-        // user->logout (logging)
-        // event?
         $authService->clearIdentity();
+        $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
+
         return true;
     }
 
@@ -175,11 +177,12 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $fullUrlHelper = $viewHelperManager->get('FullUrl');
         $url = $urlHelper('account/login');
 
-        $mail->setBodyHtml('mail.user.randomPassword.body', true, array(
+        $mail->setBodyHtml(array('mail.user.randomPassword.body', array(
             'displayName' => $user->getDisplayName(),
+            'username'    => $user->getUsername(),
             'password'    => $password,
             'loginUrl'    => $fullUrlHelper('https').$url,
-        ));
+        )));
 
         $mail->addTo($user->getEmail(), $user->getDisplayName());
         $emailService->sendMail($mail);

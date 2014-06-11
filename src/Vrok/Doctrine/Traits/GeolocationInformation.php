@@ -7,9 +7,6 @@
 
 namespace Vrok\Doctrine\Traits;
 
-// required in the using class:
-//use Doctrine\ORM\Mapping as ORM;
-
 /**
  * Used to store the geocoordinates of an object: longitude & latitude in degrees.
  */
@@ -38,7 +35,7 @@ trait GeolocationInformation
 // <editor-fold defaultstate="collapsed" desc="latitude">
     /**
      * @var string
-     * @ORM\Column(type="decimal", precision=13, scale=10, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="decimal", precision=13, scale=10, nullable=true)
      */
     protected $latitude;
 
@@ -65,7 +62,7 @@ trait GeolocationInformation
 // <editor-fold defaultstate="collapsed" desc="longitude">
     /**
      * @var string
-     * @ORM\Column(type="decimal", precision=13, scale=10, nullable=true)
+     * @Doctrine\ORM\Mapping\Column(type="decimal", precision=13, scale=10, nullable=true)
      */
     protected $longitude;
 

@@ -7,15 +7,12 @@
 
 namespace Vrok\Doctrine\Traits;
 
-// required in the using class:
-//use Doctrine\ORM\Mapping as ORM;
-
 trait AutoincrementId
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
+     * @Doctrine\ORM\Mapping\Id
+     * @Doctrine\ORM\Mapping\GeneratedValue(strategy="AUTO")
+     * @Doctrine\ORM\Mapping\Column(type="integer")
      */
     protected $id;
 

@@ -8,7 +8,6 @@
 namespace Vrok\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 use Vrok\Doctrine\Entity as VrokEntity;
 use Vrok\Owner\HasOwnerInterface;
 
@@ -16,9 +15,8 @@ use Vrok\Owner\HasOwnerInterface;
  * Validation object for confirming changes/action etc. via a token sent by
  * email.
  *
- * @ORM\Entity
- * @ORM\Table(name="validations")
  * @ORM\Entity(repositoryClass="Vrok\Entity\ValidationRepository")
+ * @ORM\Table(name="validations")
  * @ORM\AttributeOverrides({
  *      @ORM\AttributeOverride(name="ownerClass",
  *          column=@ORM\Column(

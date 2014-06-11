@@ -2,16 +2,12 @@
 
 namespace Vrok\Doctrine\Traits;
 
-// required in the using class:
-//use Doctrine\ORM\Mapping as ORM;
-//use Gedmo\Mapping\Annotation as Gedmo;
-
 trait ModificationDate
 {
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime", nullable=false)
+     * @Gedmo\Mapping\Annotation\Timestampable(on="update")
+     * @Doctrine\ORM\Mapping\Column(type="datetime", nullable=false)
      */
     protected $updatedAt;
 
