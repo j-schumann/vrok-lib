@@ -12,14 +12,20 @@ trait AddressInformation
     /**
      * Retrieve the address as a single string (e.g. for geocoding).
      *
+     * @param bool $full    if true the addressInfo, district and country are returned
      * @return string
      */
-    public function getAddress()
+    public function getAddress($full = false)
     {
         $address = $this->street;
         if ($this->street && $this->houseNumber) {
             $address .= ' '.$this->houseNumber;
         }
+
+        if ($full && $this->street && $this->addressInfo) {
+            $address .= ', '.$this->addressInfo;
+        }
+
         if ($this->postalCode || $this->city) {
             $address .= ',';
         }
@@ -28,6 +34,14 @@ trait AddressInformation
         }
         if ($this->city) {
             $address .= ' '.$this->city;
+        }
+
+        if ($full && $this->district) {
+            $address .= ' '.$this->district;
+        }
+
+        if ($full && $this->country) {
+            $address .= ', '.$this->country;
         }
 
         return trim($address, ', ');

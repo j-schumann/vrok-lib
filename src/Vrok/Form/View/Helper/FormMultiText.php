@@ -8,6 +8,7 @@ use Zend\Form\Exception;
 use Zend\Form\View\Helper\AbstractHelper;
 use Zend\Form\View\Helper\FormText;
 
+// @todo used? necessary?
 class FormMultiText extends AbstractHelper
 {
     /**

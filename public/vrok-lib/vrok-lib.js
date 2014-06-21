@@ -123,6 +123,10 @@
                 console.error('Vrok.Tools.submit: Request to "'
                     +form.context.action+'" failed!');
                 console.debug(data);
+
+                // still try to process, maybe we received a 403 with a
+                // redirect in the response.script
+                Vrok.Tools.processResponse(data.responseJSON, $container);
             }
         };
         $.ajax(request);

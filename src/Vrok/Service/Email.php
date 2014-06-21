@@ -10,26 +10,100 @@ namespace Vrok\Service;
 use Vrok\Mail\Message;
 use Zend\Mail\Message as ZendMessage;
 use Zend\Mail\Transport;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
  * Service for easy composing and sending of emails.
  */
-class Email implements ServiceLocatorAwareInterface
+class Email
 {
-    use ServiceLocatorAwareTrait;
-
     /**
+     * Email address to set as default sender.
      *
      * @var string
      */
     protected $defaultSenderAddress = 'mail@example.com';
 
     /**
+     * Name to set as default sender.
+     *
      * @var string
      */
     protected $defaultSenderName = null;
+
+    /**
+     * Partial name to use as surrounding layout for the HTML email body.
+     *
+     * @var string
+     */
+    protected $layout = '';
+
+    /**
+     * View helper service locator.
+     *
+     * @var ViewHelperManager
+     */
+    protected $viewHelperManager = null;
+
+    /**
+     * Class constructor - sets the hard dependency.
+     *
+     * @param ViewHelperManager $vhm
+     */
+    public function __construct(ViewHelperManager $vhm)
+    {
+        $this->viewHelperManager = $vhm;
+    }
+
+    /**
+     * Returns a new Message instance and presets the From header with the
+     * configured default.
+     *
+     * @param bool $useLayout   if set true the configured default layout is injected
+     *     into and used by the new message
+     * @return Message
+     */
+    public function createMail($useLayout = true)
+    {
+        $mail = new Message($this->viewHelperManager);
+        $mail->setFrom($this->defaultSenderAddress, $this->defaultSenderName);
+        if ($useLayout && $this->layout) {
+            $mail->setLayout($this->layout);
+        }
+
+        return $mail;
+    }
+
+    /**
+     * Sends the given email using the default transport.
+     *
+     * @param ZendMessage $mail
+     */
+    public function sendMail(ZendMessage $mail)
+    {
+        $transport = new Transport\Sendmail();
+        $transport->send($mail);
+    }
+
+    /**
+     * Allows to set multiple options as once.
+     *
+     * @param array $options
+     */
+    public function setOptions($options)
+    {
+        // @todo use Zend guards to check argument
+
+        if (isset($options['default_sender_address'])) {
+            $this->setDefaultSenderAddress($options['default_sender_address']);
+        }
+        if (isset($options['default_sender_name'])) {
+            $this->setDefaultSenderName($options['default_sender_name']);
+        }
+        if (isset($options['layout'])) {
+            $this->setLayout($options['layout']);
+        }
+    }
 
     /**
      * Retrieve the default email sender address.
@@ -76,26 +150,24 @@ class Email implements ServiceLocatorAwareInterface
     }
 
     /**
-     * Returns a new Message instance and presets the From header with the
-     * configured default.
+     * Retrieve the HTML mail layout partial.
      *
-     * @return Message
+     * @return string
      */
-    public function createMail()
+    public function getLayout()
     {
-        $mail = new Message($this->getServiceLocator()->get('translator'));
-        $mail->setFrom($this->defaultSenderAddress, $this->defaultSenderName);
-        return $mail;
+        return $this->layout;
     }
 
     /**
-     * Sends the given email using the default transport.
+     * Sets the HTML mail layout partial
      *
-     * @param ZendMessage $mail
+     * @param string $layout
+     * @return self
      */
-    public function sendMail(ZendMessage $mail)
+    public function setLayout($layout)
     {
-        $transport = new Transport\Sendmail();
-        $transport->send($mail);
+        $this->layout = $layout;
+        return $this;
     }
 }

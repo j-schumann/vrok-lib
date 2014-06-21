@@ -156,6 +156,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $authService->clearIdentity();
         $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
 
+        \Zend\Session\Container::getDefaultManager()->destroy();
         return true;
     }
 
@@ -177,7 +178,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $fullUrlHelper = $viewHelperManager->get('FullUrl');
         $url = $urlHelper('account/login');
 
-        $mail->setBodyHtml(array('mail.user.randomPassword.body', array(
+        $mail->setHtmlBody(array('mail.user.randomPassword.body', array(
             'displayName' => $user->getDisplayName(),
             'username'    => $user->getUsername(),
             'password'    => $password,

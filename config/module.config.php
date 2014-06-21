@@ -54,73 +54,21 @@ return array(
     'service_manager' => array(
         // add some short names that hopefully don't conflict
         'aliases' => array(
-            'ClientInfo'        => 'Vrok\Client\Info',
-            'OwnerService'      => 'Vrok\Owner\OwnerService',
-            'UserManager'       => 'Vrok\User\Manager',
-            'ValidationManager' => 'Vrok\Validation\Manager',
+            'AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
+            'ClientInfo'               => 'Vrok\Client\Info',
+            'OwnerService'             => 'Vrok\Owner\OwnerService',
+            'UserManager'              => 'Vrok\User\Manager',
+            'ValidationManager'        => 'Vrok\Validation\Manager',
         ),
 
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
-            'Vrok\Authentication\Adapter\Doctrine' => 'Vrok\Authentication\Adapter\Doctrine',
-            'Vrok\Client\Info'                     => 'Vrok\Client\Info',
+            'Vrok\Authentication\Adapter\Doctrine'         => 'Vrok\Authentication\Adapter\Doctrine',
+            'Vrok\Client\Info'                             => 'Vrok\Client\Info',
+            'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
         ),
 
         'factories' => array(
-            'Vrok\Owner\OwnerService' => function($sm) {
-                $service = new \Vrok\Owner\OwnerService();
-
-                $config = $sm->get('Config');
-                if (!empty($config['owner_service']['allowed_owners'])) {
-                    $allowedOwners = $config['owner_service']['allowed_owners'];
-                    $service->setAllowedOwners($allowedOwners);
-                }
-                return $service;
-            },
-            'Vrok\Service\Email' => function($sm) {
-                $service = new \Vrok\Service\Email();
-
-                $config = $sm->get('Config');
-                if (!empty($config['email_service']['default_sender_address'])) {
-                    $service->setDefaultSenderAddress(
-                            $config['email_service']['default_sender_address']);
-                }
-                if (!empty($config['email_service']['default_sender_name'])) {
-                    $service->setDefaultSenderName(
-                            $config['email_service']['default_sender_name']);
-                }
-
-                return $service;
-            },
-            'Vrok\Service\Meta' => function($sm) {
-                $em = $sm->get('Doctrine\ORM\EntityManager');
-                $service = new \Vrok\Service\Meta($em);
-
-                $config = $sm->get('Config');
-                if (!empty($config['meta_service']['defaults'])) {
-                    $service->setDefaults($config['meta_service']['defaults']);
-                }
-                return $service;
-            },
-            'Vrok\User\Manager' => function($sm) {
-                $manager = new \Vrok\User\Manager();
-
-                $config = $sm->get('Config');
-                if (!empty($config['user_manager'])) {
-                    $manager->setConfig($config['user_manager']);
-                }
-                return $manager;
-            },
-            'Vrok\Validation\Manager' => function($sm) {
-                $manager = new \Vrok\Validation\Manager();
-
-                $config = $sm->get('Config');
-                if (!empty($config['validation_manager']['timeouts'])) {
-                    $manager->setTimeouts($config['validation_manager']['timeouts']);
-                }
-                return $manager;
-            },
-
             // replace the default translator with our custom implementation
             'Zend\I18n\Translator\TranslatorInterface'
                 => 'Vrok\I18n\Translator\TranslatorServiceFactory',
@@ -138,10 +86,11 @@ return array(
             'alternativeUrl'       => 'Vrok\View\Helper\AlternativeUrl',
             'formDecorator'        => 'Vrok\Form\View\Helper\FormDecorator',
             'formElementDecorator' => 'Vrok\Form\View\Helper\FormElementDecorator',
-            'formMultiText'        => 'Vrok\Form\View\Helper\FormMultiText',
-            'fullUrl'              => 'Vrok\View\Helper\FullUrl',
             'flashMessenger'       => 'Vrok\View\Helper\FlashMessenger',
             'translatePlural'      => '\Vrok\I18n\Translator\View\Helper\TranslatePlural',
+
+            // @todo used? necessary?
+            'formMultiText'        => 'Vrok\Form\View\Helper\FormMultiText',
         ),
     ),
 );

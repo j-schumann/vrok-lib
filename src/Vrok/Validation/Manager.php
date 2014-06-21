@@ -21,8 +21,19 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
 
+    const EVENT_VALIDATION_EXPIRED    = 'validationExpired';
     const EVENT_VALIDATION_FAILED     = 'validationFailed';
     const EVENT_VALIDATION_SUCCESSFUL = 'validationSuccessful';
+
+    /**
+     * Name of the route where an user may confirm a validation.
+     * "/params" is appended to this route name when a validation object is provided
+     * (fixes the display of an additional "/" on the end of the URL when no route
+     * parameters were set)
+     *
+     * @var string
+     */
+    protected $confirmationRoute = 'validation/confirm';
 
     /**
      * Do not only trigger under the identifier \Vrok\Validation\Manager but also
@@ -38,14 +49,6 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      * @var int[]   array(type => timeout, ...)
      */
     protected $timeouts = array();
-
-
-    /**
-     * Name of the route where an user may confirm a validation.
-     *
-     * @var string
-     */
-    protected $confirmationRoute = 'validation/confirm';
 
     /**
      * Creates a new validation of the given type for the given owner.
@@ -84,26 +87,24 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     {
         $repository = $this->getValidationRepository();
         $validation = $repository->find($id);
-
-        // this will cause a failed validation event to be logged but this would
-        // also be the case if the validation was already purged by the cron job
-        if ($validation && $this->isExpiredValidation($validation)) {
-            $repository->remove($validation);
-            $validation = null;
+        if (!$validation) {
+            $this->triggerFail();
+            return false;
         }
 
-        if (!$validation || $validation->getToken() != $token) {
-            $this->getServiceLocator()->get('ControllerPluginManager')
-                    ->get('flashMessenger')
-                    ->addErrorMessage('message.validation.noMatchingValidation');
+        // trigger the failure event before removing the validation so the listeners
+        // can receive the object
+        if ($this->isExpiredValidation($validation)) {
+            $this->triggerFail($validation);
 
-            // allow logging and setting of flash messages but leave everything else
-            // to the controller -> return false
-            $this->getEventManager()->trigger(
-                self::EVENT_VALIDATION_FAILED,
-                $this,
-                array('validation' => $validation,)
-            );
+            // @todo should the validation be removed immediately or is this better done
+            // by the cron job to reduce page load time?
+            $this->removeIfExpired($validation);
+            return false;
+        }
+
+        if ($validation->getToken() != $token) {
+            $this->triggerFail($validation);
             return false;
         }
 
@@ -121,6 +122,28 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     }
 
     /**
+     * Outsource for confirmValidation, adds a flash message and triggers the
+     * validationFailed event to allow logging etc.
+     *
+     * @triggers validationFailed
+     * @param ValidationEntity $validation
+     */
+    protected function triggerFail(ValidationEntity $validation = null)
+    {
+        $this->getServiceLocator()->get('ControllerPluginManager')
+                ->get('flashMessenger')
+                ->addErrorMessage('message.validation.noMatchingValidation');
+
+        // allow logging and setting of flash messages but leave everything else
+        // to the controller -> return false
+        $this->getEventManager()->trigger(
+            self::EVENT_VALIDATION_FAILED,
+            $this,
+            array('validation' => $validation,)
+        );
+    }
+
+    /**
      * Retrieve the URL where the given validation can be confirmed.
      * If no validation is given the base URL to the validation form is returned.
      *
@@ -129,8 +152,12 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     public function getConfirmationUrl(ValidationEntity $validation = null)
     {
-        $url = $this->getServiceLocator()->get('viewhelpermanager')->get('noAliasUrl');
-        return $url($this->confirmationRoute, array(
+        $url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
+        if (!$validation) {
+            return $url($this->confirmationRoute);
+        }
+
+        return $url($this->confirmationRoute.'/params', array(
             'id'    => $validation ? $validation->getId() : null,
             'token' => $validation ? $validation->getToken() : null,
         ));
@@ -164,23 +191,49 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     /**
      * Deletes all expired validations from the database.
      *
+     * @triggers validationExpired
      * @return int  the number of expired & deleted validations
      */
     public function purgeValidations()
     {
-        $repository = $this->getValidationRepository();
-        $validations = $repository->findAll();
+        $validations = $this->getValidationRepository()->findAll();
         $count = 0;
 
         foreach($validations as $validation) {
-            if ($this->isExpiredValidation($validation)) {
-                $repository->remove($validation);
+            if ($this->removeIfExpired($validation)) {
                 $count++;
             }
         }
 
-        $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->flush();
         return $count;
+    }
+
+    /**
+     * Triggers the validationExpired event and removes the validation from the database
+     * if it is expired.
+     *
+     * @triggers validationExpired
+     * @param ValidationEntity $validation
+     * @return boolean  true if the validation is expired and was removed, else false
+     */
+    protected function removeIfExpired(ValidationEntity $validation)
+    {
+        if (!$this->isExpiredValidation($validation)) {
+            return false;
+        }
+
+        $this->getEventManager()->trigger(
+            self::EVENT_VALIDATION_EXPIRED,
+            $validation
+        );
+
+        // remove the validation regardless of the event result and flush the EM,
+        // there were probably more cleanups through the event listeners so we want
+        // to commit them now
+        $this->getValidationRepository()->remove($validation);
+        $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->flush();
+
+        return true;
     }
 
     /**
@@ -197,7 +250,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         }
 
         $expirationDate = $validation->getCreatedAt();
-        $expirationDate->add(new DateInterval('PT'.$timeout.'S'));
+        $expirationDate->add(new \DateInterval('PT'.$timeout.'S'));
         $now = new \DateTime('now');
 
         return $expirationDate <= $now;

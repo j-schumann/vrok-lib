@@ -7,30 +7,55 @@
 
 namespace Vrok\Mail;
 
-use Zend\I18n\Translator\TranslatorInterface;
-use Zend\I18n\Translator\TranslatorAwareInterface;
-use Zend\I18n\Translator\TranslatorAwareTrait;
 use Zend\Mail\Message as ZendMessage;
 use Zend\Mime\Message as MimeMessage;
 use Zend\Mime\Mime;
 use Zend\Mime\Part as MimePart;
+use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
  * Adds functionality to automatically translate the subject or body and
  * append the default (translated) signature if not specified otherwise.
+ * Allows to use layouts for HTML mails where the content is embedded.
  */
-class Message extends ZendMessage implements TranslatorAwareInterface
+class Message extends ZendMessage
 {
-    use TranslatorAwareTrait;
+    /**
+     * Partial name to use as surrounding layout for the HTML email body.
+     *
+     * @var string
+     */
+    protected $layout = '';
 
     /**
-     * Sets the translator instance and defaults to UTF8 encoding.
+     * The locale to use for translations.
      *
-     * @param TranslatorInterface $translator
+     * @var string
      */
-    public function __construct(TranslatorInterface $translator)
+    protected $locale = null;
+
+    /**
+     * The textDomain to use for translations.
+     *
+     * @var string
+     */
+    protected $textDomain = null;
+
+    /**
+     * View helper service locator.
+     *
+     * @var ViewHelperManager
+     */
+    protected $viewHelperManager = null;
+
+    /**
+     * Sets the ViewHelperManager instance and defaults to UTF8 encoding.
+     *
+     * @param ViewHelperManager $vhm
+     */
+    public function __construct(ViewHelperManager $vhm)
     {
-        $this->setTranslator($translator);
+        $this->viewHelperManager = $vhm;
         $this->setEncoding('UTF-8');
     }
 
@@ -39,13 +64,12 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      *
      * @param string $subject
      * @param bool $translate   will try to translate the $html if true
-     * @param string $locale
      * @return self
      */
-    public function setSubject($subject, $translate = true, $locale = null)
+    public function setSubject($subject, $translate = true)
     {
         return parent::setSubject($translate
-            ? $this->translate($subject, $locale)
+            ? $this->translate($subject)
             : $subject
         );
     }
@@ -58,17 +82,16 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      *     translation-string and the params to replace within the translation
      * @param bool $appendSignature
      * @param bool $translate   will try to translate the $html if true
-     * @param string $locale
      * @return self
      */
-    public function setBodyText($text, $appendSignature = true, $translate = true, $locale = null)
+    public function setTextBody($text, $appendSignature = true, $translate = true)
     {
         if (!is_string($text) && !is_array($text)) {
             throw new Exception\InvalidArgumentException('$text must be a string or array');
         }
 
         if ($translate) {
-            $text = $this->translate($text, $locale);
+            $text = $this->translate($text);
         }
         if ($appendSignature) {
             $text .= $this->getSignature('text');
@@ -89,22 +112,29 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      *
      * @param string|array $html    the HTML body, may be a an array consisting of a
      *     translation-string and the params to replace within the translation
-     * @param bool $appendSignature
      * @param bool $translate   will try to translate the $html if true
-     * @param string $locale
+     * @param bool $appendSignature
      * @return self
      */
-    public function setBodyHtml($html, $appendSignature = true, $translate = true, $locale = null)
+    public function setHtmlBody($html, $translate = true, $appendSignature = false)
     {
         if (!is_string($html) && !is_array($html)) {
             throw new InvalidArgumentException('$html must be a string or array');
         }
 
         if ($translate) {
-            $html = $this->translate($html, $locale);
+            $html = $this->translate($html);
         }
         if ($appendSignature) {
             $html .= $this->getSignature('html');
+        }
+
+        if ($this->layout) {
+            $partial = $this->getPartialHelper();
+            $html = $partial($this->layout, array(
+                'body'    => $html,
+                'subject' => $this->getSubject(),
+            ));
         }
 
         $part = new MimePart($html);
@@ -121,17 +151,12 @@ class Message extends ZendMessage implements TranslatorAwareInterface
      * parameters.
      *
      * @param string|array $message
-     * @param string $locale
      * @return string
      */
-    protected function translate($message, $locale = null)
+    protected function translate($message)
     {
-        $translator = $this->getTranslator();
-        return $translator->translate(
-            $message,
-            $this->getTranslatorTextDomain(),
-            $locale
-        );
+        $translator = $this->getTranslateHelper();
+        return $translator($message, $this->textDomain, $this->locale);
     }
 
     /**
@@ -144,7 +169,7 @@ class Message extends ZendMessage implements TranslatorAwareInterface
     {
         switch ($type) {
             case 'html':
-            case 'text/html':
+            case Mime::TYPE_HTML:
                 $signature = $this->translate('mail.signature.html');
                 return $signature !== 'mail.signature.html'
                     ? '<br /><br />--<br />'.$signature
@@ -156,5 +181,87 @@ class Message extends ZendMessage implements TranslatorAwareInterface
                     ? "\n\n--\n".$signature
                     : '';
         }
+    }
+
+    /**
+     * Retrieve the HTML mail layout partial.
+     *
+     * @return string
+     */
+    public function getLayout()
+    {
+        return $this->layout;
+    }
+
+    /**
+     * Sets the HTML mail layout partial
+     *
+     * @param string $layout
+     * @return self
+     */
+    public function setLayout($layout)
+    {
+        $this->layout = $layout;
+        return $this;
+    }
+
+    /**
+     * Retrieve the used locale.
+     *
+     * @return string
+     */
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+
+    /**
+     * Sets the locale used.
+     *
+     * @param string $locale
+     * @return self
+     */
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * Retrieve the used textDomain.
+     *
+     * @return string
+     */
+    public function getTextDomain()
+    {
+        return $this->textDomain;
+    }
+
+    /**
+     * Sets the textDomain used.
+     *
+     * @param string $textDomain
+     * @return self
+     */
+    public function setTextDomain($textDomain)
+    {
+        $this->textDomain = $textDomain;
+        return $this;
+    }
+
+    /**
+     * @return \Zend\View\Helper\Partial
+     */
+    protected function getPartialHelper()
+    {
+        return $this->viewHelperManager->get('partial');
+    }
+
+    /**
+     * @return \Zend\I18n\View\Helper\Translate
+     */
+    protected function getTranslateHelper()
+    {
+        return $this->viewHelperManager->get('translate');
     }
 }
