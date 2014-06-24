@@ -97,7 +97,8 @@ class Module implements
                 },
                 'Vrok\Service\Email' => function($sm) {
                     $vhm = $sm->get('ViewHelperManager');
-                    $service = new \Vrok\Service\Email($vhm);
+                    $transport = $sm->get('Zend\Mail\Transport');
+                    $service = new \Vrok\Service\Email($transport, $vhm);
 
                     $config = $sm->get('Config');
                     if (!empty($config['email_service'])) {
@@ -137,6 +138,15 @@ class Module implements
                         $manager->setTimeouts($config['validation_manager']['timeouts']);
                     }
                     return $manager;
+                },
+
+                'Zend\Mail\Transport' => function($sm) {
+                    $spec = array();
+                    $config = $sm->get('Config');
+                    if (!empty($config['email_service']['transport'])) {
+                        $spec = $config['email_service']['transport'];
+                    }
+                    return \Zend\Mail\Transport\Factory::create($spec);
                 },
             ),
         );

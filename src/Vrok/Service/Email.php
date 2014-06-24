@@ -9,7 +9,7 @@ namespace Vrok\Service;
 
 use Vrok\Mail\Message;
 use Zend\Mail\Message as ZendMessage;
-use Zend\Mail\Transport;
+use Zend\Mail\Transport\TransportInterface;
 use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
@@ -39,6 +39,11 @@ class Email
     protected $layout = '';
 
     /**
+     * @var TransportInterface
+     */
+    protected $transport = null;
+
+    /**
      * View helper service locator.
      *
      * @var ViewHelperManager
@@ -50,8 +55,9 @@ class Email
      *
      * @param ViewHelperManager $vhm
      */
-    public function __construct(ViewHelperManager $vhm)
+    public function __construct(TransportInterface $transport, ViewHelperManager $vhm)
     {
+        $this->transport = $transport;
         $this->viewHelperManager = $vhm;
     }
 
@@ -81,8 +87,7 @@ class Email
      */
     public function sendMail(ZendMessage $mail)
     {
-        $transport = new Transport\Sendmail();
-        $transport->send($mail);
+        $this->transport->send($mail);
     }
 
     /**
