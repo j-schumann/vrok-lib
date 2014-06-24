@@ -1,8 +1,13 @@
 <?php
+/**
+ * @copyright   (c) 2014, Vrok
+ * @license     http://customlicense CustomLicense
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
 
 namespace Vrok\Doctrine;
 
-class Common
+abstract class Common
 {
     /**
      * Helper function to return a unified string to use as translation identifer.

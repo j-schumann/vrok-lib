@@ -14,6 +14,28 @@ return array(
         ),
     ),
 
+    'console' => array(
+        'router' => array(
+            'routes' => array(
+                'purge-validations' => array(
+                    'options' => array(
+                        'route' => 'purge-validations',
+                        'defaults' => array(
+                            'controller' => 'Vrok\Controller\Validation',
+                            'action'     => 'purge',
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    ),
+
+    'controllers' => array(
+        'invokables' => array(
+            'Vrok\Controller\Validation'  => 'Vrok\Controller\ValidationController',
+        ),
+    ),
+
     'controller_plugins' => array(
         'invokables' => array(
             'translate' => 'Vrok\Mvc\Controller\Plugin\Translate',
@@ -72,6 +94,8 @@ return array(
             // replace the default translator with our custom implementation
             'Zend\I18n\Translator\TranslatorInterface'
                 => 'Vrok\I18n\Translator\TranslatorServiceFactory',
+
+            'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
         ),
     ),
 
