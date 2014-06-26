@@ -1,8 +1,7 @@
 .js-loading-overlay {
     position: absolute;
-    z-index: 199;
+    z-index: 999;
     background: #fff;
     opacity: 0.5;
     border-radius: inherit;
-    border: 1px #f00 solid;
 }

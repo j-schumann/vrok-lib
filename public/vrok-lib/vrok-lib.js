@@ -157,7 +157,10 @@
                 console.debug(container);
                 return false;
             }
+            
             container.html($.parseHTML( response.html ));
+            container.loading(false);
+            
             $('html,body').animate({
                 scrollTop: Math.max(container.offset().top-50, 0)
             });
