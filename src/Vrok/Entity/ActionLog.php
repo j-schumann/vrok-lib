@@ -16,7 +16,7 @@ use Vrok\Doctrine\Entity;
  * Allows to log reaction times showing how long it took the user from a notification
  * till a corresponding action occured.
  *
- * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntryRepository")
+ * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
  * @ORM\Table(name="actionlog")
  */
 class ActionLog extends Entity

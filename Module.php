@@ -121,6 +121,16 @@ class Module implements
                     $em = $sm->get('Doctrine\ORM\EntityManager');
                     return new \Vrok\Service\Queue($em);
                 },
+                'Vrok\Service\Todo' => function($sm) {
+                    $service = new \Vrok\Service\Todo();
+                    $service->setServiceLocator($sm);
+
+                    $config = $sm->get('Config');
+                    if (!empty($config['todo_service']['timeouts'])) {
+                        $service->setTimeouts($config['todo_service']['timeouts']);
+                    }
+                    return $service;
+                },
                 'Vrok\User\Manager' => function($sm) {
                     $manager = new \Vrok\User\Manager();
 
@@ -139,7 +149,6 @@ class Module implements
                     }
                     return $manager;
                 },
-
                 'Zend\Mail\Transport' => function($sm) {
                     $spec = array();
                     $config = $sm->get('Config');

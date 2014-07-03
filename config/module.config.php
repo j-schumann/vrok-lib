@@ -99,6 +99,14 @@ return array(
         ),
     ),
 
+    'slm_queue' => array(
+        'job_manager' => array(
+            'invokables' => array(
+                'Vrok\SlmQueue\Job\ExitWorker' => 'Vrok\SlmQueue\Job\ExitWorker',
+            ),
+        ),
+    ),
+
     'validation_manager' => array(
         'timeouts' => array(
             'password' => 172800, //48*60*60

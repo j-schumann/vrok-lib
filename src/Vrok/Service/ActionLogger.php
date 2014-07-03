@@ -87,6 +87,6 @@ class ActionLogger
      */
     public function getLogRepository()
     {
-        return $this->entityManager->getRepository('Ellie\Entity\ActionLog');
+        return $this->entityManager->getRepository('Vrok\Entity\ActionLog');
     }
 }
