@@ -17,7 +17,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url":  "https://github.com/missinglink/supervisord"
+            "url":  "https://github.com/missinglink/supervisord.git"
         }
     ],
     "autoload": {
