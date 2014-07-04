@@ -11,14 +11,10 @@
         "doctrine/doctrine-orm-module": "~0.8.0",
         "gedmo/doctrine-extensions": "~2.3.9",
         "zendframework/zendframework": "~2.3.1",
-        "zf-commons/zfc-user-doctrine-orm": "~1.0.0",
-        "missinglink/supervisord": "dev-master"
+        "zf-commons/zfc-user-doctrine-orm": "~1.0.0"
     },
     "repositories": [
-        {
-            "type": "vcs",
-            "url":  "https://github.com/missinglink/supervisord.git"
-        }
+
     ],
     "autoload": {
         "psr-0": {
