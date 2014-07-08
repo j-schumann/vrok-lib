@@ -11,14 +11,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
 
 /**
- * References a single user that may be assigned the Todo.
+ * References a single user that can be assigned the Todo.
  *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
- * @ORM\Table(name="todo_users")
+ * @ORM\Table(name="todo_users", indexes={@ORM\Index(name="status_idx", columns={"status"})})
  */
 class UserTodo extends Entity
 {
-    const STATUS_OPEN        = 'open';         // steht diesem Benutzer zur Übernahme/Erledigung zur Verfügung
+    const STATUS_OPEN        = 'open';        // steht diesem Benutzer zur Übernahme/Erledigung zur Verfügung
     const STATUS_ASSIGNED    = 'assigned';    // ist diesem Benutzer zugewiesen (evtl auch weiteren)
     const STATUS_COMPLETED   = 'completed';   // ist für/durch diesen Benutzer erledigt
     const STATUS_UNCONFIRMED = 'unconfirmed'; // Eine Statusänderung muss von diesem Benutzer noch zur Kenntnis genommen/bestätigt werden
@@ -27,7 +27,8 @@ class UserTodo extends Entity
 // <editor-fold defaultstate="collapsed" desc="todo">
     /**
      * @var Todo
-     * @ORM\ManyToOne(targetEntity="Vrok\Entity\Todo", cascade={"persist"})
+     * @Orm\Id
+     * @ORM\ManyToOne(targetEntity="Vrok\Entity\Todo", cascade={"persist"}, inversedBy="userTodos")
      * @ORM\JoinColumn(name="todo_id", unique=false, referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected $todo;
@@ -51,12 +52,15 @@ class UserTodo extends Entity
     public function setTodo(\Vrok\Entity\Todo $todo)
     {
         $this->todo = $todo;
+        $todo->addUserTodo($this);
+
         return $this;
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="user">
     /**
      * @var User
+     * @Orm\Id
      * @ORM\ManyToOne(targetEntity="Vrok\Entity\User", cascade={"persist"})
      * @ORM\JoinColumn(name="user_id", unique=false, referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */

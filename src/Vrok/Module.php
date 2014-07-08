@@ -198,5 +198,8 @@ class Module implements
         // function here
         $sharedEvents->attach('OwnerService', 'getOwnerStrategy',
                 array('Vrok\Owner\UserStrategy', 'onGetOwnerStrategy'));
+
+        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily',
+                array('Vrok\SlmQueue\Job\PurgeValidations', 'onCronDaily'));
     }
 }

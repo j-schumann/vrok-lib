@@ -66,7 +66,6 @@ class SlmQueueController extends AbstractActionController
     {
         $queues = $this->getQueues();
         foreach($queues as $key => $queue) {
-
             $connection = $queue->connection;
             /* @var $connection \Doctrine\DBAL\Connection */
 

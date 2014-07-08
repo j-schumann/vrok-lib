@@ -10,6 +10,7 @@ namespace Vrok\Service;
 use Doctrine\Common\Persistence\ObjectManager;
 use Vrok\Entity\User;
 use Vrok\Entity\Todo as TodoEntity;
+use Vrok\Entity\UserTodo;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -24,119 +25,104 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
 
-    const EVENT_DEADLINEREACHED = 'deadlineReached';
-
-    /**
-     * List of timeouts in seconds until the deadline is reached and an event is triggered.
-     * Types that don't have a timeout don't get a deadline set.
-     *
-     * @var int[]   array(type => timeout, ...)
-     */
-    protected $timeouts = array();
+    const EVENT_TODO_OVERDUE = 'todoOverdue';
 
     /**
      * Creates a todo of the given type.
-     * The Todo may be assigned to a user and may reference an object.
      *
-     * @todo timeout als param
-     * @param string $type
-     * @param User $user
-     * @param mixed $object
-     * @param bool $flush   if true the current unitOfWork is committed to the DB
+     * @param string $type      name that identifies the task that should be fulfilled
+     * @param mixed $object     the object this todo is meant for
+     * @param int $timeout      number of seconds used to create the deadline
+     * @param User $creator     the user that created this todo, null for automatically
+     *     created Todos
      */
-    public function createTodo($type, User $user = null, $object = null, $flush = false)
+    public function createTodo($type, $object = null, $timeout = null,
+            User $creator = null)
     {
-        if ($this->getTodo($type, $user, $object)) {
-            throw new \Vrok\Doctrine\Exception\RuntimeException('A todo for the type "'
-                .$type.'" and user/object already exists!');
-        }
-
         $todo = new TodoEntity();
         $todo->setType($type);
-
-        $timeout = $this->getTimeout($type);
-        if ($timeout) {
-            $deadline = new \DateTime();
-            $deadline->add(new \DateInterval('PT'.$timeout.'S'));
-            $todo->setDeadline($deadline);
-        }
-
-        if ($user) {
-            $todo->setUser($user);
-        }
 
         if ($object) {
             $ownerService = $this->getServiceLocator()->get('OwnerService');
             $ownerService->setOwner($todo, $object);
         }
 
-        $this->getEntityManager()->persist($todo);
-        if ($flush) {
-            $this->getEntityManager()->flush();
+        if ($timeout) {
+            $deadline = new \DateTime();
+            $deadline->add(new \DateInterval('PT'.$timeout.'S'));
+            $todo->setDeadline($deadline);
         }
 
+        if ($creator) {
+            $todo->setCreator($creator);
+        }
+
+        $this->getEntityManager()->persist($todo);
+
+        // we need to flush before we can reference UserTodos, they need the ID.
+        $this->getEntityManager()->flush();
         return $todo;
     }
 
     /**
-     * Find an open todo by the unique combination of type, user and object.
+     * Adds the reference to the given User to the given Todo (as UserTodo).
      *
-     * @param string $type
-     * @param \Vrok\Entity\User $user
-     * @param object $object
+     * @param TodoEntity $todo
+     * @param User $user
+     * @param string $status
+     * @return UserTodo
      */
-    public function getOpenTodo($type, User $user = null, $object = null)
+    public function referenceUser(TodoEntity $todo, User $user,
+            $status = UserTodo::STATUS_ASSIGNED)
+    {
+        $userTodo = new UserTodo();
+        $userTodo->setUser($user);
+        $userTodo->setStatus($status);
+        $userTodo->setTodo($todo);
+
+        $this->getEntityManager()->persist($userTodo);
+        return $userTodo;
+    }
+
+    /**
+     * Retrieve all (open) todos for the given User.
+     * This includes todos that are not completed and not cancelled and the user can take
+     * over (no one is assigned), he is assigned to and he needs to confirm.
+     *
+     * @param User $user
+     * @return TodoEntity[]
+     */
+    public function getOpenUserTodos(User $user)
     {
         $qb = $this->getTodoRepository()->createQueryBuilder('t');
-        $qb->where('type', ':type')
-           ->andWhere('user', ':user')
-           ->andWhere('status', ':status')
-           ->setParameter('type', $type)
-           ->setParameter('user', $user)
-           ->setParameter('status', TodoEntity::STATUS_OPEN);
+        $qb->leftJoin('t.userTodos ut')
+           ->where('ut.user = :user')
+           ->andWhere($qb->expr()->notIn('t.status', ':todoStatus'))
+           ->andWhere($qb->expr()->in('ut.status', ':userStatus'));
 
-        if ($object) {
-            $ownerService = $this->getServiceLocator()->get('OwnerService');
-            $qb->andWhere('t.ownerClass = :ownerClass')
-               ->andWhere('t.ownerIdentifier = :ownerIdentifier')
-               ->setParameter('ownerClass', get_class($object))
-               ->setParameter('ownerIdentifier', $ownerService->getOwnerIdentifier($object));
-        }
-        else {
-            // explicitly match NULL or every object matches
-            $qb->andWhere($qb->expr()->isNull('t.ownerClass'))
-               ->andWhere($qb->expr()->isNull('t.ownerIdentifier'));
-        }
+        $qb->setParameter('user', $user)
+           ->setParameter('todoStatus', array(
+               TodoEntity::STATUS_COMPLETED,
+               TodoEntity::STATUS_CANCELLED,
+           ))
+           ->setParameter('userStatus', array(
+                UserTodo::STATUS_ASSIGNED,
+                UserTodo::STATUS_OPEN,
+                UserTodo::STATUS_UNCONFIRMED,
+           ));
 
         return $qb->getQuery()->getResult();
     }
 
     /**
-     * Retrieve all todos for the given owner.
-     *
-     * @param \Vrok\Entity\User $user
-     * @param string $status    if not null only Todos with the given status are returned
-     * @return TodoEntity[]
-     */
-    public function getUserTodos(User $user, $status = TodoEntity::STATUS_OPEN)
-    {
-        $criteria = array('user' => $user);
-        if ($status) {
-            $criteria['status'] = $status;
-        }
-
-        $repository = $this->getTodoRepository();
-        return $repository->findBy($criteria);
-    }
-
-    /**
      * Retrieve all todos referenced to the given object.
+     * This may include also cancelled or completed todos that are not yet deleted!
      *
      * @param object $object
      * @param string $status    if not null only Todos with the given status are returned
      * @return TodoEntity[]
      */
-    public function getObjectTodos($object, $status = TodoEntity::STATUS_OPEN)
+    public function getObjectTodos($object, $status = null)
     {
         $qb = $this->getTodoRepository()->createQueryBuilder('t');
 
@@ -154,69 +140,60 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
         }
 
         if ($status) {
-           $qb->andWhere('status', ':status')
-              ->setParameter('status', TodoEntity::STATUS_OPEN);
+           $qb->andWhere('t.status = :status')
+              ->setParameter('status', $status);
         }
 
         return $qb->getQuery()->getResult();
     }
 
     /**
-     * Remove a todo by the unique combination of type, user and object.
+     * Retrieve the referenced object for the given todo.
      *
-     * @param string $type
-     * @param \Vrok\Entity\User $user
-     * @param object $object
-     * @return bool     true if the todo was found and removed, else false
+     * @param TodoEntity $todo
+     * @return object   or null if no object referenced.
      */
-    public function deleteTodo($type, User $user = null, $object = null)
+    public function getReferencedObject(TodoEntity $todo)
     {
-        $todo = $this->getTodo($type, $user, $object);
-        if ($todo) {
-            $this->getEntityManager()->remove($todo);
-            return true;
+        $ownerService = $this->getServiceLocator()->get('OwnerService');
+        return $ownerService->getOwner($todo);
+    }
+
+    /**
+     * Checks all open or assigned todos if the deadline has been reached, if yes
+     * the event is triggered.
+     *
+     * Todos already marked as STATUS_OVERDUE are ignored, their event was triggered
+     * before, it is task of the listeners to set the STATUS_OVERDUE if they don't want to
+     * receive any further notifications.
+     *
+     * As this probably triggers notification emails this should be called only once per
+     * day via cronjob.
+     *
+     * @triggers todoOverdue
+     */
+    public function checkTodos()
+    {
+        $qb = $this->getTodoRepository()->createQueryBuilder('t');
+        $qb->where('t.deadline < :deadline')
+           ->andWhere($qb->expr()->in('t.status', ':todoStatus'))
+           ->setParameter('deadline', new \DateTime())
+           ->setParameter('todoStatus', array(
+               TodoEntity::STATUS_OPEN,
+               TodoEntity::STATUS_ASSIGNED,
+           ));
+
+        $todos = $qb->getQuery()->getResult();
+        foreach($todos as $todo) {
+            $this->getEventManager()->trigger(
+                self::EVENT_TODO_OVERDUE,
+                $todo
+            );
         }
 
-        return false;
-    }
-
-    /**
-     * Retrieve the timeout in seconds configured for the given type or
-     * null if no timeout was set (todo will never expire).
-     *
-     * @param string $type
-     * @return int|null
-     */
-    public function getTimeout($type)
-    {
-        return isset($this->timeouts[$type])
-            ? $this->timeouts[$type]
-            : null;
-    }
-
-    /**
-     * Sets the type timeout in seconds.
-     *
-     * @todo validate args
-     * @param string $type
-     * @param int $timeout
-     */
-    public function setTimeout($type, $timeout)
-    {
-        $this->timeouts[$type] = $timeout;
-    }
-
-    /**
-     * Sets multiple timeouts at once.
-     *
-     * @todo use Zend Guard to check for array etc
-     * @param array $timeouts
-     */
-    public function setTimeouts($timeouts)
-    {
-        foreach($timeouts as $type => $timeout) {
-            $this->setTimeout($type, $timeout);
-        }
+        // flush here, the event listeners may have changed the status of the todos etc.,
+        // we don't want each single one to flush() if not necessary.
+        $this->getEntityManager()->flush();
     }
 
     /**

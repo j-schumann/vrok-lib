@@ -11,27 +11,36 @@ use Vrok\Mvc\Controller\AbstractActionController;
 
 /**
  * Console router to trigger the CRON events.
+ * The console routes must be called by an actual cron script, the listeners should
+ * execute short tasks directly or add their tasks as jobs to the job queue.
  */
 class CronController extends AbstractActionController
 {
+    const EVENT_CRON_HOURLY  = 'cronHourly';
+    const EVENT_CRON_DAILY   = 'cronDaily';
+    const EVENT_CRON_MONTHLY = 'cronMonthly';
+
+    /**
+     * @triggers cronHourly
+     */
     public function cronHourlyAction()
     {
-        $log = $this->getServiceLocator()->get('ZendLog');
-        /* @var $log \Zend\Log\Logger */
-        $log->debug('cron-hourly');
+        $this->getEventManager()->trigger(self::EVENT_CRON_HOURLY, $this);
     }
 
+    /**
+     * @triggers cronDaily
+     */
     public function cronDailyAction()
     {
-        $log = $this->getServiceLocator()->get('ZendLog');
-        /* @var $log \Zend\Log\Logger */
-        $log->debug('cron-daily');
+        $this->getEventManager()->trigger(self::EVENT_CRON_DAILY, $this);
     }
 
+    /**
+     * @triggers cronMonthly
+     */
     public function cronMonthlyAction()
     {
-        $log = $this->getServiceLocator()->get('ZendLog');
-        /* @var $log \Zend\Log\Logger */
-        $log->debug('cron-monthly');
+        $this->getEventManager()->trigger(self::EVENT_CRON_MONTHLY, $this);
     }
 }
