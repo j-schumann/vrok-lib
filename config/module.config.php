@@ -17,6 +17,33 @@ return array(
     'console' => array(
         'router' => array(
             'routes' => array(
+                'cron-hourly' => array(
+                    'options' => array(
+                        'route' => 'cron-hourly',
+                        'defaults' => array(
+                            'controller' => 'Vrok\Controller\Cron',
+                            'action'     => 'cron-hourly',
+                        ),
+                    ),
+                ),
+                'cron-daily' => array(
+                    'options' => array(
+                        'route' => 'cron-daily',
+                        'defaults' => array(
+                            'controller' => 'Vrok\Controller\Cron',
+                            'action'     => 'cron-daily',
+                        ),
+                    ),
+                ),
+                'cron-monthly' => array(
+                    'options' => array(
+                        'route' => 'cron-monthly',
+                        'defaults' => array(
+                            'controller' => 'Vrok\Controller\Cron',
+                            'action'     => 'cron-monthly',
+                        ),
+                    ),
+                ),
                 'purge-validations' => array(
                     'options' => array(
                         'route' => 'purge-validations',
@@ -26,12 +53,23 @@ return array(
                         ),
                     ),
                 ),
+                'check-jobs' => array(
+                    'options' => array(
+                        'route' => 'check-jobs',
+                        'defaults' => array(
+                            'controller' => 'Vrok\Controller\SlmQueue',
+                            'action'     => 'check-jobs',
+                        ),
+                    ),
+                ),
             ),
         ),
     ),
 
     'controllers' => array(
         'invokables' => array(
+            'Vrok\Controller\Cron'        => 'Vrok\Controller\CronController',
+            'Vrok\Controller\SlmQueue'    => 'Vrok\Controller\SlmQueueController',
             'Vrok\Controller\Validation'  => 'Vrok\Controller\ValidationController',
         ),
     ),
@@ -65,10 +103,108 @@ return array(
         ),
     ),
 
+    'listeners' => array(
+        'Vrok\Notification\AdminNotifications',
+    ),
+
     'owner_service' => array(
         'allowed_owners' => array(
             'Vrok\Entity\Validation' => array(
                 'Vrok\Entity\User',
+            ),
+        ),
+    ),
+
+    'router' => array(
+        'routes' => array(
+            'slm-queue' => array(
+                'type'    => 'Literal',
+                'options' => array(
+                    'route'    => '/slm-queue/',
+                    'defaults' => array(
+                        '__NAMESPACE__' => 'Vrok\Controller',
+                        'controller'    => 'SlmQueue',
+                        'action'        => 'index',
+                    ),
+                ),
+                'may_terminate' => true,
+                'child_routes'  => array(
+                    'recover' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => 'recover/[:name][/]',
+                            'constraints' => array(
+                                'name' => '[a-zA-Z0-9_-]+',
+                            ),
+                            'defaults' => array(
+                                'action' => 'recover',
+                            ),
+                        ),
+                    ),
+                    'list-buried' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => 'list-buried/[:name][/]',
+                            'constraints' => array(
+                                'name' => '[a-zA-Z0-9_-]+',
+                            ),
+                            'defaults' => array(
+                                'action' => 'list-buried',
+                            ),
+                        ),
+                    ),
+                    'list-running' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => 'list-running/[:name][/]',
+                            'constraints' => array(
+                                'name' => '[a-zA-Z0-9_-]+',
+                            ),
+                            'defaults' => array(
+                                'action' => 'list-running',
+                            ),
+                        ),
+                    ),
+                    'delete' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => 'delete/[:name]/[:id][/]',
+                            'constraints' => array(
+                                'name' => '[a-zA-Z0-9_-]+',
+                                'id'   => '[0-9]+',
+                            ),
+                            'defaults' => array(
+                                'action' => 'delete',
+                            ),
+                        ),
+                    ),
+                    'release' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => 'release/[:name]/[:id][/]',
+                            'constraints' => array(
+                                'name' => '[a-zA-Z0-9_-]+',
+                                'id'   => '[0-9]+',
+                            ),
+                            'defaults' => array(
+                                'action' => 'release',
+                            ),
+                        ),
+                    ),
+                    'unbury' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => 'unbury/[:name]/[:id][/]',
+                            'constraints' => array(
+                                'name' => '[a-zA-Z0-9_-]+',
+                                'id'   => '[0-9]+',
+                            ),
+                            'defaults' => array(
+                                'action' => 'unbury',
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ),
     ),
@@ -87,6 +223,7 @@ return array(
         'invokables' => array(
             'Vrok\Authentication\Adapter\Doctrine'         => 'Vrok\Authentication\Adapter\Doctrine',
             'Vrok\Client\Info'                             => 'Vrok\Client\Info',
+            'Vrok\Notification\AdminNotifications'         => 'Vrok\Notification\AdminNotifications',
             'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
         ),
 
@@ -123,6 +260,12 @@ return array(
 
             // @todo used? necessary?
             'formMultiText'        => 'Vrok\Form\View\Helper\FormMultiText',
+        ),
+    ),
+
+    'view_manager' => array(
+        'template_path_stack' => array(
+            __DIR__ . '/../view',
         ),
     ),
 );

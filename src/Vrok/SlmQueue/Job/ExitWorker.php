@@ -26,6 +26,8 @@ class ExitWorker extends AbstractJob
      */
     public function execute()
     {
-        exit;
+        // status code != 0 triggers restart by supervisor,
+        // 0 would be interpreted as expected exit (State: EXITED)
+        exit(1);
     }
 }

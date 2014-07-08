@@ -1,0 +1,18 @@
+<h3><?php echo $this->translate('view.slmQueue.recover.heading'); ?></h3>
+<p>
+    <?php echo $this->translate('view.slmQueue.recover.intro'); ?>
+</p>
+<div class="flash-messenger">
+    <?php $this->flashMessenger()->renderAll(); ?>
+</div>
+
+<?php
+    $this->form->setAttribute('action', $this->url('slm-queue/recover', array(
+        'name' => $this->name,
+    )));
+    echo $this->formDecorator($this->form);
+?>
+
+<a href="<?php echo $this->url('slm-queue'); ?>" title="<?php echo $this->translate('view.slmQueue.gotoOverview'); ?>">
+    <?php echo $this->translate('view.slmQueue.gotoOverview'); ?>
+</a>

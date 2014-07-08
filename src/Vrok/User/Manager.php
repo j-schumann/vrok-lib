@@ -328,6 +328,16 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     }
 
     /**
+     * Retrieve the group repository instance.
+     *
+     * @return \Vrok\Entity\GroupRepository
+     */
+    public function getGroupRepository()
+    {
+        return $this->getEntityManager()->getRepository('Vrok\Entity\Group');
+    }
+
+    /**
      * Sets multiple config options at once.
      *
      * @todo validate $config

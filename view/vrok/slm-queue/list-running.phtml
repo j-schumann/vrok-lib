@@ -1,0 +1,61 @@
+<h3><?php echo $this->translate(array('view.slmQueue.listRunning.heading', $this->name)); ?></h3>
+<p>
+    <?php echo $this->translate('view.slmQueue.listRunning.intro'); ?>
+</p>
+<div class="flash-messenger">
+    <?php $this->flashMessenger()->renderAll(); ?>
+</div>
+<a href="<?php echo $this->url('slm-queue'); ?>" title="<?php echo $this->translate('view.slmQueue.gotoOverview'); ?>">
+    <?php echo $this->translate('view.slmQueue.gotoOverview'); ?>
+</a>
+<br />
+<?php if (count($this->runningJobs)) : ?>
+<table id="slmqueue-job-list">
+    <thead>
+        <tr>
+            <th>
+                <?php echo $this->translate('view.slmQueue.job.class'); ?>
+            </th>
+            <th>
+                <?php echo $this->translate('view.slmQueue.job.content'); ?>
+            </th>
+            <th>
+                <?php echo $this->translate('view.slmQueue.job.created'); ?>
+            </th>
+            <th>
+                <?php echo $this->translate('view.slmQueue.job.executed'); ?>
+            </th>
+            <th>
+                <?php echo $this->translate('view.actions'); ?>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach($this->runningJobs as $job) :
+        $data = json_decode($job['data'], true);
+        $content = unserialize($data['content']);
+        ?>
+        <tr>
+            <td><?php echo $data['class']; ?></td>
+            <td><?php echo json_encode($content); ?></td>
+            <td><?php echo $job['created']; ?></td>
+            <td><?php echo $job['executed']; ?></td>
+            <td>
+                <a href="<?php echo $this->url('slm-queue/release', array('name' => $this->name, 'id' => $job['id'])); ?>" title="<?php echo $this->translate('view.slmQueue.releaseJob'); ?>">
+                    <?php echo $this->translate('view.slmQueue.releaseJob'); ?>
+                </a>
+                <br />
+                <a href="<?php echo $this->url('slm-queue/delete', array('name' => $this->name, 'id' => $job['id'])); ?>" title="<?php echo $this->translate('view.slmQueue.deleteJob'); ?>">
+                    <?php echo $this->translate('view.slmQueue.deleteJob'); ?>
+                </a>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+<?php else : ?>
+<br />
+<p>
+    <?php echo $this->translate('message.slmQueue.noJobsFound'); ?>
+</p>
+<?php endif;
