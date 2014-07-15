@@ -12,31 +12,37 @@ trait AddressInformation
     /**
      * Retrieve the address as a single string (e.g. for geocoding).
      *
-     * @param bool $full    if true the addressInfo, district and country are returned
+     * @param bool $full        if true addressInfo, district and country are returned too
+     * @param bool $anonymous   if true street, housenumber and addressInfo are omitted
      * @return string
      */
-    public function getAddress($full = false)
+    public function getAddress($full = false, $anonymous = false)
     {
-        $address = $this->street;
-        if ($this->street && $this->houseNumber) {
-            $address .= ' '.$this->houseNumber;
-        }
+        $address = '';
 
-        if ($full && $this->street && $this->addressInfo) {
-            $address .= ', '.$this->addressInfo;
-        }
+        if (!$anonymous) {
+            $address = $this->street;
+            if ($this->street && $this->houseNumber) {
+                $address .= ' '.$this->houseNumber;
+            }
 
-        if ($this->postalCode || $this->city) {
+            if ($full && $this->street && $this->addressInfo) {
+                $address .= ', '.$this->addressInfo;
+            }
+
             $address .= ',';
         }
+
+
         if ($this->postalCode) {
             $address .= ' '.$this->postalCode;
         }
+
         if ($this->city) {
             $address .= ' '.$this->city;
         }
 
-        if ($full && $this->district) {
+        if ($full && $this->city && $this->district) {
             $address .= ' '.$this->district;
         }
 

@@ -32,9 +32,11 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      *
      * @param string $type      name that identifies the task that should be fulfilled
      * @param mixed $object     the object this todo is meant for
-     * @param int $timeout      number of seconds used to create the deadline
+     * @param int $timeout      number of seconds used to create the deadline, if not
+     *     set no reminder/overdue event is triggered
      * @param User $creator     the user that created this todo, null for automatically
      *     created Todos
+     * @return TodoEntity
      */
     public function createTodo($type, $object = null, $timeout = null,
             User $creator = null)
@@ -87,7 +89,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     /**
      * Retrieve all (open) todos for the given User.
      * This includes todos that are not completed and not cancelled and the user can take
-     * over (no one is assigned), he is assigned to and he needs to confirm.
+     * over (no one is assigned), he is assigned to or he needs to confirm.
      *
      * @param User $user
      * @return TodoEntity[]
@@ -166,6 +168,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      * Todos already marked as STATUS_OVERDUE are ignored, their event was triggered
      * before, it is task of the listeners to set the STATUS_OVERDUE if they don't want to
      * receive any further notifications.
+     * Todos without a deadline will never trigger the event.
      *
      * As this probably triggers notification emails this should be called only once per
      * day via cronjob.

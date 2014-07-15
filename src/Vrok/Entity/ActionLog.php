@@ -116,8 +116,8 @@ class ActionLog extends Entity
 // <editor-fold defaultstate="collapsed" desc="user">
     /**
      * @var User
-     * @ORM\OneToOne(targetEntity="Vrok\Entity\User", cascade={"persist"})
-     * @ORM\JoinColumn(name="user_id", unique=true, referencedColumnName="id", nullable=true)
+     * @ORM\ManyToOne(targetEntity="Vrok\Entity\User", cascade={"persist"})
+     * @ORM\JoinColumn(name="user_id", unique=false, referencedColumnName="id", nullable=true)
      */
     protected $user;
 

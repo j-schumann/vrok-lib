@@ -215,7 +215,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         $this->getEntityManager()->persist($object);
 
         // in rare cases when we create a new instance and set the same
-        // identifiers as an already existing record uses. The hdydrator will
+        // identifiers as an already existing record uses, the hdydrator will
         // return a new instance (the existing record) updated with the data and
         // leave the given $instance unchanged.
         // For this case we return the existing record here to keep the

@@ -228,7 +228,7 @@ return array(
         ),
 
         'factories' => array(
-            // replace the default translator with our custom implementation
+            // replace the default translator with our custom extension
             'Zend\I18n\Translator\TranslatorInterface'
                 => 'Vrok\I18n\Translator\TranslatorServiceFactory',
 
@@ -239,7 +239,9 @@ return array(
     'slm_queue' => array(
         'job_manager' => array(
             'invokables' => array(
-                'Vrok\SlmQueue\Job\ExitWorker' => 'Vrok\SlmQueue\Job\ExitWorker',
+                'Vrok\SlmQueue\Job\CheckTodos'       => 'Vrok\SlmQueue\Job\CheckTodos',
+                'Vrok\SlmQueue\Job\ExitWorker'       => 'Vrok\SlmQueue\Job\ExitWorker',
+                'Vrok\SlmQueue\Job\PurgeValidations' => 'Vrok\SlmQueue\Job\PurgeValidations',
             ),
         ),
     ),

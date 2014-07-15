@@ -10,7 +10,6 @@ namespace Vrok\Service;
 use Doctrine\ORM\EntityManager;
 use Vrok\Entity\ObjectMeta;
 use Vrok\Entity\SystemMeta;
-use Vrok\Owner\HasOwnerInterface;
 
 /**
  * Service for retrieving and setting meta values for objects or system-wide.

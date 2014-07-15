@@ -80,7 +80,7 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
 
         // Generate markup
         $markup  = sprintf($this->getMessageOpenFormat(), $class);
-        $markup .= implode(sprintf($this->getMessageSeparatorString(), ' class="'.$class.'"'), $messagesToPrint);
+        $markup .= implode(sprintf($this->getMessageSeparatorString(), $class), $messagesToPrint);
         $markup .= $this->getMessageCloseString();
 
         return $markup;

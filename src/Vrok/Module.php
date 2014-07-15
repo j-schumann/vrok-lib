@@ -194,12 +194,15 @@ class Module implements
         $application = $e->getApplication();
         $sharedEvents = $application->getEventManager()->getSharedManager();
 
-        // we want to lazy load the strategy object only when needed so we use a static
+        // we want to lazy load the strategy object only when needed, so we use a static
         // function here
         $sharedEvents->attach('OwnerService', 'getOwnerStrategy',
                 array('Vrok\Owner\UserStrategy', 'onGetOwnerStrategy'));
 
+        // Listen to the CRON events, they are rare, don't instantiate any objects yet
         $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily',
                 array('Vrok\SlmQueue\Job\PurgeValidations', 'onCronDaily'));
+        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily',
+                array('Vrok\SlmQueue\Job\CheckTodos', 'onCronDaily'));
     }
 }
