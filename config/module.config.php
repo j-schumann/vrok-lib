@@ -107,6 +107,32 @@ return array(
         'Vrok\Notification\AdminNotifications',
     ),
 
+    'navigation' => array(
+        'default' => array(
+            'administration' => array(
+                'label' => 'navigation.administration', // default label or none is rendered
+                'uri'   => '#', // we need a either a route or an URI to avoid fatal error
+                'order' => 1000,
+                'pages' => array(
+                    'server' => array(
+                        'label' => 'navigation.administration.server', // default label or none is rendered
+                        'uri'   => '#', // we need either a route or an URI to avoid fatal error
+                        'order' => 1000,
+                        'pages' => array(
+                            array(
+                                'label'     => 'navigation.slmQueue',
+                                'route'     => 'slm-queue',
+                                'resource'  => 'controller/Vrok\Controller\SlmQueue',
+                                'privilege' => 'index',
+                                'order'     => 1000,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    ),
+
     'owner_service' => array(
         'allowed_owners' => array(
             'Vrok\Entity\Validation' => array(

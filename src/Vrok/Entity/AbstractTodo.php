@@ -19,9 +19,11 @@ use Vrok\Owner\HasOwnerInterface;
  * when it is completed.
  *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
+ * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\Table(name="todo", indexes={@ORM\Index(name="status_idx", columns={"status"})})
+ * @ORM\DiscriminatorColumn(name="type", type="string")
  */
-class Todo extends Entity implements HasOwnerInterface
+abstract class AbstractTodo extends Entity implements HasOwnerInterface
 {
     use \Vrok\Doctrine\Traits\AutoincrementId;
     use \Vrok\Doctrine\Traits\CreationDate;
@@ -33,6 +35,21 @@ class Todo extends Entity implements HasOwnerInterface
     const STATUS_CANCELLED = 'cancelled'; // wurde abgebrochen (durch Aktion eines Nutzers oder vom System)
     const STATUS_OVERDUE   = 'overdue';   // Deadline ist abgelaufen
 
+    // used to build the translation string for each Todo type
+    const ASSIGNEE_DESCRIPTION_PREFIX = 'todo.assigneeDescription.';
+    const INSPECTION_DESCRIPTION_PREFIX = 'todo.inspectionDescription.';
+    const TITLE_PREFIX = 'todo.title.';
+
+    /**
+     * @var \Vrok\Doctrine\Entity
+     */
+    protected $object = null;
+
+    /**
+     * @var \Zend\View\Helper\Url
+     */
+    protected $urlHelper = null;
+
     /**
      * Initialize collection for lazy loading.
      */
@@ -41,35 +58,95 @@ class Todo extends Entity implements HasOwnerInterface
         $this->userTodos = new ArrayCollection();
     }
 
-// <editor-fold defaultstate="collapsed" desc="type">
     /**
-     * @var string
-     * @ORM\Column(type="string", length=255, nullable=false)
+     * Checks if the given User is assigned to this Todo.
+     *
+     * @param \Vrok\Entity\User $user
+     * @return bool
      */
-    protected $type;
+    public function isUserAssigned(User $user)
+    {
+        foreach($this->getUserTodos() as $ut) {
+            if ($ut->getUser()->getId() == $user->getId()
+                && $ut->getStatus() == UserTodo::STATUS_ASSIGNED
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
-     * Returns the validation type.
+     * Sets the object that is referenced by this todo (fetched from the OwnerService)
+     * and the URL helper to generate the complete URLs for action/inspection.
+     * Called by the TodoService.
+     *
+     * @param mixed $object
+     * @param \Zend\View\Helper\Url $urlHelper
+     */
+    public function setHelpers($object, \Zend\View\Helper\Url $urlHelper)
+    {
+        $this->object = $object;
+        $this->urlHelper = $urlHelper;
+    }
+
+    /**
+     * Retrieve the translation message for the short title of this task.
      *
      * @return string
      */
-    public function getType()
+    public function getTitle()
     {
-        return $this->type;
+        return self::TITLE_PREFIX.$this->getShortName();
     }
 
     /**
-     * Sets the validation type.
+     * Retrieve the URL to the action that leads to the comletion of this todo.
+     * Displayed the user(s) that are assigned to this todo.
      *
-     * @param string $value
-     * @return self
+     * Uses the urlHelper set with {@link setHelpers} to render the route with the
+     * necessary parameters.
+     *
+     * @return string
      */
-    public function setType($value)
+    abstract function getActionUrl();
+
+    /**
+     * Retrieve the description of the todo for the given user.
+     * This probably differs for the assignee and for any other user that is not
+     * assigned to this todo, e.g. for inspection of Todos for other users by admins or
+     * after completion. The inspection description may also differ for different user
+     * groups.
+     * Can contain links and other HTML markup.
+     *
+     * Uses the helpers set with {@link setHelpers} to retrieve the necessary URLs and
+     * parameters and return the translation message.
+     *
+     * @param User $user        the user for which the description is generated, to
+     *     allow different URLs / texts for different user groups.
+     * @return array
+     */
+    abstract function getDescription(User $user);
+
+    /**
+     * Gets the lower-case short name of the todo class as used in the discriminatorMap.
+     * Copied from Doctrine\ORM\Mapping\ClassMetadataFactory, used to construct the
+     * translation strings.
+     *
+     * @return string
+     */
+    final public function getShortName()
     {
-        $this->type = $value;
-        return $this;
+        $className = get_class($this);
+        if (strpos($className, "\\") === false) {
+            return strtolower($className);
+        }
+
+        $parts = explode("\\", $className);
+        return strtolower(end($parts));
     }
-// </editor-fold>
+
 // <editor-fold defaultstate="collapsed" desc="status">
     /**
      * @var string
@@ -191,14 +268,14 @@ class Todo extends Entity implements HasOwnerInterface
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="userTodos">
     /**
-     * @ORM\OneToMany(targetEntity="UserTodo", mappedBy="todo", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Vrok\Entity\UserTodo", mappedBy="todo", cascade={"persist"})
      **/
     protected $userTodos;
 
     /**
      * Returns the list of all referenced UserTodos.
      *
-     * @return Collection
+     * @return UserTodo[]
      */
     public function getUserTodos()
     {

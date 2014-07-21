@@ -26,4 +26,12 @@ abstract class AbstractJob extends SlmJob implements QueueAwareInterface
     {
         return $this->getQueue()->getJobPluginManager()->getServiceLocator();
     }
+
+    /**
+     * @return \Doctrine\Common\Persistence\ObjectManager
+     */
+    protected function getEntityManager()
+    {
+        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+    }
 }

@@ -26,9 +26,9 @@ class UserTodo extends Entity
 
 // <editor-fold defaultstate="collapsed" desc="todo">
     /**
-     * @var Todo
+     * @var AbstractTodo
      * @Orm\Id
-     * @ORM\ManyToOne(targetEntity="Vrok\Entity\Todo", cascade={"persist"}, inversedBy="userTodos")
+     * @ORM\ManyToOne(targetEntity="Vrok\Entity\AbstractTodo", cascade={"persist"}, inversedBy="userTodos")
      * @ORM\JoinColumn(name="todo_id", unique=false, referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected $todo;
@@ -36,7 +36,7 @@ class UserTodo extends Entity
     /**
      * Returns the referenced Todo.
      *
-     * @return \Vrok\Entity\Todo
+     * @return \Vrok\Entity\AbstractTodo
      */
     public function getTodo()
     {
@@ -46,10 +46,10 @@ class UserTodo extends Entity
     /**
      * Sets the referenced Todo.
      *
-     * @param \Vrok\Entity\User $todo
+     * @param \Vrok\Entity\AbstractTodo $todo
      * @return self
      */
-    public function setTodo(\Vrok\Entity\Todo $todo)
+    public function setTodo(\Vrok\Entity\AbstractTodo $todo)
     {
         $this->todo = $todo;
         $todo->addUserTodo($this);
