@@ -81,6 +81,12 @@ return array(
     ),
 
     'doctrine' => array(
+        'configuration' => array(
+            'orm_default' => array(
+                'entity_listener_resolver'
+                        => 'Vrok\Doctrine\Orm\Mapping\EntityListenerResolver',
+            ),
+        ),
         'driver' => array(
             'vrok_entities' => array(
                 'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
@@ -247,10 +253,11 @@ return array(
 
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
-            'Vrok\Authentication\Adapter\Doctrine'         => 'Vrok\Authentication\Adapter\Doctrine',
-            'Vrok\Client\Info'                             => 'Vrok\Client\Info',
-            'Vrok\Notification\AdminNotifications'         => 'Vrok\Notification\AdminNotifications',
-            'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
+            'Vrok\Authentication\Adapter\Doctrine'             => 'Vrok\Authentication\Adapter\Doctrine',
+            'Vrok\Client\Info'                                 => 'Vrok\Client\Info',
+            'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => 'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver',
+            'Vrok\Notification\AdminNotifications'             => 'Vrok\Notification\AdminNotifications',
+            'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy'     => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
         ),
 
         'factories' => array(

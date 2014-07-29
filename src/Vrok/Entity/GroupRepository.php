@@ -25,7 +25,6 @@ class GroupRepository extends EntityRepository
         switch ($fieldName) {
             case 'id':
                 $definition['type'] = 'hidden';
-                $definition['options']['allowEmpty'] = true;
                 break;
 
             case 'name':

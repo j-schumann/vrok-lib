@@ -59,6 +59,22 @@ class UserRepository extends EntityRepository
             case 'email':
                 $spec['validators']['email'] =
                     $this->getFormHelper()->getEmailValidatorSpecification();
+                $spec['validators']['stringLength']['options']['messages'] =
+                    array(\Zend\Validator\StringLength::TOO_LONG =>
+                        $this->getTranslationString('name').'.tooLong',);
+                $spec['validators']['uniqueObject'] = array(
+                    'name'    => 'DoctrineModule\Validator\UniqueObject',
+                    'options' => array(
+                        'use_context'       => true,
+                        'object_repository' => $this,
+                        'fields'            => 'email',
+                        'object_manager'    => $this->getEntityManager(),
+                        'messages'          => array(
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('email').'.notUnique',
+                        ),
+                    ),
+                );
                 break;
 
             case 'username':
