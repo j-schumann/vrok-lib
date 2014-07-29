@@ -3,6 +3,7 @@
     "description": "Vrok Library",
     "license": "private",
     "homepage": "http://www.vrok.de/",
+    "minimum-stability": "dev",
 
     "require": {
         "php": ">=5.4",
