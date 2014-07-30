@@ -45,7 +45,10 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
 
         $shared->attach(
             'SupervisorControl\Controller\ConsoleController',
-            \SupervisorControl\Controller\ConsoleController::EVENT_PROCESSNOTRUNNING,
+            // do not use constant to avoid dependency
+            // (\SupervisorControl\Controller\ConsoleController::EVENT_PROCESSNOTRUNNING)
+            'processNotRunning',
+
             array($this, 'onProcessNotRunning')
         );
 
