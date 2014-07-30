@@ -117,10 +117,6 @@ class Module implements
                     }
                     return $service;
                 },
-                'Vrok\Service\Queue' => function($sm) {
-                    $em = $sm->get('Doctrine\ORM\EntityManager');
-                    return new \Vrok\Service\Queue($em);
-                },
                 'Vrok\Service\Todo' => function($sm) {
                     $service = new \Vrok\Service\Todo();
                     $service->setServiceLocator($sm);
