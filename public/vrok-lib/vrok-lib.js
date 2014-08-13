@@ -1,16 +1,16 @@
 (function($) {
     window.Vrok = window.Vrok || {};
     Vrok.Tools = Vrok.Tools || {};
-    
+
     /**
      * Issues a JSON(P) request to the given url and places the result HTML in the
      * container given.
      *
      * @param {string} url              the URL to which the request is sent
-     * @param {Node|string}container    the result DOM node
+     * @param {Node|string} container    the result DOM node
      * @param {boolean} showOverlay     whether or not to show the loading overlay
      * @param {function} callback       function to call after the load finished
-     * @param {boolean} jsonp           set true if request should be made as 
+     * @param {boolean} jsonp           set true if request should be made as
      *     JSONP, e.g. for cross domain requests, requires the server to support
      *     this
      */
@@ -19,8 +19,7 @@
         // assume container is the ID of the DOMNode
         if (typeof(container) === 'string') {
             $container = $('#'+container);
-        }
-        else {
+        } else {
             $container = $(container);
         }
 
@@ -49,7 +48,7 @@
 
         $.ajax(request);
     };
-    
+
     /**
      * Submit function for AJAX enabled forms,
      * sends the given form to the address set as the forms action.
@@ -59,6 +58,7 @@
      * @param {string} senderName     the clicked elements id
      * @param {string} senderValue    the clicked elements value
      * @param {string} container      (optional) result container
+     * @param {function} callback     (optional) function to call on success
      * @return {boolean}              false to prevent the browser from submitting
      */
     Vrok.Tools.submit = function(element, senderName, senderValue, container, callback) {
@@ -66,11 +66,9 @@
         if (element.form) {
             // element is a normal input element assigned to a form
             form = $(element.form);
-        }
-        else if (element.tagName && element.tagName.toUpperCase() === 'FORM') {
+        } else if (element.tagName && element.tagName.toUpperCase() === 'FORM') {
             form = $(element);
-        }
-        else if (typeof(element) === 'string') {
+        } else if (typeof(element) === 'string') {
             // assume element is the Id of the DOMNode of the form to submit
             var result = $('#'+element);
             if (result.length) {
@@ -91,7 +89,7 @@
                     +'" name="'+senderName+'" />');
             form.append(sender);
         }
-        
+
         // add a flag so the server can detect if this was an AJAX submit, which
         // may not be possible otherwise, e.g. when using a hidden iframe as
         // transport method
@@ -132,7 +130,7 @@
         $.ajax(request);
         return false;
     };
-    
+
     /**
      * Processes the JSON response.
      *
@@ -157,21 +155,26 @@
                 console.debug(container);
                 return false;
             }
-            
+
             container.html($.parseHTML( response.html ));
             container.loading(false);
-            
+
+            // we trigger a custom event here to allow listeners to take
+            // additional actions after the response was loaded into the
+            // container, e.g. initialize form, without requiring a callback
+            container.trigger('processed');
+
             $('html,body').animate({
                 scrollTop: Math.max(container.offset().top-50, 0)
             });
         }
-        
+
         // execute additional script code
         if (response.script) {
             eval(response.script);
         }
     };
-    
+
     /**
      * Adds a loading overlay on the element.
      *
@@ -186,13 +189,13 @@
     $.fn.loading = function(state, addClass) {
         // element to animate
         var $this = $(this);
-        
+
         // hide or show the overlay
         state = state === undefined ? true : !!state;
- 
+
         $this.each(function(i, element) {
             var $element = $(element);
- 
+
             // if we want to create an overlay and any one exists
             if( state && $element.find(".js-loading-overlay").length === 0 ) {
                  // creates the overlay
@@ -217,19 +220,61 @@
                 //$this.find("input,button,.btn")
                 //     .addClass("disabled")
                 //     .prop("disabled", true);
- 
+
             // if we want to destroy this overlay
             } else if(!state) {
                 $element.removeClass("js-loading")
                         .find(".js-loading-overlay").remove();
- 
+
                 // Enable all inputs
                 $this.find("input,button,.btn")
                      .removeClass("disabled")
                      .prop("disabled", false);
             }
         });
- 
+
         return this;
     };
+
+    // initialize ajax-forms on page load
+    $(document).ready(function() {
+        // We do not want to submit ajax forms when the "enter" key is pressed
+        // on any other form elements but the submit buttons (which is the
+        // default behaviour in all browsers) because most times our forms will
+        // have multiple buttons (prev, next, save, cancel, ...) and we need to
+        // detect which one was clicked/triggered
+        // Because a "click" is triggered on the nearest/next button (in Tab
+        // order) from the element where we pressed enter we need to detect
+        // if a) the button was directly clicked or triggered via "enter" key
+        // directly on the button or b) triggered by "enter" on another element.
+        // Gecko browsers would support e.originalEvent.explicitOriginalTarget
+        // but all others don't so we use a workaround: we store the name of the
+        // element on which "enter" was pressed in the data attribute on the
+        // form and compare it to the buttons name in the "click" handler
+        // only if there is no name stored (mouse click) or the name equals the
+        // buttons name ("enter" directly on the button) the form is submitted.
+
+        $("body").on('keypress', '.ajax-form', function(e) {
+            if (e.which === 13 /* "enter" */) {
+                $(this).data('enter-pressed', e.target.name);
+            }
+        });
+
+        // reset form.data on keyup (triggered after "click"
+        $("body").on('keyup', '.ajax-form', function(e) {
+            $(this).data('enter-pressed', "");
+        });
+
+        // body is the nearest static container we can safely assume to be
+        // present for all forms...
+        $("body").on('click', '.ajax-form input[type="submit"]', function(e) {
+            var enterPressed = $(this.form).data('enter-pressed');
+            if (enterPressed && enterPressed !== this.name) {
+                e.preventDefault();
+                return false;
+            }
+
+            return Vrok.Tools.submit(this, this.name, this.value);
+        });
+    });
 }(jQuery));

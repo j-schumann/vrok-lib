@@ -41,25 +41,26 @@ abstract class AbstractActionController extends ZendController
      * provided in the given parameter name.
      *
      * @param string $entityClass
-     * @param string $identifier
+     * @param string $param     parameter name to use
+     * @param string $field     field name to query with the parameter value
      * @return mixed    Doctrine Entity or an array containing the error message
      */
-    public function getEntityFromParam($entityClass, $identifier = 'id')
+    public function getEntityFromParam($entityClass, $param = 'id', $field = 'id')
     {
-        $value = $this->params($identifier);
+        $value = $this->params($param);
         if (!$value) {
-            return array(self::MESSAGE_PARAM_MISSING, $identifier);
+            return array(self::MESSAGE_PARAM_MISSING, $param);
         }
 
         $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
         $repository = $em->getRepository($entityClass);
 
-        $entity = $repository->findOneBy(array($identifier => $value));
+        $entity = $repository->findOneBy(array($field => $value));
         if ($entity) {
             return $entity;
         }
 
-        return array(self::MESSAGE_PARAM_INVALID, $identifier);
+        return array(self::MESSAGE_PARAM_INVALID, $param);
     }
 
     /**
