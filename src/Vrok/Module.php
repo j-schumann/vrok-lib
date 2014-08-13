@@ -192,16 +192,16 @@ class Module implements
 
         // we want to lazy load the strategy object only when needed, so we use a
         // closure here
-        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function() {
-            return \Vrok\Owner\UserStrategy::onGetOwnerStrategy();
+        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function($e) {
+            return \Vrok\Owner\UserStrategy::onGetOwnerStrategy($e);
         });
 
         // Listen to the CRON events, they are rare, don't instantiate any objects yet
-        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily', function() {
-	    return \Vrok\SlmQueue\Job\PurgeValidations::onCronDaily();
+        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily', function($e) {
+	    return \Vrok\SlmQueue\Job\PurgeValidations::onCronDaily($e);
         });
-        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily', function() {
-            return \Vrok\SlmQueue\Job\CheckTodos::onCronDaily();
+        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily', function($e) {
+            return \Vrok\SlmQueue\Job\CheckTodos::onCronDaily($e);
         });
     }
 }
