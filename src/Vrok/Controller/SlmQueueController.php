@@ -335,9 +335,14 @@ class SlmQueueController extends AbstractActionController
      */
     public function checkJobsAction()
     {
+        $config = $this->getServiceLocator()->get('Config');
+        $threshold = isset($config['slm_queue']['runtime_threshold'])
+            ? (int)$config['slm_queue']['runtime_threshold']
+            : 60 * 60;
+
         $queues = $this->getQueues();
         foreach($queues as $queue) {
-            $interval = new \DateInterval('PT3600S');
+            $interval = new \DateInterval('PT'.$threshold.'S');
             $interval->invert = true;
             $maxAge = new \DateTime(null, new \DateTimeZone('UTC'));
             $maxAge->add($interval);
@@ -352,7 +357,8 @@ class SlmQueueController extends AbstractActionController
 
             if ($runningCount) {
                 $this->getEventManager()->trigger(self::EVENT_LONGRUNNINGJOBSFOUND, $queue, array(
-                    'count' => $runningCount,
+                    'count'     => $runningCount,
+                    'threshold' => $threshold,
                 ));
             }
 

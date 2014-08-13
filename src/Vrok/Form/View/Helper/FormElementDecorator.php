@@ -126,7 +126,7 @@ class FormElementDecorator extends AbstractHelper
         }
 
         if ($type === 'multi_checkbox' || $type === 'radio') {
-            $markup .= '<fieldset>';
+            $markup .= "<fieldset class=\"$containerClass\">";
         }
 
         if ($type === 'checkbox') {

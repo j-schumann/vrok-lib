@@ -117,6 +117,7 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
     {
         $queue = $e->getTarget();
         $count = $e->getParam('count');
+        $threshold = $e->getParam('threshold');
 
         $emailService = $this->serviceLocator->get('Vrok\Service\Email');
         $url = $this->serviceLocator->get('viewhelpermanager')->get('url');
@@ -127,8 +128,9 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
 
         $mail->setHtmlBody(array('mail.slmQueue.longRunningJobsFound.body', array(
             'queueName' => $queue->getName(),
-            'count' => $count,
-            'queueUrl' => $fullUrl('https').$url('slm-queue/list-running', array(
+            'count'     => $count,
+            'threshold' => $threshold / 60, // @todo implement DateInterval-Viewhelper
+            'queueUrl'  => $fullUrl('https').$url('slm-queue/list-running', array(
                 'name' => $queue->getName()
             )),
         )));

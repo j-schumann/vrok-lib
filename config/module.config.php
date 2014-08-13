@@ -3,17 +3,17 @@
  * Vrok-Lib config
  */
 return array(
+// <editor-fold defaultstate="collapsed" desc="asset_manager">
     'asset_manager' => array(
         'resolver_configs' => array(
             'paths' => array(
                 __DIR__ . '/../public',
             ),
             'map' => array(
-
-            ),
+                        ),
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="console">
     'console' => array(
         'router' => array(
             'routes' => array(
@@ -22,7 +22,7 @@ return array(
                         'route' => 'cron-hourly',
                         'defaults' => array(
                             'controller' => 'Vrok\Controller\Cron',
-                            'action'     => 'cron-hourly',
+                            'action' => 'cron-hourly',
                         ),
                     ),
                 ),
@@ -31,7 +31,7 @@ return array(
                         'route' => 'cron-daily',
                         'defaults' => array(
                             'controller' => 'Vrok\Controller\Cron',
-                            'action'     => 'cron-daily',
+                            'action' => 'cron-daily',
                         ),
                     ),
                 ),
@@ -40,7 +40,7 @@ return array(
                         'route' => 'cron-monthly',
                         'defaults' => array(
                             'controller' => 'Vrok\Controller\Cron',
-                            'action'     => 'cron-monthly',
+                            'action' => 'cron-monthly',
                         ),
                     ),
                 ),
@@ -49,7 +49,7 @@ return array(
                         'route' => 'purge-validations',
                         'defaults' => array(
                             'controller' => 'Vrok\Controller\Validation',
-                            'action'     => 'purge',
+                            'action' => 'purge',
                         ),
                     ),
                 ),
@@ -58,33 +58,33 @@ return array(
                         'route' => 'check-jobs',
                         'defaults' => array(
                             'controller' => 'Vrok\Controller\SlmQueue',
-                            'action'     => 'check-jobs',
+                            'action' => 'check-jobs',
                         ),
                     ),
                 ),
             ),
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="controllers">
     'controllers' => array(
         'invokables' => array(
-            'Vrok\Controller\Cron'        => 'Vrok\Controller\CronController',
-            'Vrok\Controller\SlmQueue'    => 'Vrok\Controller\SlmQueueController',
-            'Vrok\Controller\Validation'  => 'Vrok\Controller\ValidationController',
+            'Vrok\Controller\Cron' => 'Vrok\Controller\CronController',
+            'Vrok\Controller\SlmQueue' => 'Vrok\Controller\SlmQueueController',
+            'Vrok\Controller\Validation' => 'Vrok\Controller\ValidationController',
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="controller_plugins">
     'controller_plugins' => array(
         'invokables' => array(
             'translate' => 'Vrok\Mvc\Controller\Plugin\Translate',
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="doctrine">
     'doctrine' => array(
         'configuration' => array(
             'orm_default' => array(
                 'entity_listener_resolver'
-                        => 'Vrok\Doctrine\Orm\Mapping\EntityListenerResolver',
+                => 'Vrok\Doctrine\Orm\Mapping\EntityListenerResolver',
             ),
         ),
         'driver' => array(
@@ -107,30 +107,30 @@ return array(
                 ),
             ),
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="listeners">
     'listeners' => array(
         'Vrok\Notification\AdminNotifications',
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="navigation">
     'navigation' => array(
         'default' => array(
             'administration' => array(
                 'label' => 'navigation.administration', // default label or none is rendered
-                'uri'   => '#', // we need a either a route or an URI to avoid fatal error
+                'uri' => '#', // we need a either a route or an URI to avoid fatal error
                 'order' => 1000,
                 'pages' => array(
                     'server' => array(
                         'label' => 'navigation.administration.server', // default label or none is rendered
-                        'uri'   => '#', // we need either a route or an URI to avoid fatal error
+                        'uri' => '#', // we need either a route or an URI to avoid fatal error
                         'order' => 1000,
                         'pages' => array(
                             array(
-                                'label'     => 'navigation.slmQueue',
-                                'route'     => 'slm-queue',
-                                'resource'  => 'controller/Vrok\Controller\SlmQueue',
+                                'label' => 'navigation.slmQueue',
+                                'route' => 'slm-queue',
+                                'resource' => 'controller/Vrok\Controller\SlmQueue',
                                 'privilege' => 'index',
-                                'order'     => 1000,
+                                'order' => 1000,
                             ),
                         ),
                     ),
@@ -138,7 +138,8 @@ return array(
             ),
         ),
     ),
-
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="owner_service">
     'owner_service' => array(
         'allowed_owners' => array(
             'Vrok\Entity\Validation' => array(
@@ -146,25 +147,26 @@ return array(
             ),
         ),
     ),
-
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="router">
     'router' => array(
         'routes' => array(
             'slm-queue' => array(
-                'type'    => 'Literal',
+                'type' => 'Literal',
                 'options' => array(
-                    'route'    => '/slm-queue/',
+                    'route' => '/slm-queue/',
                     'defaults' => array(
                         '__NAMESPACE__' => 'Vrok\Controller',
-                        'controller'    => 'SlmQueue',
-                        'action'        => 'index',
+                        'controller' => 'SlmQueue',
+                        'action' => 'index',
                     ),
                 ),
                 'may_terminate' => true,
-                'child_routes'  => array(
+                'child_routes' => array(
                     'recover' => array(
-                        'type'    => 'Segment',
+                        'type' => 'Segment',
                         'options' => array(
-                            'route'    => 'recover/[:name][/]',
+                            'route' => 'recover/[:name][/]',
                             'constraints' => array(
                                 'name' => '[a-zA-Z0-9_-]+',
                             ),
@@ -174,9 +176,9 @@ return array(
                         ),
                     ),
                     'list-buried' => array(
-                        'type'    => 'Segment',
+                        'type' => 'Segment',
                         'options' => array(
-                            'route'    => 'list-buried/[:name][/]',
+                            'route' => 'list-buried/[:name][/]',
                             'constraints' => array(
                                 'name' => '[a-zA-Z0-9_-]+',
                             ),
@@ -186,9 +188,9 @@ return array(
                         ),
                     ),
                     'list-running' => array(
-                        'type'    => 'Segment',
+                        'type' => 'Segment',
                         'options' => array(
-                            'route'    => 'list-running/[:name][/]',
+                            'route' => 'list-running/[:name][/]',
                             'constraints' => array(
                                 'name' => '[a-zA-Z0-9_-]+',
                             ),
@@ -198,12 +200,12 @@ return array(
                         ),
                     ),
                     'delete' => array(
-                        'type'    => 'Segment',
+                        'type' => 'Segment',
                         'options' => array(
-                            'route'    => 'delete/[:name]/[:id][/]',
+                            'route' => 'delete/[:name]/[:id][/]',
                             'constraints' => array(
                                 'name' => '[a-zA-Z0-9_-]+',
-                                'id'   => '[0-9]+',
+                                'id' => '[0-9]+',
                             ),
                             'defaults' => array(
                                 'action' => 'delete',
@@ -211,12 +213,12 @@ return array(
                         ),
                     ),
                     'release' => array(
-                        'type'    => 'Segment',
+                        'type' => 'Segment',
                         'options' => array(
-                            'route'    => 'release/[:name]/[:id][/]',
+                            'route' => 'release/[:name]/[:id][/]',
                             'constraints' => array(
                                 'name' => '[a-zA-Z0-9_-]+',
-                                'id'   => '[0-9]+',
+                                'id' => '[0-9]+',
                             ),
                             'defaults' => array(
                                 'action' => 'release',
@@ -224,12 +226,12 @@ return array(
                         ),
                     ),
                     'unbury' => array(
-                        'type'    => 'Segment',
+                        'type' => 'Segment',
                         'options' => array(
-                            'route'    => 'unbury/[:name]/[:id][/]',
+                            'route' => 'unbury/[:name]/[:id][/]',
                             'constraints' => array(
                                 'name' => '[a-zA-Z0-9_-]+',
-                                'id'   => '[0-9]+',
+                                'id' => '[0-9]+',
                             ),
                             'defaults' => array(
                                 'action' => 'unbury',
@@ -239,68 +241,75 @@ return array(
                 ),
             ),
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => array(
         // add some short names that hopefully don't conflict
         'aliases' => array(
             'AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
-            'ClientInfo'               => 'Vrok\Client\Info',
-            'OwnerService'             => 'Vrok\Owner\OwnerService',
-            'UserManager'              => 'Vrok\User\Manager',
-            'ValidationManager'        => 'Vrok\Validation\Manager',
+            'ClientInfo' => 'Vrok\Client\Info',
+            'OwnerService' => 'Vrok\Owner\OwnerService',
+            'UserManager' => 'Vrok\User\Manager',
+            'ValidationManager' => 'Vrok\Validation\Manager',
         ),
 
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
-            'Vrok\Authentication\Adapter\Doctrine'             => 'Vrok\Authentication\Adapter\Doctrine',
-            'Vrok\Client\Info'                                 => 'Vrok\Client\Info',
+            'Vrok\Authentication\Adapter\Doctrine' => 'Vrok\Authentication\Adapter\Doctrine',
+            'Vrok\Client\Info' => 'Vrok\Client\Info',
             'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => 'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver',
-            'Vrok\Notification\AdminNotifications'             => 'Vrok\Notification\AdminNotifications',
-            'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy'     => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
+            'Vrok\Notification\AdminNotifications' => 'Vrok\Notification\AdminNotifications',
+            'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
         ),
 
         'factories' => array(
             // replace the default translator with our custom extension
             'Zend\I18n\Translator\TranslatorInterface'
-                => 'Vrok\I18n\Translator\TranslatorServiceFactory',
+                    => 'Vrok\I18n\Translator\TranslatorServiceFactory',
 
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
+            'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
         ),
     ),
-
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="slm_queue">
     'slm_queue' => array(
+        // after how many seconds are jobs reported as long running by
+        // SlmQueueController::checkJobsAction?
+        'runtime_threshold' => 3600, // 60 * 60
+
         'job_manager' => array(
             'invokables' => array(
-                'Vrok\SlmQueue\Job\CheckTodos'       => 'Vrok\SlmQueue\Job\CheckTodos',
-                'Vrok\SlmQueue\Job\ExitWorker'       => 'Vrok\SlmQueue\Job\ExitWorker',
+                'Vrok\SlmQueue\Job\CheckTodos' => 'Vrok\SlmQueue\Job\CheckTodos',
+                'Vrok\SlmQueue\Job\ExitWorker' => 'Vrok\SlmQueue\Job\ExitWorker',
                 'Vrok\SlmQueue\Job\PurgeValidations' => 'Vrok\SlmQueue\Job\PurgeValidations',
             ),
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="validation_manager">
     'validation_manager' => array(
         'timeouts' => array(
             'password' => 172800, //48*60*60
         ),
-    ),
-
+    ), // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="view_helpers">
     'view_helpers' => array(
         'invokables' => array(
-            'alternativeUrl'       => 'Vrok\View\Helper\AlternativeUrl',
-            'formDecorator'        => 'Vrok\Form\View\Helper\FormDecorator',
+            'alternativeUrl' => 'Vrok\View\Helper\AlternativeUrl',
+            'formDecorator' => 'Vrok\Form\View\Helper\FormDecorator',
             'formElementDecorator' => 'Vrok\Form\View\Helper\FormElementDecorator',
-            'flashMessenger'       => 'Vrok\View\Helper\FlashMessenger',
-            'translatePlural'      => '\Vrok\I18n\Translator\View\Helper\TranslatePlural',
-
-            // @todo used? necessary?
-            'formMultiText'        => 'Vrok\Form\View\Helper\FormMultiText',
+            'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
+            'translatePlural' => '\Vrok\I18n\Translator\View\Helper\TranslatePlural',
+                        // @todo used? necessary?
+            'formMultiText' => 'Vrok\Form\View\Helper\FormMultiText',
         ),
     ),
-
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="view_manager">
     'view_manager' => array(
         'template_path_stack' => array(
             __DIR__ . '/../view',
         ),
     ),
+// </editor-fold>
 );

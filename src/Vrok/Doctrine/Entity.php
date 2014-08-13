@@ -10,4 +10,3 @@ namespace Vrok\Doctrine;
 class Entity
 {
 }
-

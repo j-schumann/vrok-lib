@@ -9,6 +9,8 @@ namespace Vrok\Doctrine;
 
 use Doctrine\ORM\EntityRepository as DoctrineRepository;
 use Vrok\Doctrine\FormHelper;
+use Vrok\Stdlib\Guard\ObjectGuardTrait;
+use Vrok\Stdlib\Guard\InstanceOfGuardTrait;
 use Zend\InputFilter\InputFilterProviderInterface;
 
 /**
@@ -16,6 +18,9 @@ use Zend\InputFilter\InputFilterProviderInterface;
  */
 class EntityRepository extends DoctrineRepository implements InputFilterProviderInterface
 {
+    use InstanceOfGuardTrait;
+    use ObjectGuardTrait;
+
     /**
      * FormHelper instance for this table.
      *
@@ -50,9 +55,12 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * @param int|null   $offset
      * @return array The objects.
      */
-    public function findByNot(array $criteria, array $orderBy = null,
-            $limit = null, $offset = null)
-    {
+    public function findByNot(
+        array $criteria,
+        array $orderBy = null,
+        $limit = null,
+        $offset = null
+    ) {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $expr = $this->getEntityManager()->getExpressionBuilder();
 
@@ -110,6 +118,21 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     public function hasField($fieldName)
     {
         return $this->getClassMetadata()->hasField($fieldName);
+    }
+
+    /**
+     * Retrieve the primary key value[s] for the given entity.
+     *
+     * @param object $entity
+     * @return array
+     */
+    public function getIdentifierValues($entity)
+    {
+        $class = $this->getClassName();
+        $this->guardForInstanceOf($entity, $class);
+
+        $meta = $this->getClassMetadata();
+        return $meta->getIdentifierValues($entity);
     }
 
     /**

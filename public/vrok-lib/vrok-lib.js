@@ -7,15 +7,26 @@
      * container given.
      *
      * @param {string} url              the URL to which the request is sent
-     * @param {Node|string} container    the result DOM node
-     * @param {boolean} showOverlay     whether or not to show the loading overlay
-     * @param {function} callback       function to call after the load finished
-     * @param {boolean} jsonp           set true if request should be made as
-     *     JSONP, e.g. for cross domain requests, requires the server to support
-     *     this
+     * @param {Node|string} container   the result DOM node
+     * @param {object} options          hash of options:
+     *     {function} callback       function to call after the load finished
+     *     {boolean} jsonp           set true if request should be made as
+     *          JSONP, e.g. for cross domain requests, requires the server to
+     *          support this
+     *     {boolean} scrollTo        whether or not after loading the page is scrolled
+     *          to the top of the container
+     *     {boolean} showOverlay     whether or not to show the loading overlay
      */
-    Vrok.Tools.json = function(url, container, showOverlay, callback, jsonp) {
+    Vrok.Tools.json = function(url, container, options) {
         var $container = null;
+        var defaults = {
+            callback: null,
+            jsonp: false,
+            scrollTo: false,
+            showOverlay: true
+        };
+        $.extend(defaults, options);
+
         // assume container is the ID of the DOMNode
         if (typeof(container) === 'string') {
             $container = $('#'+container);
@@ -23,7 +34,7 @@
             $container = $(container);
         }
 
-        if (showOverlay) {
+        if (defaults.showOverlay) {
             $container.loading(true);
         }
 
@@ -31,17 +42,23 @@
             dataType: "json",
             url: url,
             success: function (data) {
-                Vrok.Tools.processResponse(data, $container);
-                if (typeof(callback) === 'function') {
-                    callback($container);
+                Vrok.Tools.processResponse(data, $container, defaults);
+
+                if (typeof(defaults.callback) === 'function') {
+                    defaults.callback($container);
                 }
             },
             error: function (data) {
                 console.error('Vrok.Tools.json: Request to "'+url+'" failed!');
                 console.debug(data);
+
+                // still try to process, maybe we received a 403 with a
+                // redirect in the response.script
+                Vrok.Tools.processResponse(data.responseJSON, $container, defaults);
             }
         };
-        if (jsonp) {
+
+        if (defaults.jsonp) {
             request.dataType = 'jsonp';
             request.jsonp    = 'callback';
         }
@@ -58,11 +75,26 @@
      * @param {string} senderName     the clicked elements id
      * @param {string} senderValue    the clicked elements value
      * @param {string} container      (optional) result container
-     * @param {function} callback     (optional) function to call on success
+     * @param {object} options          hash of options:
+     *     {function} callback       function to call after the load finished
+     *     {boolean} jsonp           set true if request should be made as
+     *          JSONP, e.g. for cross domain requests, requires the server to
+     *          support this
+     *     {boolean} scrollTo        whether or not after loading the page is scrolled
+     *          to the top of the container
+     *     {boolean} showOverlay     whether or not to show the loading overlay
      * @return {boolean}              false to prevent the browser from submitting
      */
-    Vrok.Tools.submit = function(element, senderName, senderValue, container, callback) {
+    Vrok.Tools.submit = function(element, senderName, senderValue, container, options) {
         var form = null;
+        var defaults = {
+            callback: null,
+            jsonp: false,
+            scrollTo: true,
+            showOverlay: true
+        };
+        $.extend(defaults, options);
+
         if (element.form) {
             // element is a normal input element assigned to a form
             form = $(element.form);
@@ -104,7 +136,10 @@
         var $container = container
             ? $('#'+container)
             : $(form.context.parentNode);
-        $container.loading();
+
+        if (defaults.showOverlay) {
+            $container.loading();
+        }
 
         var request = {
             type: "POST",
@@ -112,9 +147,10 @@
             data: data,
             url: form.context.action,
             success: function (data) {
-                Vrok.Tools.processResponse(data, $container);
-                if (typeof(callback) === 'function') {
-                    callback($container);
+                Vrok.Tools.processResponse(data, $container, defaults);
+
+                if (typeof(defaults.callback) === 'function') {
+                    defaults.callback($container);
                 }
             },
             error: function (data) {
@@ -124,9 +160,10 @@
 
                 // still try to process, maybe we received a 403 with a
                 // redirect in the response.script
-                Vrok.Tools.processResponse(data.responseJSON, $container);
+                Vrok.Tools.processResponse(data.responseJSON, $container, defaults);
             }
         };
+
         $.ajax(request);
         return false;
     };
@@ -138,10 +175,14 @@
      * - html: this is set as the innerHTML of the container
      * - script: this is eval'ed
      *
-     * @param {object} response    JSON response to an XHR/JSONP request
-     * @param {object} container   jQuery object where the response HTML is inserted
+     * @param {object} response     JSON response to an XHR/JSONP request
+     * @param {object} container    jQuery object where the response HTML is inserted
+     * @param {object} options      hash of additional options:
+     *     {boolean} showOverlay     whether or not to show the loading overlay
+     *     {boolean} scrollTo        whether or not after loading the page is scrolled
+     *          to the top of the container
      */
-    Vrok.Tools.processResponse = function(response, container) {
+    Vrok.Tools.processResponse = function(response, container, options) {
         if (response.html && typeof(response.html) === 'string') {
             // allow the response to overwrite the (probably autodetected)
             // result container, e.g. when returning a complete view instead
@@ -157,16 +198,21 @@
             }
 
             container.html($.parseHTML( response.html ));
-            container.loading(false);
+
+            if (options.showOverlay) {
+                container.loading(false);
+            }
 
             // we trigger a custom event here to allow listeners to take
             // additional actions after the response was loaded into the
             // container, e.g. initialize form, without requiring a callback
             container.trigger('processed');
 
-            $('html,body').animate({
-                scrollTop: Math.max(container.offset().top-50, 0)
-            });
+            if (options.scrollTo) {
+                $('html,body').animate({
+                    scrollTop: Math.max(container.offset().top-50, 0)
+                });
+            }
         }
 
         // execute additional script code
