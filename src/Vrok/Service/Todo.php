@@ -27,6 +27,8 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
 
     const EVENT_TODO_OVERDUE = 'todoOverdue';
 
+    protected $partial = 'vrok/partials/todo-list';
+
     /**
      * Creates a todo of the given type.
      * Status and assigned users can be set afterwards.
@@ -111,26 +113,20 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      */
     public function getOpenUserTodos(User $user)
     {
-        $qb = $this->getTodoRepository()->createQueryBuilder('t');
-        $qb->leftJoin('t.userTodos ut')
-           ->where('ut.user = :user')
-           ->andWhere($qb->expr()->notIn('t.status', ':todoStatus'))
-           ->andWhere($qb->expr()->in('ut.status', ':userStatus'))
-           ->orderBy('t.deadline', 'ASC');
-
-        $qb->setParameter('user', $user)
-           ->setParameter('todoStatus', array(
-               TodoEntity::STATUS_COMPLETED,
-               TodoEntity::STATUS_CANCELLED,
-           ))
-           ->setParameter('userStatus', array(
+        $filter = $this->getTodoFilter('t');
+        $filter->byUser($user, array(
                 UserTodo::STATUS_ASSIGNED,
                 UserTodo::STATUS_OPEN,
-     // @todo implement confirmation of todos with changed state
-     //           UserTodo::STATUS_UNCONFIRMED,
-           ));
+                // @todo implement confirmation of todos with changed state
+                //UserTodo::STATUS_UNCONFIRMED,
+            ))
+            ->byStatusNot(array(
+                TodoEntity::STATUS_COMPLETED,
+                TodoEntity::STATUS_CANCELLED,
+            ))
+            ->orderBy('t.deadline', 'ASC');
 
-        return $qb->getQuery()->getResult();
+        return $filter->getResult();
     }
 
     /**
@@ -143,34 +139,15 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      */
     public function getObjectTodos($object, $status = null)
     {
-        $qb = $this->getTodoRepository()->createQueryBuilder('t');
-        $qb->orderBy('t.deadline', 'ASC');
-
-        if ($object) {
-            $ownerService = $this->getServiceLocator()->get('OwnerService');
-            $qb->where('t.ownerClass = :ownerClass')
-               ->andWhere('t.ownerIdentifier = :ownerIdentifier')
-               ->setParameter('ownerClass', get_class($object))
-               ->setParameter('ownerIdentifier', $ownerService->getOwnerIdentifier($object));
-        }
-        else {
-            // explicitly match NULL or every object matches
-            $qb->andWhere($qb->expr()->isNull('t.ownerClass'))
-               ->andWhere($qb->expr()->isNull('t.ownerIdentifier'));
-        }
+        $filter = $this->getTodoFilter('t');
+        $filter->byObject($object)
+               ->orderBy('t.deadline', 'ASC');
 
         if ($status) {
-           $qb->andWhere('t.status = :status')
-              ->setParameter('status', $status);
+           $filter->byStatus($status);
         }
 
-        return $qb->getQuery()->getResult();
-    }
-
-    public function getUserTodoList(User $assignee, User $user)
-    {
-        $todos = $this->getOpenUserTodos($assignee);
-        return $this->buildTodoList($todos, $user);
+        return $filter->getResult();
     }
 
     /**
@@ -185,17 +162,54 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     {
         $list = array();
         foreach($todos as $todo) {
+            $todo->setHelpers(
+                $this->getReferencedObject($todo),
+                $this->getServiceLocator()->get('viewhelpermanager')->get('url')
+            );
+
             $list[] = array(
+/* aktuell nicht nötig/benutzt:
                 'title'       => $todo->getTitle(),
                 'actionUrl'   => $todo->isUserAssigned($user)
                     ? $todo->getActionUrl()
                     : null,
-                'description' => $this->getDescription($todo, $user),
+ */
+                'description' => $todo->getDescription($user),
                 'deadline'    => $todo->getDeadline(),
             );
         }
 
         return $list;
+    }
+
+    /**
+     * Retrieve the list of all Todos assigned to $assignee to be shown to $user.
+     *
+     * @param \Vrok\Entity\User $assignee
+     * @param \Vrok\Entity\User $user
+     * @return array
+     */
+    public function getUserTodoList(User $assignee, User $user = null)
+    {
+        $todos = $this->getOpenUserTodos($assignee);
+        return $this->buildTodoList($todos, $user ?: $assignee);
+    }
+
+    /**
+     * Retrieve the rendered list of all Todos assigned to $assignee to be shown to $user.
+     *
+     * @param \Vrok\Entity\User $assignee
+     * @param \Vrok\Entity\User $user
+     * @return string
+     */
+    public function renderUserTodoList(User $assignee, User $user = null)
+    {
+        $todos = $this->getUserTodoList($assignee, $user);
+        $partial = $this->getServiceLocator()->get('viewhelpermanager')->get('partial');
+
+        return $partial($this->getPartial(), array(
+            'todos' => $todos,
+        ));
     }
 
     /**
@@ -206,28 +220,8 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      */
     public function getReferencedObject(TodoEntity $todo)
     {
-        $r = $this->getTodoRepository();
         $ownerService = $this->getServiceLocator()->get('OwnerService');
         return $ownerService->getOwner($todo);
-    }
-
-    /**
-     * Renders the description of the given Todo for the given user.
-     * This can contain a link to the action to complete the Todo if this user
-     * is assigned to it or inspect a Todo by other users or after completion.
-     *
-     * @param \Vrok\Entity\AbstractTodo $todo
-     * @param \Vrok\Entity\User $user
-     * @return string
-     */
-    public function getDescription(TodoEntity $todo, User $user)
-    {
-        $todo->setHelpers(
-            $this->getReferencedObject($todo),
-            $this->getServiceLocator()->get('viewhelpermanager')->get('url')
-        );
-
-        return $todo->getDescription($user);
     }
 
     /**
@@ -246,17 +240,11 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      */
     public function checkTodos()
     {
-        $qb = $this->getTodoRepository()->createQueryBuilder('t');
-        // this only queries todos that have a deadline set
-        $qb->where('t.deadline < :deadline')
-           ->andWhere($qb->expr()->in('t.status', ':todoStatus'))
-           ->setParameter('deadline', new \DateTime())
-           ->setParameter('todoStatus', array(
-               TodoEntity::STATUS_OPEN,
-               TodoEntity::STATUS_ASSIGNED,
-           ));
+        $filter = $this->getTodoFilter();
+        $filter->byDeadline(new \DateTime(), '<')
+               ->byStatus(array(TodoEntity::STATUS_OPEN, TodoEntity::STATUS_ASSIGNED));
 
-        $todos = $qb->getQuery()->getResult();
+        $todos = $filter->getResult();
         foreach($todos as $todo) {
             $this->getEventManager()->trigger(
                 self::EVENT_TODO_OVERDUE,
@@ -270,13 +258,35 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     }
 
     /**
-     * Retrieve the repository for the action log entries.
+     * Retrieve a new todo filter instance.
      *
+     * @param string $alias     the alias for the Todo record
+     * @return \Vrok\Entity\Filter\TodoFilter
+     */
+    public function getTodoFilter($alias = 't', $class = 'Vrok\Entity\AbstractTodo')
+    {
+        $qb = $this->getTodoRepository($class)->createQueryBuilder($alias);
+        $ownerService = $this->getServiceLocator()->get('OwnerService');
+
+        $filter = new \Vrok\Entity\Filter\TodoFilter($qb, $ownerService);
+        return $filter;
+    }
+
+    /**
+     * Retrieve the repository for Todos.
+     *
+     * @param string $class     give a subclass here to only query for this todo type
      * @return \Vrok\Doctrine\EntityRepository
      */
-    public function getTodoRepository()
+    public function getTodoRepository($class = 'Vrok\Entity\AbstractTodo')
     {
-        return $this->getEntityManager()->getRepository('Vrok\Entity\AbstractTodo');
+        if (strpos('\\', $class) === false) {
+            $meta = $this->getEntityManager()->getClassMetadata('Vrok\Entity\AbstractTodo');
+            if (isset($meta->discriminatorMap[$class])) {
+                $class = $meta->discriminatorMap[$class];
+            }
+        }
+        return $this->getEntityManager()->getRepository($class);
     }
 
     /**
@@ -287,5 +297,25 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     public function getEntityManager()
     {
         return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+    }
+
+    /**
+     * Retrieve the partial file name that is used to render the todo list.
+     *
+     * @return string
+     */
+    public function getPartial()
+    {
+        return $this->partial;
+    }
+
+    /**
+     * Sets the partial to use for rendering the todo list.
+     *
+     * @param string $partial
+     */
+    public function setPartial($partial)
+    {
+        $this->partial = $partial;
     }
 }

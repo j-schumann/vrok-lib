@@ -117,20 +117,20 @@ return array(
         'default' => array(
             'administration' => array(
                 'label' => 'navigation.administration', // default label or none is rendered
-                'uri' => '#', // we need a either a route or an URI to avoid fatal error
+                'uri'   => '#', // we need a either a route or an URI to avoid fatal error
                 'order' => 1000,
                 'pages' => array(
                     'server' => array(
                         'label' => 'navigation.administration.server', // default label or none is rendered
-                        'uri' => '#', // we need either a route or an URI to avoid fatal error
+                        'uri'   => '#', // we need either a route or an URI to avoid fatal error
                         'order' => 1000,
                         'pages' => array(
                             array(
-                                'label' => 'navigation.slmQueue',
-                                'route' => 'slm-queue',
-                                'resource' => 'controller/Vrok\Controller\SlmQueue',
+                                'label'     => 'navigation.slmQueue',
+                                'route'     => 'slm-queue',
+                                'resource'  => 'controller/Vrok\Controller\SlmQueue',
                                 'privilege' => 'index',
-                                'order' => 1000,
+                                'order'     => 1000,
                             ),
                         ),
                     ),
