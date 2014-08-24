@@ -23,7 +23,8 @@
             callback: null,
             jsonp: false,
             scrollTo: false,
-            showOverlay: true
+            showOverlay: true,
+            data: {}
         };
         $.extend(defaults, options);
 
@@ -40,6 +41,7 @@
 
         var request = {
             dataType: "json",
+            data: defaults.data,
             url: url,
             success: function (data) {
                 Vrok.Tools.processResponse(data, $container, defaults);

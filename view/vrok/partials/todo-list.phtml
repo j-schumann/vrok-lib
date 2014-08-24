@@ -2,19 +2,29 @@
 <?php
     $now = new \DateTime();
     foreach($this->todos as $todo) :
-?>
-    <dd <?php if (!empty($todo['deadline']) && $todo['deadline'] < $now) { echo ' class="todo-overdue"'; } ?>>
-        <span class="todo-description">
-            <?php echo $this->translate($todo['description']); ?>
-        </span>
-        <?php if (!empty($todo['deadline'])) : ?>
-        <div class="todo-deadline">
-            <?php echo $this->translate(array('view.todo.until', $this->dateFormat($todo['deadline'],
-                \IntlDateFormatter::MEDIUM, \IntlDateFormatter::SHORT))); ?>
-        </div>
-        <?php endif; ?>
-    </dd>
-<?php endforeach;
+
+        if ($todo['isOpen']) : ?>
+        <dd <?php if (!empty($todo['deadline']) && $todo['deadline'] < $now || $todo->getStatus() == 'overdue') { echo ' class="todo-overdue"'; } ?>>
+            <span class="todo-description">
+                <?php echo $this->translate($todo['description']); ?>
+            </span>
+            <?php if (!empty($todo['deadline'])) : ?>
+            <div class="todo-deadline">
+                <?php echo $this->translate(array('view.todo.until', $this->dateFormat($todo['deadline'],
+                    \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::SHORT))); ?>
+            </div>
+            <?php endif; ?>
+        </dd>
+
+        <?php else : ?>
+        <dd class="todo-grey">
+            <span class="todo-description">
+                <?php echo $this->translate($todo['description']); ?>
+            </span>
+        </dd>
+
+        <?php endif;
+    endforeach;
 
     if (!count($this->todos)) : ?>
     <dd>

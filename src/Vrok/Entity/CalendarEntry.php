@@ -14,17 +14,17 @@ use Vrok\Doctrine\Entity;
 use Vrok\Owner\HasOwnerInterface;
 
 /**
- * Represents a single task to be done. The target could be fulfilled by different
- * actions, it is responsibilty of the business logic to create the Todo and decide
- * when it is completed.
+ * Represents a calendar entry that can be assigned to an user or other object.
  *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\Table(name="todo", indexes={@ORM\Index(name="status_idx", columns={"status"})})
+ * @ORM\Table(name="calendar_entries", indexes={
+ *     @ORM\Index(name="startDate", columns={"startDate"})
+ *     @ORM\Index(name="endDate", columns={"endDate"})
+ * })
  * @ORM\DiscriminatorColumn(name="type", type="string")
- * @ORM\EntityListeners({"Vrok\Entity\Listener\TodoListener"})
  */
-abstract class AbstractTodo extends Entity implements HasOwnerInterface
+abstract class AbstractCalendarEntry extends Entity implements HasOwnerInterface
 {
     use \Vrok\Doctrine\Traits\AutoincrementId;
     use \Vrok\Doctrine\Traits\CreationDate;
@@ -36,20 +36,10 @@ abstract class AbstractTodo extends Entity implements HasOwnerInterface
     const STATUS_CANCELLED = 'cancelled'; // wurde abgebrochen (durch Aktion eines Nutzers oder vom System)
     const STATUS_OVERDUE   = 'overdue';   // Deadline ist abgelaufen
 
-    // used to build the translation string for each Todo type
-    const ASSIGNEE_DESCRIPTION_PREFIX = 'todo.assigneeDescription.';
-    const INSPECTION_DESCRIPTION_PREFIX = 'todo.inspectionDescription.';
-    const TITLE_PREFIX = 'todo.title.';
-
     /**
      * @var \Vrok\Doctrine\Entity
      */
     protected $object = null;
-
-    /**
-     * @var \Zend\View\Helper\Url
-     */
-    protected $urlHelper = null;
 
     /**
      * Initialize collection for lazy loading.

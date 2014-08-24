@@ -44,7 +44,8 @@ trait GeolocationInformation
      *
      * @return string
      */
-    public function getLatitude()     {
+    public function getLatitude()
+    {
         return $this->latitude;
     }
 
@@ -54,7 +55,8 @@ trait GeolocationInformation
      * @param string $latitude
      * @return self
      */
-    public function setLatitude($latitude)     {
+    public function setLatitude($latitude)
+    {
         $this->latitude = $latitude;
         return $this;
     }
@@ -66,13 +68,13 @@ trait GeolocationInformation
      */
     protected $longitude;
 
-
     /**
      * Returns the latitude.
      *
      * @return string
      */
-    public function getLongitude()     {
+    public function getLongitude()
+    {
         return $this->longitude;
     }
 
@@ -82,10 +84,10 @@ trait GeolocationInformation
      * @param string $longitude
      * @return self
      */
-    public function setLongitude($longitude)     {
+    public function setLongitude($longitude)
+    {
         $this->longitude = $longitude;
         return $this;
     }
-
 // </editor-fold>
 }

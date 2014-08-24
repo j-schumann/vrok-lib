@@ -25,8 +25,14 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
 
-    const EVENT_TODO_OVERDUE = 'todoOverdue';
+    const EVENT_TODO_COMPLETED = 'todoCompleted';
+    const EVENT_TODO_OVERDUE   = 'todoOverdue';
 
+    /**
+     * Template for rendering the users todo list.
+     *
+     * @var string
+     */
     protected $partial = 'vrok/partials/todo-list';
 
     /**
@@ -82,6 +88,50 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     }
 
     /**
+     * Marks all open todos of the given type for the given object as completed.
+     * Marked as completed by the current user, confirmed for all others.
+     *
+     * @param string $type
+     * @param object $object
+     * @param bool $flush   if true the entityManager is flushed
+     * @triggers todoCompleted
+     */
+    public function completeObjectTodo($type, $object, $flush = true)
+    {
+        $authService = $this->getServiceLocator()->get('zfcuser_auth_service');
+        $identity = $authService->getIdentity();
+
+        $filter = $this->getTodoFilter('t', $type);
+        $filter->byObject($object)
+               ->areOpen();
+
+        $todos = $filter->getResult();
+        foreach ($todos as $todo) {
+            /*@var $todo TodoEntity */
+            $todo->setStatus(TodoEntity::STATUS_COMPLETED);
+            $todo->setCompletedAt(new \DateTime());
+
+            foreach($todo->getUserTodos() as $userTodo) {
+                if ($userTodo->getUser() == $identity) {
+                    $userTodo->setStatus(UserTodo::STATUS_COMPLETED);
+                }
+                else {
+                    $userTodo->setStatus(UserTodo::STATUS_CONFIRMED);
+                }
+            }
+
+            $this->getEventManager()->trigger(
+                self::EVENT_TODO_COMPLETED,
+                $todo
+            );
+        }
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
      * Adds the reference to the given User to the given Todo (as UserTodo).
      *
      * @param TodoEntity $todo
@@ -101,53 +151,6 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
 
         $this->getEntityManager()->persist($userTodo);
         return $userTodo;
-    }
-
-    /**
-     * Retrieve all (open) todos for the given User.
-     * This includes todos that are not completed and not cancelled and the user can take
-     * over (no one is assigned), he is assigned to or he needs to confirm.
-     *
-     * @param User $user
-     * @return TodoEntity[]
-     */
-    public function getOpenUserTodos(User $user)
-    {
-        $filter = $this->getTodoFilter('t');
-        $filter->byUser($user, array(
-                UserTodo::STATUS_ASSIGNED,
-                UserTodo::STATUS_OPEN,
-                // @todo implement confirmation of todos with changed state
-                //UserTodo::STATUS_UNCONFIRMED,
-            ))
-            ->byStatusNot(array(
-                TodoEntity::STATUS_COMPLETED,
-                TodoEntity::STATUS_CANCELLED,
-            ))
-            ->orderBy('t.deadline', 'ASC');
-
-        return $filter->getResult();
-    }
-
-    /**
-     * Retrieve all todos referenced to the given object.
-     * This may include also cancelled or completed todos that are not yet deleted!
-     *
-     * @param object $object
-     * @param string $status    if not null only Todos with the given status are returned
-     * @return TodoEntity[]
-     */
-    public function getObjectTodos($object, $status = null)
-    {
-        $filter = $this->getTodoFilter('t');
-        $filter->byObject($object)
-               ->orderBy('t.deadline', 'ASC');
-
-        if ($status) {
-           $filter->byStatus($status);
-        }
-
-        return $filter->getResult();
     }
 
     /**
@@ -176,6 +179,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
  */
                 'description' => $todo->getDescription($user),
                 'deadline'    => $todo->getDeadline(),
+                'isOpen'      => $todo->isOpen(),
             );
         }
 
@@ -191,7 +195,16 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      */
     public function getUserTodoList(User $assignee, User $user = null)
     {
-        $todos = $this->getOpenUserTodos($assignee);
+        $filter = $this->getTodoFilter('t');
+        $filter->byUser($assignee, array(
+                UserTodo::STATUS_ASSIGNED,
+                UserTodo::STATUS_OPEN,
+                // @todo implement confirmation of todos with changed state
+                //UserTodo::STATUS_UNCONFIRMED,
+            ))
+            ->orderBy('t.deadline', 'ASC');
+
+        $todos = $filter->getResult();
         return $this->buildTodoList($todos, $user ?: $assignee);
     }
 

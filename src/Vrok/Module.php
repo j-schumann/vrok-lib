@@ -8,7 +8,6 @@
 namespace Vrok;
 
 use Zend\EventManager\EventInterface;
-use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ControllerPluginProviderInterface;
@@ -19,29 +18,12 @@ use Zend\ModuleManager\Feature\ViewHelperProviderInterface;
  * Module bootstrapping.
  */
 class Module implements
-    AutoloaderProviderInterface,
     BootstrapListenerInterface,
     ConfigProviderInterface,
     ControllerPluginProviderInterface,
     ServiceProviderInterface,
     ViewHelperProviderInterface
 {
-    /**
-     * Returns the autoloader definiton to use to load classes within this module.
-     *
-     * @return array
-     */
-    public function getAutoloaderConfig()
-    {
-        return array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
-                    __NAMESPACE__ => __DIR__,
-                ),
-            ),
-        );
-    }
-
     /**
      * Returns the modules default configuration.
      *

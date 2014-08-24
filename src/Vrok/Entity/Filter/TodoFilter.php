@@ -1,4 +1,9 @@
 <?php
+/**
+ * @copyright   (c) 2014, Vrok
+ * @license     http://customlicense CustomLicense
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
 
 namespace Vrok\Entity\Filter;
 
@@ -102,28 +107,7 @@ class TodoFilter extends AbstractFilter
     public function byType($type)
     {
         $this->qb->andWhere($this->alias." INSTANCE OF :todoType")
-        //$this->qb->andWhere($this->alias.".type = :todoType")
                  ->setParameter('todoType', $type);
-        return $this;
-    }
-
-    /**
-     * Only todos that aren't in the given status/states are returned.
-     *
-     * @param mixed $status     single status as string or list of states as array
-     * @return self
-     */
-    public function byStatusNot($status)
-    {
-        if (is_array($status)) {
-            $this->qb->andWhere(
-                    $this->qb->expr()->notIn($this->alias.'.status', ':todoStatus'));
-        }
-        else {
-            $this->qb->andWhere($this->alias.'.status != :todoStatus');
-        }
-
-        $this->qb->setParameter('todoStatus', $status);
         return $this;
     }
 
