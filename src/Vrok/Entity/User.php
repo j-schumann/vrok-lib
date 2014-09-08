@@ -255,6 +255,15 @@ class User extends Entity implements RoleProviderInterface, UserInterface
         $this->setPasswordDate(new \DateTime());
         return $this;
     }
+
+    /**
+     * Removes the users password.
+     * Used for soft-deletion.
+     */
+    public function removePassword()
+    {
+        $this->password = '';
+    }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="isRandomPassword">
     /**

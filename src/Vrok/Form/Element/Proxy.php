@@ -19,7 +19,7 @@ class Proxy extends DoctrineProxy
         // loadValueOptions use the already loaded objects -> reload them first
         $this->objects = array();
         $this->loadObjects();
-        
+
         $this->valueOptions = array();
         $this->loadValueOptions();
     }

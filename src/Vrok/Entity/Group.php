@@ -33,6 +33,7 @@ class Group extends Entity implements HierarchicalRoleInterface
     }
 
     /**
+     * For HierarchicalRoleInterface
      * {@inheritdoc}
      */
     public function getRoleId()
@@ -40,103 +41,6 @@ class Group extends Entity implements HierarchicalRoleInterface
         return $this->getName();
     }
 
-// <editor-fold defaultstate="collapsed" desc="name">
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=50, nullable=false, unique=true)
-     */
-    protected $name;
-
-    /**
-     * Returns the groups name.
-     * Used to assign privileges.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Sets the groups name.
-     * Must be unique.
-     *
-     * @param string $name
-     * @return self
-     */
-    public function setName($name)
-    {
-        $this->name = (string) $name;
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="description">
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=true)
-     */
-    protected $description;
-
-    /**
-     * Returns the groups description.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
-    }
-
-    /**
-     * Sets the groups description.
-     *
-     * @param string $description
-     * @return self
-     */
-    public function setDescription($description)
-    {
-        $this->description = (string) $description;
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="parent">
-    /**
-     * @ORM\ManyToOne(targetEntity="Group", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="RESTRICT")
-     */
-    protected $parent;
-
-    /**
-     * Retrieve the Group this one inherits from.
-     *
-     * @return Group
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * Sets the parent Group.
-     *
-     * @param Group $parent
-     * @return self
-     */
-    public function setParent(Group $parent = null)
-    {
-        if ($this->parent && $this->parent !== $parent) {
-            $this->parent->removeChild($this);
-        }
-
-        $this->parent = $parent;
-        if ($parent) {
-            $this->parent->addChild($this);
-        }
-
-        return $this;
-    }
-// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="children">
     /**
      * @ORM\OneToMany(targetEntity="Group", mappedBy="parent", fetch="EXTRA_LAZY")
@@ -170,11 +74,11 @@ class Group extends Entity implements HierarchicalRoleInterface
     }
 
     /**
-     * Removes the given Language from the collection.
-     * Called by $language->setParent to keep the collection consistent.
+     * Removes the given Group from the collection.
+     * Called by $group->setParent to keep the collection consistent.
      *
-     * @param Language $child
-     * @return boolean     true if the Language was in the collection and was
+     * @param Group $child
+     * @return boolean     true if the Group was in the collection and was
      *     removed, else false
      */
     public function removeChild(Group $child)
@@ -204,6 +108,35 @@ class Group extends Entity implements HierarchicalRoleInterface
         foreach($children as $child) {
             $this->removeChild($child);
         }
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="description">
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $description;
+
+    /**
+     * Returns the groups description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Sets the groups description.
+     *
+     * @param string $description
+     * @return self
+     */
+    public function setDescription($description)
+    {
+        $this->description = (string) $description;
+        return $this;
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="members">
@@ -279,6 +212,74 @@ class Group extends Entity implements HierarchicalRoleInterface
         foreach($members as $member) {
             $this->removeMember($member);
         }
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="name">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=50, nullable=false, unique=true)
+     */
+    protected $name;
+
+    /**
+     * Returns the groups name.
+     * Used to assign privileges.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Sets the groups name.
+     * Must be unique.
+     *
+     * @param string $name
+     * @return self
+     */
+    public function setName($name)
+    {
+        $this->name = (string) $name;
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="parent">
+    /**
+     * @ORM\ManyToOne(targetEntity="Group", inversedBy="children")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="RESTRICT")
+     */
+    protected $parent;
+
+    /**
+     * Retrieve the Group this one inherits from.
+     *
+     * @return Group
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Sets the parent Group.
+     *
+     * @param Group $parent
+     * @return self
+     */
+    public function setParent(Group $parent = null)
+    {
+        if ($this->parent && $this->parent !== $parent) {
+            $this->parent->removeChild($this);
+        }
+
+        $this->parent = $parent;
+        if ($parent) {
+            $this->parent->addChild($this);
+        }
+
+        return $this;
     }
 // </editor-fold>
 }

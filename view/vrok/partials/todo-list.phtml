@@ -4,7 +4,7 @@
     foreach($this->todos as $todo) :
 
         if ($todo['isOpen']) : ?>
-        <dd <?php if (!empty($todo['deadline']) && $todo['deadline'] < $now || $todo->getStatus() == 'overdue') { echo ' class="todo-overdue"'; } ?>>
+        <dd <?php if (!empty($todo['deadline']) && $todo['deadline'] < $now || $todo['status'] == 'overdue') { echo ' class="todo-overdue"'; } ?>>
             <span class="todo-description">
                 <?php echo $this->translate($todo['description']); ?>
             </span>

@@ -106,6 +106,26 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     }
 
     /**
+     * Marks an User as deleted by setting the deletedAt date and removing his
+     * identification information.
+     *
+     * @param \Vrok\Entity\User $user
+     */
+    public function softDeleteUser(UserEntity $user)
+    {
+        // @todo NULL erlauben? Oder andere Domain bestimmen
+        $user->setEmail('deleted_'.$user->getId().'@deleted.com');
+        $user->setUsername('deleted_'.$user->getId());
+        $user->setDisplayName('deleted user');
+
+        $user->setIsActive(false);
+        $user->removePassword();
+        $user->setDeletedAt(new \DateTime());
+
+        $this->getEntityManager()->flush();
+    }
+
+    /**
      * Creates a new Group from the given form data.
      *
      * @param array $formData
@@ -121,6 +141,33 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $this->getEventManager()->trigger(self::EVENT_CREATE_GROUP_POST, $group);
 
         return $group;
+    }
+
+    /**
+     * Retrieve the currently logged in user (if any).
+     *
+     * @return \Vrok\Entity\User
+     */
+    public function getCurrentUser()
+    {
+        $authService = $this->getServiceLocator()->get('zfcuser_auth_service');
+        return $authService->getIdentity();
+    }
+
+    /**
+     * Checks if the current user is allowed to access the given resource (and has
+     * the given privilege).
+     * Mimics BjyAuthorize\Controller\Plugin\IsAllowed
+     *
+     * @param mixed $resource
+     * @param string $privilege
+     * @return bool
+     */
+    public function isAllowed($resource, $privilege = null)
+    {
+        $authorizeService =
+                $this->getServiceLocator()->get('BjyAuthorize\Service\Authorize');
+        return $authorizeService->isAllowed($resource, $privilege);
     }
 
     /**
@@ -305,6 +352,19 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     {
         $url = $this->getServiceLocator()->get('ControllerPluginManager')->get('url');
         return $url->fromRoute($this->getUserAdminRoute(), array('id' => $userId));
+    }
+
+    /**
+     * Retrieve a new user filter instance.
+     *
+     * @param string $alias     the alias for the user record
+     * @return \Vrok\Entity\Filter\UserFilter
+     */
+    public function getUserFilter($alias = 'u')
+    {
+        $qb = $this->getUserRepository()->createQueryBuilder($alias);
+        $filter = new \Vrok\Entity\Filter\UserFilter($qb);
+        return $filter;
     }
 
     /**

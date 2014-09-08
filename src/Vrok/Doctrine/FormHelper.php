@@ -245,7 +245,6 @@ class FormHelper implements InputFilterProviderInterface
     protected function getAttributes(array $mapping)
     {
         $attributes = array();
-
         if ($this->elementIsRequired($mapping)) {
             $attributes['required'] = 'required';
         }

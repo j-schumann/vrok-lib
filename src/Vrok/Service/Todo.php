@@ -132,6 +132,34 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     }
 
     /**
+     * Marks all open todos of an object as cancelled, e.g. when an order is cancelled.
+     *
+     * @param object $object
+     * @param bool $flush   if true the entityManager is flushed
+     */
+    public function cancelObjectTodos($object, $flush = true)
+    {
+        $filter = $this->getTodoFilter();
+        $filter->byObject($object)
+               ->areOpen();
+
+        $todos = $filter->getResult();
+        foreach ($todos as $todo) {
+            /*@var $todo TodoEntity */
+            $todo->setStatus(TodoEntity::STATUS_CANCELLED);
+            $todo->setCompletedAt(new \DateTime());
+
+            foreach($todo->getUserTodos() as $userTodo) {
+                $userTodo->setStatus(UserTodo::STATUS_CONFIRMED);
+            }
+        }
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
      * Adds the reference to the given User to the given Todo (as UserTodo).
      *
      * @param TodoEntity $todo
@@ -180,6 +208,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
                 'description' => $todo->getDescription($user),
                 'deadline'    => $todo->getDeadline(),
                 'isOpen'      => $todo->isOpen(),
+                'status'      => $todo->getStatus(),
             );
         }
 
@@ -202,7 +231,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
                 // @todo implement confirmation of todos with changed state
                 //UserTodo::STATUS_UNCONFIRMED,
             ))
-            ->orderBy('t.deadline', 'ASC');
+            ->orderByField('deadline', 'ASC');
 
         $todos = $filter->getResult();
         return $this->buildTodoList($todos, $user ?: $assignee);
@@ -274,6 +303,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      * Retrieve a new todo filter instance.
      *
      * @param string $alias     the alias for the Todo record
+     * @param string $class     the (sub)class for which should be filtered
      * @return \Vrok\Entity\Filter\TodoFilter
      */
     public function getTodoFilter($alias = 't', $class = 'Vrok\Entity\AbstractTodo')

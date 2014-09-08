@@ -1,8 +1,16 @@
 <?php
+/**
+ * @copyright   (c) 2014, Vrok
+ * @license     http://customlicense CustomLicense
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
 
 namespace Vrok\Doctrine;
 
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator as ORMPaginator;
+use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator as PaginatorAdapter;
+use Zend\Paginator\Paginator as ZendPaginator;
 
 /**
  * Base class for helper classes that allow filtering of entities and their relations.
@@ -90,5 +98,29 @@ abstract class AbstractFilter
     public function getResult()
     {
         return $this->qb->getQuery()->getResult();
+    }
+
+    /**
+     * Sorts the result by the given field..
+     *
+     * @param string $field
+     * @param string $order
+     * @return self
+     */
+    public function orderByField($field, $order = 'asc')
+    {
+        $this->qb->orderBy($this->alias.'.'.$field, $order);
+        return $this;
+    }
+
+    /**
+     * Constructs a paginator for the current query.
+     *
+     * @return \Zend\Paginator\Paginator
+     */
+    public function getPaginator()
+    {
+        $query = $this->getQuery();
+        return new ZendPaginator(new PaginatorAdapter(new ORMPaginator($query)));
     }
 }
