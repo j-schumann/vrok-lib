@@ -152,7 +152,7 @@ class FieldHistory extends Entity
     public function getValue()
     {
         // the datatype for the history field is json array so NULL is returned as array
-        // -> fix here, there is most probably no semantiv difference
+        // -> fix here, there is most probably no semantic difference
         if (is_array($this->value) && !count($this->value)) {
             return null;
         }
