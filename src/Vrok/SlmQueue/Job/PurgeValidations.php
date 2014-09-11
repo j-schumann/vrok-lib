@@ -36,5 +36,8 @@ class PurgeValidations extends AbstractJob
         $queue = $qm->get('jobs');
         $job = $queue->getJobPluginManager()->get(__CLASS__);
         $queue->push($job);
+
+        $log = $controller->getServiceLocator()->get('ZendLog');
+        $log->debug('purgeValidations Job pushed '.  date('Y-m-d H:i:s'));
     }
 }

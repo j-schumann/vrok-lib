@@ -204,6 +204,8 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
                 $count++;
             }
         }
+        $log = $this->getServiceLocator()->get('ZendLog');
+        $log->debug('purgeValidations finished '.  date('Y-m-d H:i:s'));
 
         return $count;
     }
