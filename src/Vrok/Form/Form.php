@@ -41,7 +41,6 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
      */
     public function hasErrors()
     {
-        \Doctrine\Common\Util\Debug::dump($this->getMessages(), 4);
         return (bool)count($this->getMessages());
     }
 

@@ -37,7 +37,7 @@ class CronController extends AbstractActionController
     {
         $this->getEventManager()->trigger(self::EVENT_CRON_DAILY, $this);
         $log = $this->serviceLocator->get('ZendLog');
-        $log->debug('crondaily finished '.  date('Y-m-d H:i:s'));
+        $log->debug('cronDaily finished '.  date('Y-m-d H:i:s'));
     }
 
     /**
