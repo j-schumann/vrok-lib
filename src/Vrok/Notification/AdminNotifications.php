@@ -197,19 +197,19 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
 
     /**
      *
-     * @todo https://github.com/juriansluiman/SlmQueue/pull/83
+     * @todo https://github.com/juriansluiman/SlmQueue/pull/104
+     * @todo #250
      * @param \Zend\EventManager\EventInterface $e
      */
     public function onProcessJobPost(EventInterface $e)
     {
-        \Doctrine\Common\Util\Debug::dump($e, 4);
-        \Doctrine\Common\Util\Debug::dump($e->getJob(), 4);
-        $log = $this->serviceLocator->get('ZendLog');
+      //  \Doctrine\Common\Util\Debug::dump($e, 4);
+      //  \Doctrine\Common\Util\Debug::dump($e->getJob(), 4);
+      //  $log = $this->serviceLocator->get('ZendLog');
         /* @var $log \Zend\Log\Logger */
 
-        $log->debug(get_class($e));
-        $log->debug(get_class($e->getTarget()));
-        $log->debug(get_class($e->getParam('job')));
-
+      //  $log->debug(get_class($e));
+      //  $log->debug(get_class($e->getTarget()));
+      //  $log->debug(get_class($e->getParam('job')));
     }
 }

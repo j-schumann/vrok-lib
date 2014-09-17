@@ -21,8 +21,6 @@ class PurgeValidations extends AbstractJob
     {
         $manager = $this->getServiceLocator()->get('Vrok\Validation\Manager');
         $manager->purgeValidations();
-        $log = $this->getServiceLocator()->get('ZendLog');
-        $log->debug('job executed '.  date('Y-m-d H:i:s'));
     }
 
     /**
@@ -38,8 +36,5 @@ class PurgeValidations extends AbstractJob
         $queue = $qm->get('jobs');
         $job = $queue->getJobPluginManager()->get(__CLASS__);
         $queue->push($job);
-
-        $log = $controller->getServiceLocator()->get('ZendLog');
-        $log->debug('purgeValidations Job pushed '.  date('Y-m-d H:i:s'));
     }
 }
