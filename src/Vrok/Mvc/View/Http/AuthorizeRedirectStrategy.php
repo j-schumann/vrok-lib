@@ -12,6 +12,8 @@ use BjyAuthorize\Guard\Controller;
 use BjyAuthorize\Guard\Route;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
+use Zend\EventManager\ListenerAggregateTrait;
+use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
@@ -25,14 +27,12 @@ use Zend\View\Model\ViewModel;
  * the logged out user to the login form or show the 403 page if the user is logged in.
  * Allows to redirect the user back to his source page after login.
  */
-class AuthorizeRedirectStrategy implements ListenerAggregateInterface, ServiceLocatorAwareInterface
+class AuthorizeRedirectStrategy implements
+    ListenerAggregateInterface,
+    ServiceLocatorAwareInterface
 {
+    use ListenerAggregateTrait;
     use ServiceLocatorAwareTrait;
-
-    /**
-     * @var \Zend\Stdlib\CallbackHandler[]
-     */
-    protected $listeners = array();
 
     /**
      * @var string
@@ -40,23 +40,76 @@ class AuthorizeRedirectStrategy implements ListenerAggregateInterface, ServiceLo
     protected $template = 'error/403';
 
     /**
-     * {@inheritDoc}
+     * Number of seconds a user may be inactive before being logged out an the next hit.
+     *
+     * @var int
      */
-    public function attach(EventManagerInterface $events)
-    {
-        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH_ERROR, array($this, 'onDispatchError'), -5000);
-    }
+    protected $ttl = 1800; // 30*60
 
     /**
      * {@inheritDoc}
      */
-    public function detach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events)
     {
-        foreach ($this->listeners as $index => $listener) {
-            if ($events->detach($listener)) {
-                unset($this->listeners[$index]);
-            }
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH, array($this, 'onDispatch'), 5000);
+        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH_ERROR, array($this, 'onDispatchError'), -5000);
+    }
+
+    /**
+     * Handles redirects in case the activity timeout is reached.
+     *
+     * @param \Zend\Mvc\MvcEvent $event
+     */
+    public function onDispatch(MvcEvent $event)
+    {
+        // redirect to login is not necessary for console...
+        if (! $event->getRequest() instanceof HttpRequest) {
+            return;
         }
+
+        $provider = $this->getServiceLocator()->get('BjyAuthorize\Provider\Identity\ProviderInterface');
+        $identityRoles = $provider->getIdentityRoles();
+
+        // no logged in user -> nothing to log out
+        if (!in_array($provider->getAuthenticatedRole(), $identityRoles)) {
+            return;
+        }
+
+        $now = time();
+        $session = new \Zend\Session\Container(__CLASS__);
+        if (isset($session['activityTimeout']) && $session['activityTimeout'] < $now) {
+            $manager = $this->getServiceLocator()->get('Vrok\User\Manager');
+            $manager->logout();
+
+            $translator = $this->getServiceLocator()
+                    ->get('Zend\I18n\Translator\TranslatorInterface');
+            $message = $translator->translate(array(
+                'message.user.activityTimeout',
+                floor($this->getTtl() / 60)
+            ));
+
+            $cm = $this->getServiceLocator()->get('ControllerPluginManager');
+            $messenger = $cm->get('flashMessenger');
+            $messenger->addErrorMessage($message);
+
+            // @todo the helper returns a viewmodel containing a script-redirect
+            // when the request is a XHR. This viewmodel is ignored by the event
+            // trigger, the user is then redirected with error 500 to the login page
+            // when he has no privilege to access the called page because is his
+            // logged out now. But our activity-timeout message is not displayed.
+            // also: we should differentiate between XHR that only expect JSON etc
+            // and those that support the script-redirect
+            $helper = $cm->get('loginRedirector');
+            return $helper->gotoLogin();
+        }
+
+        // @todo XHR requests that are triggered periodically also keep the user
+        // logged in, how can we differentiate between automatic hits and user
+        // induced actions?
+
+        // logged in but no timeout -> new session, set new timeout
+        // logged in but timeout in the future -> refresh timeout
+        $session['activityTimeout']  = $now + $this->getTtl();
     }
 
     /**
@@ -133,12 +186,11 @@ class AuthorizeRedirectStrategy implements ListenerAggregateInterface, ServiceLo
         }
 
         // no identity -> not logged in -> redirect to login page
-        $messenger = $this->getServiceLocator()->get('ControllerPluginManager')
-                    ->get('flashMessenger');
+        $cm = $this->getServiceLocator()->get('ControllerPluginManager');
+        $messenger = $cm->get('flashMessenger');
         $messenger->addErrorMessage('message.user.loginRequired');
 
-        $helper = $this->getServiceLocator()->get('ControllerPluginManager')
-                    ->get('loginRedirector');
+        $helper = $cm->get('loginRedirector');
         $result = $helper->gotoLogin();
 
         // Helper returns JsonModel for XHR and a response with the location header
@@ -152,6 +204,14 @@ class AuthorizeRedirectStrategy implements ListenerAggregateInterface, ServiceLo
     }
 
     /**
+     * @return string
+     */
+    public function getTemplate()
+    {
+        return $this->template;
+    }
+
+    /**
      * @param string $template
      */
     public function setTemplate($template)
@@ -160,10 +220,26 @@ class AuthorizeRedirectStrategy implements ListenerAggregateInterface, ServiceLo
     }
 
     /**
-     * @return string
+     * Returns the number seconds a user may be inactive before being logged out.
+     *
+     * $return int
+     * @todo konfigurierbar machen. Die Strategy ist servicelocator-aware weil nicht alle
+     * dependencies injected werden sollen (nur in den allerwenigsten Fällen brauchen wir
+     * tatsächlich den LoginRedirector und den Messenger, die Strategy wird aber bei jedem
+     * Pagehit geladen). Daher hier auch die TTL aus dem SM holen.
      */
-    public function getTemplate()
+    public function getTtl()
     {
-        return $this->template;
+        return $this->ttl;
+    }
+
+    /**
+     * Sets the number seconds a user may be inactive before being logged out.
+     *
+     * @param int $ttl
+     */
+    public function setTtl($ttl)
+    {
+        $this->ttl = (int)$ttl;
     }
 }

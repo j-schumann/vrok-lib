@@ -115,6 +115,7 @@ class FormHelper implements InputFilterProviderInterface
                 ->getClassMetadata($association['targetEntity']);
 
         $property = null;
+        // @todo warum 'name', wo kommt das her? warum ist das unique?
         if ($target->hasField('name')) {
             $property = 'name';
         }
@@ -129,8 +130,8 @@ class FormHelper implements InputFilterProviderInterface
         }
 
         $definition = array(
-            'type' => 'Vrok\Form\Element\ObjectSelect',
-            'name' => $fieldName,
+            'type'    => 'Vrok\Form\Element\ObjectSelect',
+            'name'    => $fieldName,
             'options' => array(
                 'object_manager'     => $this->objectManager,
                 'target_class'       => $association['targetEntity'],
@@ -208,6 +209,8 @@ class FormHelper implements InputFilterProviderInterface
 
             case 'date':
                 return 'Zend\Form\Element\DateSelect';
+
+            // @todo datetime element
 
             case 'text':
                 return 'Zend\Form\Element\Textarea';

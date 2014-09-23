@@ -84,4 +84,30 @@ class UserRepository extends EntityRepository
 
         return $spec;
     }
+
+    /**
+     * Allows to search for users by group name(s).
+     * Proxies to the UserFilter, implemented here to be used in a ObjectSelect element
+     * which requires the functions to be implemented in the repository.
+     * We can not use findBy(groups => $name) because this will return:
+     * "You cannot search for the association field 'Vrok\Entity\User#groups', because it
+     * is the inverse side of an association."
+     *
+     * @param string|array $group
+     * @return User[]
+     */
+    public function findByGroup($group)
+    {
+        $qb = $this->createQueryBuilder('u');
+        $filter = new Filter\UserFilter($qb);
+
+        if (is_array($group)) {
+            $filter->byGroupNames($group);
+        }
+        else {
+            $filter->byGroupName($group);
+        }
+
+        return $filter->getResult();
+    }
 }

@@ -51,16 +51,46 @@ abstract class AbstractActionController extends ZendController
         if (!$value) {
             return array(self::MESSAGE_PARAM_MISSING, $param);
         }
+        return $this->getEntity($entityClass, $value, $field)
+            ?: array(self::MESSAGE_PARAM_INVALID, $param);
+    }
 
+    /**
+     * Tries to load an entity with the given class using the identifier
+     * provided in the given parameter name.
+     *
+     * @param string $entityClass
+     * @param string $param     parameter name to use
+     * @param string $field     field name to query with the parameter value
+     * @return mixed    Doctrine Entity or an array containing the error message
+     */
+    public function getEntityFromQuery($entityClass, $param = 'id', $field = 'id')
+    {
+        $value = $this->params()->fromQuery($param);
+        if (!$value) {
+            return array(self::MESSAGE_PARAM_MISSING, $param);
+        }
+        return $this->getEntity($entityClass, $value, $field)
+            ?: array(self::MESSAGE_PARAM_INVALID, $param);
+    }
+
+    /**
+     * Shortcut function to retrieve a Doctrine entity by a simple query.
+     * Returns only one entity, even if more are found!
+     *
+     * @param string $entityClass   the entity class
+     * @param mixed $value          the value for which should be queried
+     * @param string $field         (optional) the column in which we want to search for
+     *     the value, defaults to "id"
+     * @return mixed                the entity or null if none found
+     */
+    public function getEntity($entityClass, $value, $field = 'id')
+    {
         $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
         $repository = $em->getRepository($entityClass);
 
         $entity = $repository->findOneBy(array($field => $value));
-        if ($entity) {
-            return $entity;
-        }
-
-        return array(self::MESSAGE_PARAM_INVALID, $param);
+        return $entity;
     }
 
     /**

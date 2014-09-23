@@ -56,59 +56,6 @@ class Group extends Entity implements HierarchicalRoleInterface
     {
         return $this->children;
     }
-
-    /**
-     * Adds the given Group to the collection.
-     * Called by $group->setParent to keep the collection consistent.
-     *
-     * @param Group $child
-     * @return boolean  false if the Group was already in the collection,
-     *  else true
-     */
-    public function addChild(Group $child)
-    {
-        if ($this->children->contains($child)) {
-            return false;
-        }
-        return $this->children->add($child);
-    }
-
-    /**
-     * Removes the given Group from the collection.
-     * Called by $group->setParent to keep the collection consistent.
-     *
-     * @param Group $child
-     * @return boolean     true if the Group was in the collection and was
-     *     removed, else false
-     */
-    public function removeChild(Group $child)
-    {
-        return $this->children->removeElement($child);
-    }
-
-    /**
-     * Proxies to addChild for multiple elements.
-     *
-     * @param Collection $children
-     */
-    public function addChildren(Collection $children)
-    {
-        foreach($children as $child) {
-            $this->addChild($child);
-        }
-    }
-
-    /**
-     * Proxies to removeChild for multiple elements.
-     *
-     * @param Collection $children
-     */
-    public function removeChildren(Collection $children)
-    {
-        foreach($children as $child) {
-            $this->removeChild($child);
-        }
-    }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="description">
     /**
@@ -270,15 +217,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function setParent(Group $parent = null)
     {
-        if ($this->parent && $this->parent !== $parent) {
-            $this->parent->removeChild($this);
-        }
-
         $this->parent = $parent;
-        if ($parent) {
-            $this->parent->addChild($this);
-        }
-
         return $this;
     }
 // </editor-fold>

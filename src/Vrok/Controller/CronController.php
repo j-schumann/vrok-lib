@@ -22,6 +22,7 @@ class CronController extends AbstractActionController
 
     /**
      * @triggers cronHourly
+     * @todo remove rebug
      */
     public function cronHourlyAction()
     {
@@ -32,6 +33,7 @@ class CronController extends AbstractActionController
 
     /**
      * @triggers cronDaily
+     * @todo remove rebug
      */
     public function cronDailyAction()
     {
@@ -42,6 +44,7 @@ class CronController extends AbstractActionController
 
     /**
      * @triggers cronMonthly
+     * @todo remove rebug
      */
     public function cronMonthlyAction()
     {

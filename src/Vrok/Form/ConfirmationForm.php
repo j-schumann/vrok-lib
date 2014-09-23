@@ -22,8 +22,8 @@ class ConfirmationForm extends Form
         $this->add(array(
             'name'       => 'confirm',
             'attributes' => array(
-                'type'    => 'submit',
-                'value'   => 'form.confirm',
+                'type'  => 'submit',
+                'value' => 'form.confirm',
             )
         ));
     }

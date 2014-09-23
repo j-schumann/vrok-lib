@@ -15,7 +15,7 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 class Translate extends AbstractPlugin
 {
     /**
-     * Proxies to the translate() view helper.
+     * Translates the given message.
      *
      * @param  string $message
      * @param  string $textDomain
@@ -24,9 +24,8 @@ class Translate extends AbstractPlugin
      */
     public function __invoke($message, $textDomain = null, $locale = null)
     {
-        // @todo replace view helper with the translator itself?
-        $translateHelper = $this->getController()->getServiceLocator()
-                ->get('viewhelpermanager')->get('translate');
-        return $translateHelper($message, $textDomain, $locale);
+        $translator = $this->getController()->getServiceLocator()
+                ->get('Zend\I18n\Translator\TranslatorInterface');
+        return $translator->translate($message, $textDomain, $locale);
     }
 }

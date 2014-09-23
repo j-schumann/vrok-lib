@@ -203,7 +203,10 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $authService->clearIdentity();
         $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
 
-        \Zend\Session\Container::getDefaultManager()->destroy();
+        // when using destroy() we could not set any messenger notifications afterwarss
+        \Zend\Session\Container::getDefaultManager()->getStorage()->clear();
+        \Zend\Session\Container::getDefaultManager()->regenerateId();
+
         return true;
     }
 

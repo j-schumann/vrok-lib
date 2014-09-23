@@ -5,7 +5,7 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\I18n\Translator\View\Helper;
+namespace Vrok\I18n\View\Helper;
 
 use Zend\I18n\Exception;
 use Zend\I18n\View\Helper\AbstractTranslatorHelper;

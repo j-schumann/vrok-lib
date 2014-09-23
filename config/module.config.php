@@ -296,11 +296,15 @@ return array(
     'view_helpers' => array(
         'invokables' => array(
             'alternativeUrl' => 'Vrok\View\Helper\AlternativeUrl',
+            'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
+
+            'durationFormat' => '\Vrok\I18n\View\Helper\DurationFormat',
+            'translatePlural' => '\Vrok\I18n\View\Helper\TranslatePlural',
+
             'formDecorator' => 'Vrok\Form\View\Helper\FormDecorator',
             'formElementDecorator' => 'Vrok\Form\View\Helper\FormElementDecorator',
-            'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
-            'translatePlural' => '\Vrok\I18n\Translator\View\Helper\TranslatePlural',
-                        // @todo used? necessary?
+            'formDurationSelect' => 'Vrok\Form\View\Helper\FormDurationSelect',
+            // @todo used? necessary?
             'formMultiText' => 'Vrok\Form\View\Helper\FormMultiText',
         ),
     ),

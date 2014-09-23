@@ -48,6 +48,34 @@ class UserFilter extends AbstractFilter
     }
 
     /**
+     * Only users within the given group are returned.
+     *
+     * @param string $group
+     * @return self
+     */
+    public function byGroupName($group)
+    {
+        $this->joinGroups();
+        $this->qb->andWhere('g.name = :group')
+            ->setParameter('group', $group);
+        return $this;
+    }
+
+    /**
+     * Only users that are within one of the given groups are returned.
+     *
+     * @param type $groups
+     * @return self
+     */
+    public function byGroupNames($groups)
+    {
+        $this->joinGroups();
+        $this->qb->andWhere('g.name in (:groups)')
+            ->setParameter('groups', $groups);
+        return $this;
+    }
+
+    /**
      * Retrieve only users that are not marked as deleted.
      *
      * @return self
