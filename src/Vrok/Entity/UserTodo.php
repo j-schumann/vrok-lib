@@ -52,8 +52,6 @@ class UserTodo extends Entity
     public function setTodo(\Vrok\Entity\AbstractTodo $todo)
     {
         $this->todo = $todo;
-        $todo->addUserTodo($this);
-
         return $this;
     }
 // </editor-fold>

@@ -5,9 +5,9 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\User;
+namespace Vrok\Service;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManager;
 use Vrok\Entity\Group as GroupEntity;
 use Vrok\Entity\User as UserEntity;
 use Zend\Authentication\Validator\Authentication as AuthValidator;
@@ -20,7 +20,7 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * Contains processes for creating and managing Attendant objects and their
  * associated actions.
  */
-class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterface
+class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInterface
 {
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
@@ -31,7 +31,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     const EVENT_LOGOUT            = 'logout';
 
     /**
-     * Do not only trigger under the identifier \Vrok\User\Manager but also
+     * Do not only trigger under the identifier \Vrok\Service\UserManager but also
      * use the short name used as serviceManager alias.
      *
      * @var string
@@ -82,6 +82,8 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
             $data['password'] = uniqid().microtime(true);
         }
 
+        $data['id'] = '';
+
         $filter = $repository->getInputFilter();
         $filter->setData($data);
         if (!$filter->isValid()) {
@@ -122,6 +124,13 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         $user->removePassword();
         $user->setDeletedAt(new \DateTime());
 
+        // @todo event für softdelete für Aufräumarbeiten?
+        $fh = $this->getServiceLocator()->get('Vrok\Service\FieldHistory');
+        $fh->purgeEntityHistory($user);
+
+        $ms = $this->getServiceLocator()->get('Vrok\Service\Meta');
+        $ms->clearObjectMeta($user);
+
         $this->getEntityManager()->flush();
     }
 
@@ -133,11 +142,11 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     public function createGroup(array $formData)
     {
-        $objectManager = $this->getEntityManager();
+        $em = $this->getEntityManager();
 
-        $groupRepository = $objectManager->getRepository('Vrok\Entity\Group');
+        $groupRepository = $em->getRepository('Vrok\Entity\Group');
         $group = $groupRepository->updateInstance(new GroupEntity(), $formData);
-        $objectManager->flush();
+        $em->flush();
         $this->getEventManager()->trigger(self::EVENT_CREATE_GROUP_POST, $group);
 
         return $group;
@@ -150,7 +159,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     public function getCurrentUser()
     {
-        $authService = $this->getServiceLocator()->get('zfcuser_auth_service');
+        $authService = $this->getServiceLocator()->get('AuthenticationService');
         return $authService->getIdentity();
     }
 
@@ -250,7 +259,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     public function getAuthService()
     {
-        return $this->getServiceLocator()->get('zfcuser_auth_service');
+        return $this->getServiceLocator()->get('AuthenticationService');
     }
 
     /**
@@ -373,7 +382,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     /**
      * Retrieve the entity manager.
      *
-     * @return ObjectManager
+     * @return EntityManager
      */
     public function getEntityManager()
     {

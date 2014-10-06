@@ -9,10 +9,12 @@ namespace Vrok\Entity;
 
 use BjyAuthorize\Provider\Role\ProviderInterface as RoleProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
-use ZfcUser\Entity\UserInterface;
+use Vrok\Doctrine\Traits\AutoincrementId;
+use Vrok\Doctrine\Traits\CreationDate;
+use Vrok\Doctrine\Traits\DeletionDate;
+use Vrok\Stdlib\Random;
 
 /**
  * User object holding the identity and credential information.
@@ -20,11 +22,11 @@ use ZfcUser\Entity\UserInterface;
  * @ORM\Entity(repositoryClass="Vrok\Entity\UserRepository")
  * @ORM\Table(name="users")
  */
-class User extends Entity implements RoleProviderInterface, UserInterface
+class User extends Entity implements RoleProviderInterface
 {
-    use \Vrok\Doctrine\Traits\AutoincrementId;
-    use \Vrok\Doctrine\Traits\CreationDate;
-    use \Vrok\Doctrine\Traits\DeletionDate;
+    use AutoincrementId;
+    use CreationDate;
+    use DeletionDate;
 
     /**
      * Initialize collection for lazy loading.
@@ -68,7 +70,7 @@ class User extends Entity implements RoleProviderInterface, UserInterface
      */
     public function setRandomPassword($length = 10)
     {
-        $password = \Vrok\Stdlib\Random::getRandomToken((int)$length);
+        $password = Random::getRandomToken((int)$length);
         $this->setPassword($password);
         $this->setIsRandomPassword(true);
         return $password;
@@ -114,25 +116,6 @@ class User extends Entity implements RoleProviderInterface, UserInterface
         }
 
         return false;
-    }
-
-    /**
-     * Required for ZfcUserInterface.
-     * @return int
-     */
-    public function getState()
-    {
-        return 0;
-    }
-
-    /**
-     * Required for ZfcUserInterface.
-     * @param int $state
-     * @return self
-     */
-    public function setState($state)
-    {
-        return $this;
     }
 
 // <editor-fold defaultstate="collapsed" desc="username">
@@ -204,10 +187,15 @@ class User extends Entity implements RoleProviderInterface, UserInterface
     /**
      * Returns the users email
      *
+     * @param bool $punyEncoded (optional) convert mail to IDN compatible format
      * @return string
      */
-    public function getEmail()
+    public function getEmail($punyEncoded = false)
     {
+        if ($punyEncoded) {
+            $idna = new \Vrok\Stdlib\IdnaConvert();
+            return $idna->encode($this->email);
+        }
         return $this->email;
     }
 
@@ -449,7 +437,7 @@ class User extends Entity implements RoleProviderInterface, UserInterface
     /**
      * Returns the list of all groups this user is a member of.
      *
-     * @return Collection
+     * @return Group[]
      */
     public function getGroups()
     {

@@ -5,9 +5,13 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Validation;
+namespace Vrok\Service;
 
+use DateInterval;
+use DateTime;
+use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\Validation as ValidationEntity;
+use Vrok\Entity\Filter\ValidationFilter;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -15,8 +19,12 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Manages validations and triggers events when a validation fails or succeeds.
+ *
+ * Uses the serviceLocator for the EntityManager, for the FlashMessenger and the
+ * URL-Viewhelper. We don't want to inject the last two as we need them only in
+ * special cases and want to avoid instantiation if possible.
  */
-class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterface
+class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwareInterface
 {
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
@@ -36,7 +44,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
     protected $confirmationRoute = 'validation/confirm';
 
     /**
-     * Do not only trigger under the identifier \Vrok\Validation\Manager but also
+     * Do not only trigger under the identifier \Vrok\Service\ValidationManager but also
      * use the short name used as serviceManager alias.
      *
      * @var string
@@ -54,19 +62,21 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      * Creates a new validation of the given type for the given owner.
      *
      * @param string $type
-     * @param object $owner
+     * @param EntityInterface $owner
      * @return ValidationEntity
      */
-    public function createValidation($type, $owner)
+    public function createValidation($type, EntityInterface $owner)
     {
+        $em = $this->getEntityManager();
+
         $validation = new ValidationEntity();
         $validation->setType($type);
         $validation->setRandomToken();
+        $validation->setReference($em, $owner);
 
-        $ownerService = $this->getServiceLocator()->get('OwnerService');
-        $ownerService->setOwner($validation, $owner);
+        $em->persist($validation);
+        $em->flush();
 
-        $this->getValidationRepository()->persist($validation);
         return $validation;
     }
 
@@ -85,8 +95,7 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      */
     public function confirmValidation($id, $token)
     {
-        $repository = $this->getValidationRepository();
-        $validation = $repository->find($id);
+        $validation = $this->getValidationRepository()->find($id);
         if (!$validation) {
             $this->triggerFail();
             return false;
@@ -107,14 +116,14 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
             $this->triggerFail($validation);
             return false;
         }
-
+        $em = $this->getEntityManager();
         $results = $this->getEventManager()->trigger(
             self::EVENT_VALIDATION_SUCCESSFUL,
             $validation
         );
 
-        $repository->remove($validation);
-        $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->flush();
+        $em->remove($validation);
+        $em->flush();
 
         // return the event result, the controller action returns it again if it is
         // an instance of Zend\Http\Response to allow redirects
@@ -171,21 +180,17 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      * @param string $type
      * @return array
      */
-    public function getValidations($owner = null, $type = null)
+    public function getValidations(EntityInterface $owner = null, $type = null)
     {
-        $repository = $this->getValidationRepository();
-        $qb = $repository->createQueryBuilder('v');
-
+        $filter = $this->getValidationFilter();
         if ($owner) {
-            $ownerService = $this->getServiceLocator()->get('OwnerService');
-            $ownerService->getByOwner($qb, $owner);
+            $filter->byObject($owner);
         }
-
         if ($type) {
-            $qb->where($qb->expr()->eq('v.type', $type));
+            $filter->byType($type);
         }
 
-        return $qb->getQuery()->execute();
+        return $filter->getResult();
     }
 
     /**
@@ -230,8 +235,9 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         // remove the validation regardless of the event result and flush the EM,
         // there were probably more cleanups through the event listeners so we want
         // to commit them now
-        $this->getValidationRepository()->remove($validation);
-        $this->getServiceLocator()->get('Doctrine\ORM\EntityManager')->flush();
+        $em = $this->getEntityManager();
+        $em->remove($validation);
+        $em->flush();
 
         return true;
     }
@@ -250,20 +256,30 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
         }
 
         $expirationDate = $validation->getCreatedAt();
-        $expirationDate->add(new \DateInterval('PT'.$timeout.'S'));
-        $now = new \DateTime('now');
+        $expirationDate->add(new DateInterval('PT'.$timeout.'S'));
+        $now = new DateTime('now');
 
         return $expirationDate <= $now;
     }
 
     /**
+     * Retrieve a new filter instance to search for validations.
      *
-     * @return \Vrok\Entity\ValidationRepository
+     * @param string $alias
+     * @return ValidationFilter
+     */
+    public function getValidationFilter($alias = 'v')
+    {
+        $qb = $this->getValidationRepository()->createQueryBuilder($alias);
+        return new ValidationFilter($qb);
+    }
+
+    /**
+     * @return \Vrok\Doctrine\EntityRepository
      */
     public function getValidationRepository()
     {
-        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-        return $em->getRepository('Vrok\Entity\Validation');
+        return $this->getEntityManager()->getRepository('Vrok\Entity\Validation');
     }
 
     /**
@@ -298,10 +314,20 @@ class Manager implements EventManagerAwareInterface, ServiceLocatorAwareInterfac
      * @todo use Zend Guard to check for array etc
      * @param array $timeouts
      */
-    public function setTimeouts($timeouts)
+    public function setTimeouts(array $timeouts)
     {
         foreach($timeouts as $type => $timeout) {
             $this->setTimeout($type, $timeout);
         }
+    }
+
+    /**
+     * Retrieve the entityManager instance.
+     *
+     * @return EntityManager
+     */
+    protected function getEntityManager()
+    {
+        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
     }
 }

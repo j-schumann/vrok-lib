@@ -89,7 +89,7 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
             )),
         )));
 
-        $userManager = $this->serviceLocator->get('Vrok\User\Manager');
+        $userManager = $this->serviceLocator->get('UserManager');
         $group = $userManager->getGroupRepository()
                 ->findOneBy(array('name' => 'queueAdmin'));
 
@@ -135,7 +135,7 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
             )),
         )));
 
-        $userManager = $this->serviceLocator->get('Vrok\User\Manager');
+        $userManager = $this->serviceLocator->get('UserManager');
         $group = $userManager->getGroupRepository()
                 ->findOneBy(array('name' => 'queueAdmin'));
 
@@ -178,7 +178,7 @@ class AdminNotifications implements ListenerAggregateInterface, ServiceLocatorAw
             'supervisorUrl' => $fullUrl('https').$url('supervisor'),
         )));
 
-        $userManager = $this->serviceLocator->get('Vrok\User\Manager');
+        $userManager = $this->serviceLocator->get('UserManager');
         $group = $userManager->getGroupRepository()
                 ->findOneBy(array('name' => 'supervisorAdmin'));
 

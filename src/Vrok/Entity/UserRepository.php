@@ -14,8 +14,6 @@ use Vrok\Doctrine\EntityRepository;
  */
 class UserRepository extends EntityRepository
 {
-    use \Vrok\Doctrine\Traits\GetById;
-
     /**
      * {@inheritDoc}
      */

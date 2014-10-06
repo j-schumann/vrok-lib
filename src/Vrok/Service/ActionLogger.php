@@ -7,7 +7,7 @@
 
 namespace Vrok\Service;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManager;
 use Vrok\Entity\ActionLog;
 use Vrok\Client\Info;
 use Vrok\Entity\User;
@@ -29,19 +29,19 @@ class ActionLogger
     protected $clientInfo = null;
 
     /**
-     * @var ObjectManager
+     * @var EntityManager
      */
     protected $entityManager = null;
 
     /**
      * Class constructor - stores the dependencies.
      *
-     * @param ObjectManager $entityManager
+     * @param EntityManager $entityManager
      * @param AuthenticationServiceInterface $authService
      * @param Info $clientInfo
      */
     public function __construct(
-            ObjectManager $entityManager,
+            EntityManager $entityManager,
             AuthenticationServiceInterface $authService,
             Info $clientInfo
     ) {

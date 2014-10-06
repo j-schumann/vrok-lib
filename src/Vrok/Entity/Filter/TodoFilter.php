@@ -9,31 +9,15 @@ namespace Vrok\Entity\Filter;
 
 use Vrok\Entity\AbstractTodo as Todo;
 use Vrok\Doctrine\AbstractFilter;
+use Vrok\Doctrine\Traits\FilterReferenceFunctions;
 
 /**
- * Implements functions to query for Assignments by often used or complex filters to
+ * Implements functions to query for Todos by often used or complex filters to
  * avoid code duplication.
  */
 class TodoFilter extends AbstractFilter
 {
-    /**
-     * @var \Vrok\Owner\OwnerService
-     */
-    protected $ownerService = null;
-
-    /**
-     * Class constructor - stores the dependencies.
-     *
-     * @param \Doctrine\ORM\QueryBuilder $qb
-     * @param \Vrok\Owner\OwnerService $ownerService
-     */
-    public function __construct(
-        \Doctrine\ORM\QueryBuilder $qb,
-        \Vrok\Owner\OwnerService $ownerService
-    ) {
-        parent::__construct($qb);
-        $this->ownerService = $ownerService;
-    }
+    use FilterReferenceFunctions;
 
     /**
      * Retrieve only todos that relate to the given deadline as the given operator
@@ -48,33 +32,6 @@ class TodoFilter extends AbstractFilter
     {
         $this->qb->andWhere($this->alias.".deadline $operator :deadline")
            ->setParameter('deadline', $deadline);
-        return $this;
-    }
-
-    /**
-     * Only todos for the given object are returned.
-     * If no object is given all generic todos are returned
-     * (e.g. "Call 911", "Clear cache").
-     *
-     * @param object|null $object
-     * @param \Vrok\Owner\OwnerService $ownerService
-     * @return self
-     */
-    public function byObject($object)
-    {
-        if ($object) {
-            $identifier = $this->ownerService->getOwnerIdentifier($object);
-
-            $this->qb->where($this->alias.'.ownerClass = :ownerClass')
-               ->andWhere($this->alias.'.ownerIdentifier = :ownerIdentifier')
-               ->setParameter('ownerClass', get_class($object))
-               ->setParameter('ownerIdentifier', $identifier);
-        }
-        else {
-            // explicitly match NULL or every object matches
-            $this->qb->andWhere($this->qb->expr()->isNull($this->alias.'.ownerClass'))
-               ->andWhere($this->qb->expr()->isNull($this->alias.'.ownerIdentifier'));
-        }
         return $this;
     }
 

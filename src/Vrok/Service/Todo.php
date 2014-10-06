@@ -7,10 +7,14 @@
 
 namespace Vrok\Service;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use DateInterval;
+use DateTime;
+use Doctrine\ORM\EntityManager;
+use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\User;
 use Vrok\Entity\AbstractTodo as TodoEntity;
 use Vrok\Entity\UserTodo;
+use Vrok\Entity\Filter\TodoFilter;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
@@ -19,6 +23,10 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 /**
  * Handles todos for users (and the system), triggering an event when a deadline is
  * reached.
+ *
+ * Uses the serviceLocator for the EntityManager, URL-ViewHelper and AuthService,
+ * we don't want to inject these as the last two are only needed in some cases, so
+ * we don't want to instantiate them always.
  */
 class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
 {
@@ -40,16 +48,16 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      * Status and assigned users can be set afterwards.
      *
      * @param string $type              shortname of the todo class to create
-     * @param mixed $object             the object this todo is meant for
-     * @param int|\DateTime $timeout    number of seconds used to create the deadline,
-     *     or the deadline as \DateTime, if not set no reminder/overdue event is triggered
+     * @param EntityInterface $object   the object this todo is meant for
+     * @param int|DateTime $timeout    number of seconds used to create the deadline,
+     *     or the deadline as DateTime, if not set no reminder/overdue event is triggered
      * @param User $creator             the user that created this todo,
      *     null for automatically created Todos
      * @return TodoEntity
      */
     public function createTodo(
         $type,
-        $object = null,
+        EntityInterface $object = null,
         $timeout = null,
         User $creator = null
     ) {
@@ -61,19 +69,19 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
 
         $className = $classMeta->discriminatorMap[$type];
         $todo = new $className();
+        /* @var $todo TodoEntity */
         $em->persist($todo);
 
         if ($object) {
-            $ownerService = $this->getServiceLocator()->get('OwnerService');
-            $ownerService->setOwner($todo, $object);
+            $todo->setReference($em, $object);
         }
 
         if ($timeout) {
-            if ($timeout instanceof \DateTime) {
+            if ($timeout instanceof DateTime) {
                 $deadline = $timeout;
             } else {
-                $deadline = new \DateTime();
-                $deadline->add(new \DateInterval('PT'.$timeout.'S'));
+                $deadline = new DateTime();
+                $deadline->add(new DateInterval('PT'.$timeout.'S'));
             }
             $todo->setDeadline($deadline);
         }
@@ -92,13 +100,13 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      * Marked as completed by the current user, confirmed for all others.
      *
      * @param string $type
-     * @param object $object
+     * @param EntityInterface $object
      * @param bool $flush   if true the entityManager is flushed
      * @triggers todoCompleted
      */
-    public function completeObjectTodo($type, $object, $flush = true)
+    public function completeObjectTodo($type, EntityInterface $object, $flush = true)
     {
-        $authService = $this->getServiceLocator()->get('zfcuser_auth_service');
+        $authService = $this->getServiceLocator()->get('AuthenticationService');
         $identity = $authService->getIdentity();
 
         $filter = $this->getTodoFilter('t', $type);
@@ -109,7 +117,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
         foreach ($todos as $todo) {
             /*@var $todo TodoEntity */
             $todo->setStatus(TodoEntity::STATUS_COMPLETED);
-            $todo->setCompletedAt(new \DateTime());
+            $todo->setCompletedAt(new DateTime());
 
             foreach($todo->getUserTodos() as $userTodo) {
                 if ($userTodo->getUser() == $identity) {
@@ -134,10 +142,10 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     /**
      * Marks all open todos of an object as cancelled, e.g. when an order is cancelled.
      *
-     * @param object $object
+     * @param EntityInterface $object
      * @param bool $flush   if true the entityManager is flushed
      */
-    public function cancelObjectTodos($object, $flush = true)
+    public function cancelObjectTodos(EntityInterface $object, $flush = true)
     {
         $filter = $this->getTodoFilter();
         $filter->byObject($object)
@@ -147,7 +155,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
         foreach ($todos as $todo) {
             /*@var $todo TodoEntity */
             $todo->setStatus(TodoEntity::STATUS_CANCELLED);
-            $todo->setCompletedAt(new \DateTime());
+            $todo->setCompletedAt(new DateTime());
 
             foreach($todo->getUserTodos() as $userTodo) {
                 $userTodo->setStatus(UserTodo::STATUS_CONFIRMED);
@@ -194,7 +202,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
         $list = array();
         foreach($todos as $todo) {
             $todo->setHelpers(
-                $this->getReferencedObject($todo),
+                $todo->getReference($this->getEntityManager()),
                 $this->getServiceLocator()->get('viewhelpermanager')->get('url')
             );
 
@@ -255,18 +263,6 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     }
 
     /**
-     * Retrieve the referenced object for the given todo.
-     *
-     * @param TodoEntity $todo
-     * @return object   or null if no object referenced.
-     */
-    public function getReferencedObject(TodoEntity $todo)
-    {
-        $ownerService = $this->getServiceLocator()->get('OwnerService');
-        return $ownerService->getOwner($todo);
-    }
-
-    /**
      * Checks all open or assigned todos if the deadline has been reached, if yes
      * the event is triggered.
      *
@@ -304,15 +300,12 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      *
      * @param string $alias     the alias for the Todo record
      * @param string $class     the (sub)class for which should be filtered
-     * @return \Vrok\Entity\Filter\TodoFilter
+     * @return TodoFilter
      */
     public function getTodoFilter($alias = 't', $class = 'Vrok\Entity\AbstractTodo')
     {
         $qb = $this->getTodoRepository($class)->createQueryBuilder($alias);
-        $ownerService = $this->getServiceLocator()->get('OwnerService');
-
-        $filter = new \Vrok\Entity\Filter\TodoFilter($qb, $ownerService);
-        return $filter;
+        return new TodoFilter($qb);
     }
 
     /**
@@ -335,7 +328,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     /**
      * Retrieve the entity manager.
      *
-     * @return ObjectManager
+     * @return EntityManager
      */
     public function getEntityManager()
     {

@@ -7,7 +7,7 @@
 
 namespace Vrok\Form;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManager;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
@@ -82,7 +82,7 @@ trait SharedFunctions
     /**
      * Retrieve the entity manager.
      *
-     * @return ObjectManager
+     * @return EntityManager
      */
     public function getEntityManager()
     {

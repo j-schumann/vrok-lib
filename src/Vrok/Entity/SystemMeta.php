@@ -9,6 +9,8 @@ namespace Vrok\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
+use Vrok\Doctrine\Traits\CreationDate;
+use Vrok\Doctrine\Traits\ModificationDate;
 
 /**
  * Stores a single meta value (used system-wide).
@@ -18,8 +20,8 @@ use Vrok\Doctrine\Entity;
  */
 class SystemMeta extends Entity
 {
-    use \Vrok\Doctrine\Traits\CreationDate;
-    use \Vrok\Doctrine\Traits\ModificationDate;
+    use CreationDate;
+    use ModificationDate;
 
     public function __construct($name = null)
     {

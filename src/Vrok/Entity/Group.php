@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
+use Vrok\Doctrine\Traits\AutoincrementId;
 
 /**
  * Group object for providing privileges to the members.
@@ -21,7 +22,7 @@ use Vrok\Doctrine\Entity;
  */
 class Group extends Entity implements HierarchicalRoleInterface
 {
-    use \Vrok\Doctrine\Traits\AutoincrementId;
+    use AutoincrementId;
 
     /**
      * Initialize collection for lazy loading.
@@ -50,7 +51,7 @@ class Group extends Entity implements HierarchicalRoleInterface
     /**
      * Retrieve the Groups inheriting from this one.
      *
-     * @return Collection
+     * @return Group[]
      */
     public function getChildren()
     {
@@ -115,7 +116,6 @@ class Group extends Entity implements HierarchicalRoleInterface
             return false;
         }
 
-        $user->addGroup($this); // synchronously updating inverse side
         $this->members[] = $user;
         return true;
     }
@@ -132,8 +132,6 @@ class Group extends Entity implements HierarchicalRoleInterface
         if (!$this->members->contains($user)) {
             return false;
         }
-
-        $user->removeGroup($this); // synchronously updating inverse side
         return $this->members->removeElement($user);
     }
 

@@ -5,8 +5,8 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Owner\Exception;
+namespace Vrok\Service\Exception;
 
-class InvalidArgumentException extends \InvalidArgumentException
+class RuntimeException extends \RuntimeException
     implements ExceptionInterface
 {}

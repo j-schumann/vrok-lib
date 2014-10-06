@@ -35,7 +35,7 @@ class FormHelper implements InputFilterProviderInterface
      *
      * @var EntityManager
      */
-    protected $objectManager = null;
+    protected $entityManager = null;
 
     /**
      * Class constructor - stores the given metadata & manager.
@@ -46,7 +46,7 @@ class FormHelper implements InputFilterProviderInterface
     public function __construct(ClassMetadataInfo $metadata, EntityManager $entityManager)
     {
         $this->metadata = $metadata;
-        $this->objectManager = $entityManager;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -111,8 +111,7 @@ class FormHelper implements InputFilterProviderInterface
     public function getAssociationElement($fieldName)
     {
         $association = $this->metadata->associationMappings[$fieldName];
-        $target = $this->objectManager
-                ->getClassMetadata($association['targetEntity']);
+        $target = $this->entityManager->getClassMetadata($association['targetEntity']);
 
         $property = null;
         // @todo warum 'name', wo kommt das her? warum ist das unique?
@@ -133,7 +132,7 @@ class FormHelper implements InputFilterProviderInterface
             'type'    => 'Vrok\Form\Element\ObjectSelect',
             'name'    => $fieldName,
             'options' => array(
-                'object_manager'     => $this->objectManager,
+                'object_manager'     => $this->entityManager,
                 'target_class'       => $association['targetEntity'],
                 'property'           => $property,
                 'label'              => $this->getLabel($fieldName),

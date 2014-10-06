@@ -8,14 +8,18 @@
 namespace Vrok\Service;
 
 use Doctrine\ORM\EntityManager;
+use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\ObjectMeta;
 use Vrok\Entity\SystemMeta;
+use Vrok\Entity\Filter\ObjectMetaFilter;
 
 /**
  * Service for retrieving and setting meta values for objects or system-wide.
  */
 class Meta
 {
+    const EXCEPTION_NO_OBJECT = 'The parameter "object" must be an object!';
+
     /**
      * @var \Doctrine\Orm\EntityManager
      */
@@ -78,14 +82,14 @@ class Meta
     /**
      * Returns the default value for the given object meta property or null if none set.
      *
-     * @param string $ownerType
+     * @param string $class
      * @param string $name
      * @return array
      */
-    public function getObjectDefault($ownerType, $name)
+    public function getObjectDefault($class, $name)
     {
-        return isset($this->defaults[$ownerType][$name])
-            ? $this->defaults[$ownerType][$name]
+        return isset($this->defaults[$class][$name])
+            ? $this->defaults[$class][$name]
             : null;
     }
 
@@ -131,13 +135,15 @@ class Meta
      */
     public function setValue($name, $value, $encoded = false)
     {
-        $value = $encoded ? $value : json_encode($value);
-        $sr = $this->getSystemRepository();
+        if (!$encoded) {
+            $value = json_encode($value);
+        }
 
+        $sr = $this->getSystemRepository();
         $sm = $sr->find($name);
         if (!$sm) {
             $sm = new SystemMeta($name);
-            $sr->persist($sm);
+            $this->entityManager->persist($sm);
         }
 
         $sm->setValue($value);
@@ -146,40 +152,40 @@ class Meta
     }
 
     /**
-     * Tries to load the value for the given meta key.
+     * Tries to load the value for the given object & meta key.
      * Returns null if not found.
      *
      * Values are JSON encoded in the database and decoded by default (to avoid that set
      * $decode to false).
      *
-     * @param string $class         meta owner class
-     * @param int $identifier       meta owner identifier
-     * @param string $name          meta field name
-     * @param bool $decode          set to false if the value should not be decoded,
+     * @param EntityInterface $entity   the object for which the meta is retrieved
+     * @param string $name              meta field name
+     * @param bool $decode              set to false if the value should not be decoded,
      *     this is to allow custom decode param, use when setting custom encoded values
-     * @param type $skipInternal    set to true if the internal cache should not be
+     * @param type $skipInternal        set to true if the internal cache should not be
      *     used but the database queried, the internal cache will be updated afterwards
      * @return mixed
      */
-    public function getObjectValue($class, $identifier, $name, $decode = true, $skipInternal = false)
+    public function getObjectValue(EntityInterface $entity, $name, $decode = true, $skipInternal = false)
     {
-        if (!$skipInternal && isset($this->internalCache[$class][$identifier][$name])) {
-            $value = $this->internalCache[$class][$identifier][$name];
+        $class = get_class($entity);
+        $jsonIdentifier = json_encode($entity->getIdentifiers($this->entityManager));
+
+        if (!$skipInternal && isset($this->internalCache[$class][$jsonIdentifier][$name])) {
+            $value = $this->internalCache[$class][$jsonIdentifier][$name];
             return $decode ? json_decode($value, true) : $value;
         }
 
-        $or = $this->getObjectRepository();
-        $om = $or->findOneBy(array(
-            'ownerClass'      => $class,
-            'ownerIdentifier' => $identifier,
-            'name'            => $name,
-        ));
+        $filter = $this->getObjectFilter();
+        $filter->byObject($entity);
+        $filter->byName($name);
+        $om = $filter->getQuery()->getOneOrNullResult();
 
         $value = $om
             ? $om->getValue()
             : json_encode($this->getObjectDefault($class, $name));
 
-        $this->internalCache[$class][$identifier][$name] = $value;
+        $this->internalCache[$class][$jsonIdentifier][$name] = $value;
         return $decode ? json_decode($value, true) : $value;
     }
 
@@ -187,56 +193,62 @@ class Meta
      * Sets the given object meta property.
      * Attention: does not flush the entityManager to avoid too much DB queries.
      *
-     * @param string $class         meta owner class
-     * @param int $identifier       meta owner identifier
-     * @param string $name          meta value name
-     * @param mixed $value          the value to store, will be JSON encoded,
+     * @param EntityInterface $entity   the object for which the meta is stored
+     * @param string $name              meta value name
+     * @param mixed $value              the value to store, will be JSON encoded,
      *     make sure no objects are given
-     * @param bool $encoded         set to true if the value is already JSON encoded
+     * @param bool $encoded             set to true if the value is already JSON encoded
      */
-    public function setObjectValue($class, $identifier, $name, $value, $encoded = false)
+    public function setObjectValue(EntityInterface $entity, $name, $value, $encoded = false)
     {
-        $value = $encoded ? $value : json_encode($value);
-        $or = $this->getObjectRepository();
+        $class = get_class($entity);
+        $jsonIdentifier = json_encode($entity->getIdentifiers($this->entityManager));
 
-        $om = $or->findOneBy(array(
-            'ownerClass'      => $class,
-            'ownerIdentifier' => $identifier,
-            'name'            => $name,
-        ));
+        if (!$encoded) {
+            $value = json_encode($value);
+        }
+
+        $filter = $this->getObjectFilter();
+        $filter->byObject($entity);
+        $filter->byName($name);
+        $om = $filter->getQuery()->getOneOrNullResult();
+
         if (!$om) {
             $om = new ObjectMeta();
-            $om->setOwnerClass($class);
-            $om->setOwnerIdentifier($identifier);
+            $om->setReference($this->entityManager, $entity);
             $om->setName($name);
 
-            $or->persist($om);
+            $this->entityManager->persist($om);
         }
 
         $om->setValue($value);
-        $this->internalCache[$class][$identifier][$name] = $value;
+        $this->internalCache[$class][$jsonIdentifier][$name] = $value;
     }
 
     /**
-     * Retrieve the used entityManager instance.
+     * Removes all meta data for the given object.
+     * Attention: Does not flush!
      *
-     * @return EntityManager
+     * @param EntityInterface $entity
      */
-    public function getEntityManager()
+    public function clearObjectMeta(EntityInterface $entity)
     {
-        return $this->entityManager;
+        $filter = $this->getObjectFilter();
+        $filter->byObject($entity);
+        $filter->delete();
+        $filter->getQuery()->execute();
     }
 
     /**
-     * Sets the used entityManager instance.
+     * Retrieve a new filter instance to search for object meta entries.
      *
-     * @param EntityManager $entityManager
-     * @return self
+     * @param string $alias
+     * @return ObjectMetaFilter
      */
-    public function setEntityManager(EntityManager $entityManager)
+    public function getObjectFilter($alias = 'o')
     {
-        $this->entityManager = $entityManager;
-        return $this;
+        $qb = $this->getObjectRepository()->createQueryBuilder($alias);
+        return new ObjectMetaFilter($qb);
     }
 
     /**

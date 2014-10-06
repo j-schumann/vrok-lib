@@ -8,10 +8,13 @@
 namespace Vrok\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
-use Vrok\Owner\HasOwnerInterface;
+use Vrok\Doctrine\EntityInterface;
+use Vrok\Doctrine\HasReferenceInterface;
+use Vrok\Doctrine\Traits\AutoincrementId;
+use Vrok\Doctrine\Traits\CreationDate;
+use Vrok\Doctrine\Traits\ObjectReference;
 
 /**
  * Represents a single task to be done. The target could be fulfilled by different
@@ -19,16 +22,16 @@ use Vrok\Owner\HasOwnerInterface;
  * when it is completed.
  *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
- * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\Table(name="todo", indexes={@ORM\Index(name="status_idx", columns={"status"})})
+ * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\EntityListeners({"Vrok\Entity\Listener\TodoListener"})
  */
-abstract class AbstractTodo extends Entity implements HasOwnerInterface
+abstract class AbstractTodo extends Entity implements HasReferenceInterface
 {
-    use \Vrok\Doctrine\Traits\AutoincrementId;
-    use \Vrok\Doctrine\Traits\CreationDate;
-    use \Vrok\Owner\HasOwnerTrait;
+    use AutoincrementId;
+    use CreationDate;
+    use ObjectReference;
 
     const STATUS_OPEN      = 'open';      // ist noch keinem Nutzer zugewiesen (steht bei mehreren als offen!)
     const STATUS_ASSIGNED  = 'assigned';  // ist einem oder mehreren Nutzern zugewiesen
@@ -42,7 +45,7 @@ abstract class AbstractTodo extends Entity implements HasOwnerInterface
     const TITLE_PREFIX = 'todo.title.';
 
     /**
-     * @var \Vrok\Doctrine\Entity
+     * @var EntityInterface
      */
     protected $object = null;
 
@@ -79,14 +82,15 @@ abstract class AbstractTodo extends Entity implements HasOwnerInterface
     }
 
     /**
-     * Sets the object that is referenced by this todo (fetched from the OwnerService)
-     * and the URL helper to generate the complete URLs for action/inspection.
+     * Sets the object that is referenced by this todo (as the entity would need the
+     * EntityManager to fetch it itself).
+     * Also sets the URL helper to generate the complete URLs for action/inspection.
      * Called by the TodoService.
      *
-     * @param mixed $object
+     * @param EntityInterface $object
      * @param \Zend\View\Helper\Url $urlHelper
      */
-    public function setHelpers($object, \Zend\View\Helper\Url $urlHelper)
+    public function setHelpers(EntityInterface $object, \Zend\View\Helper\Url $urlHelper)
     {
         $this->object = $object;
         $this->urlHelper = $urlHelper;

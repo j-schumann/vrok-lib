@@ -5,25 +5,30 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Owner;
+namespace Vrok\Service;
 
+use Doctrine\ORM\EntityManager;
+use Vrok\Doctrine\EntityInterface;
+use Vrok\Doctrine\HasReferenceInterface;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
- * Service to retrieve and set the owner entities for the owned entities.
+ * Service to retrieve and set the referenced entities for the owned entities.
  */
-class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInterface
+class Owner implements EventManagerAwareInterface
 {
     use EventManagerAwareTrait;
-    use ServiceLocatorAwareTrait;
 
     const EVENT_GET_OWNER_STRATEGY = 'getOwnerStrategy';
 
     /**
-     * Do not only trigger under the identifier \Vrok\Owner\OwnerService but also
+     * @var EntityManager
+     */
+    protected $entityManager = null;
+
+    /**
+     * Do not only trigger under the identifier \Vrok\Service\Owner but also
      * use the short name used as serviceManager alias.
      *
      * @var string
@@ -46,72 +51,14 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
     protected $strategies = array();
 
     /**
-     * Retrieve the owner assigned to the given entity.
+     * Class constructor - stores the dependency.
      *
-     * @param HasOwnerInterface $entity
-     * @return object   or null if no owner is assigned or was not found
+     * @param EntityManager $em
      */
-    public function getOwner(HasOwnerInterface $entity)
+    public function __construct(EntityManager $em)
     {
-        if (!$entity->getOwnerClass() || !$entity->getOwnerIdentifier()) {
-            return null;
-        }
-
-        $strategy = $this->getOwnerStrategy($entity->getOwnerClass());
-        return $strategy->getOwner($entity->getOwnerIdentifier());
+        $this->entityManager = $em;
     }
-
-    /**
-     * Assigns the owner to the given entity
-     *
-     * @param HasOwnerInterface $entity
-     * @param object $owner
-     * @throws Exception\InvalidArgumentException if the owner is not allowed for the entity
-     */
-    public function setOwner(HasOwnerInterface $entity, $owner)
-    {
-        $ownerClass = get_class($owner);
-        if (!$this->isAllowedOwner($entity, $owner)) {
-            throw new Exception\InvalidArgumentException('Given owner ('
-                    .$ownerClass.') is not allowed for '.get_class($entity));
-        }
-
-        $entity->setOwnerClass($ownerClass);
-        $entity->setOwnerIdentifier($this->getOwnerIdentifier($owner));
-    }
-
-    /**
-     * Adds the where clauses to filter for the given owner to the provided queryBuilder.
-     *
-     * @param \Doctrine\ORM\QueryBuilder $qb
-     * @param object $owner
-     * @return \Doctrine\ORM\QueryBuilder
-     */
-    public function getByOwner(\Doctrine\ORM\QueryBuilder $qb, $owner)
-    {
-        // @link http://stackoverflow.com/a/16422221/1341762
-        $alias = current($qb->getDQLPart('from'))->getAlias();
-
-        $qb->andWere($qb->expr()->eq("$alias.ownerIdentifier",
-                $this->getOwnerIdentifier($owner)));
-        $qb->andWere($qb->expr()->eq("$alias.ownerClass",
-                get_class($owner)));
-
-        return $qb;
-    }
-
-    /**
-     * Retrieve the scalar identifier for the given owner entity.
-     *
-     * @param object $owner
-     * @return mixed
-     */
-    public function getOwnerIdentifier($owner)
-    {
-        $strategy = $this->getOwnerStrategy(get_class($owner), true);
-        return $strategy->getOwnerIdentifier($owner);
-    }
-
 
     /**
      * Returns the URL to which the XHR with the pattern to search for owners is
@@ -129,10 +76,10 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
     /**
      * Returns the URL to the admin page to view or edit the owner.
      *
-     * @param object $owner
+     * @param EntityInterface $owner
      * @return string
      */
-    public function getOwnerAdminUrl($owner)
+    public function getOwnerAdminUrl(EntityInterface $owner)
     {
         $strategy = $this->getOwnerStrategy(get_class($owner));
         return $strategy->getOwnerAdminUrl($owner);
@@ -142,10 +89,10 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
      * Returns a string with identifying information about the owner object,
      * e.g. username + email; account number etc.
      *
-     * @param object $owner
+     * @param EntityInterface $owner
      * @return string
      */
-    public function getOwnerPresentation($owner)
+    public function getOwnerPresentation(EntityInterface $owner)
     {
         $strategy = $this->getOwnerStrategy(get_class($owner));
         return $strategy->getOwnerPresentation($owner);
@@ -208,11 +155,11 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
     /**
      * Checks if the given owner is allowed for the given entity.
      *
-     * @param object $entity
-     * @param object $owner
+     * @param HasReferenceInterface $entity
+     * @param EntityInterface $owner
      * @return bool
      */
-    public function isAllowedOwner($entity, $owner)
+    public function isAllowedOwner(HasReferenceInterface $entity, EntityInterface $owner)
     {
         foreach($this->allowedOwners as $entityClass => $owners) {
             if (!$entity instanceOf $entityClass && !is_subclass_of($entity, $entityClass)) {
@@ -261,10 +208,10 @@ class OwnerService implements EventManagerAwareInterface, ServiceLocatorAwareInt
     /**
      * Sets multiple entity=>owner relations at once.
      *
-     * @todo validate arg
+     * @todo use zend guard for traversable
      * @param array $allowedOwners  array(entity => array(owner, ...), ...)
      */
-    public function setAllowedOwners($allowedOwners)
+    public function setAllowedOwners(array $allowedOwners)
     {
         $this->allowedOwners = array_merge($this->allowedOwners, $allowedOwners);
     }

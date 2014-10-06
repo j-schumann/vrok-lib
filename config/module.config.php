@@ -12,7 +12,8 @@ return array(
             'map' => array(
                         ),
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="console">
     'console' => array(
         'router' => array(
@@ -64,7 +65,8 @@ return array(
                 ),
             ),
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="controllers">
     'controllers' => array(
         'invokables' => array(
@@ -72,19 +74,26 @@ return array(
             'Vrok\Controller\SlmQueue' => 'Vrok\Controller\SlmQueueController',
             'Vrok\Controller\Validation' => 'Vrok\Controller\ValidationController',
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="controller_plugins">
     'controller_plugins' => array(
         'invokables' => array(
             'translate' => 'Vrok\Mvc\Controller\Plugin\Translate',
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="doctrine">
     'doctrine' => array(
         'configuration' => array(
             'orm_default' => array(
                 'entity_listener_resolver'
-                => 'Vrok\Doctrine\Orm\Mapping\EntityListenerResolver',
+                        => 'Vrok\Doctrine\Orm\Mapping\EntityListenerResolver',
+                'types' => array(
+                    // this extends the default JSON column to allow using VARCHAR
+                    // instead of TINYTEXT for lengths <= 255 so it can be indexed
+                    'json_data' => 'Vrok\Doctrine\DBAL\Types\JsonType',
+                ),
             ),
         ),
         'driver' => array(
@@ -107,11 +116,13 @@ return array(
                 ),
             ),
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="listeners">
     'listeners' => array(
         'Vrok\Notification\AdminNotifications',
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="navigation">
     'navigation' => array(
         'default' => array(
@@ -241,21 +252,32 @@ return array(
                 ),
             ),
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => array(
+        // required to overwrite existing services with an alias etc.
+        'allow_override' => true,
+
         // add some short names that hopefully don't conflict
         'aliases' => array(
             'AuthorizeRedirectStrategy' => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
-            'ClientInfo' => 'Vrok\Client\Info',
-            'OwnerService' => 'Vrok\Owner\OwnerService',
-            'UserManager' => 'Vrok\User\Manager',
-            'ValidationManager' => 'Vrok\Validation\Manager',
+            'ClientInfo'                => 'Vrok\Client\Info',
+            'MetaService'               => 'Vrok\Service\Meta',
+            'OwnerService'              => 'Vrok\Service\Owner',
+            'UserManager'               => 'Vrok\Service\UserManager',
+            'ValidationManager'         => 'Vrok\Service\ValidationManager',
+            'AuthenticationService'     => 'Zend\Authentication\AuthenticationService',
+
+            // BjyAuthorize only searches for zfcuser_user_service -> point to our
+            // own service
+            'zfcuser_user_service' => 'Vrok\Service\UserManager',
         ),
 
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => array(
             'Vrok\Authentication\Adapter\Doctrine' => 'Vrok\Authentication\Adapter\Doctrine',
+            'Vrok\Authentication\Storage\Doctrine' => 'Vrok\Authentication\Storage\Doctrine',
             'Vrok\Client\Info' => 'Vrok\Client\Info',
             'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => 'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver',
             'Vrok\Notification\AdminNotifications' => 'Vrok\Notification\AdminNotifications',
@@ -285,13 +307,15 @@ return array(
                 'Vrok\SlmQueue\Job\PurgeValidations' => 'Vrok\SlmQueue\Job\PurgeValidations',
             ),
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="validation_manager">
     'validation_manager' => array(
         'timeouts' => array(
             'password' => 172800, //48*60*60
         ),
-    ), // </editor-fold>
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="view_helpers">
     'view_helpers' => array(
         'invokables' => array(

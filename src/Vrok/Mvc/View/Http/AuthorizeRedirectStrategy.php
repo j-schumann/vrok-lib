@@ -78,7 +78,7 @@ class AuthorizeRedirectStrategy implements
         $now = time();
         $session = new \Zend\Session\Container(__CLASS__);
         if (isset($session['activityTimeout']) && $session['activityTimeout'] < $now) {
-            $manager = $this->getServiceLocator()->get('Vrok\User\Manager');
+            $manager = $this->getServiceLocator()->get('UserManager');
             $manager->logout();
 
             $translator = $this->getServiceLocator()

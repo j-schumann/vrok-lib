@@ -7,6 +7,7 @@
 
 namespace Vrok\SlmQueue\Job;
 
+use Doctrine\ORM\EntityManager;
 use SlmQueue\Job\AbstractJob as SlmJob;
 use SlmQueue\Queue\QueueAwareInterface;
 use SlmQueue\Queue\QueueAwareTrait;
@@ -28,7 +29,7 @@ abstract class AbstractJob extends SlmJob implements QueueAwareInterface
     }
 
     /**
-     * @return \Doctrine\Common\Persistence\ObjectManager
+     * @return EntityManager
      */
     protected function getEntityManager()
     {

@@ -9,7 +9,11 @@ namespace Vrok\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
-use Vrok\Owner\HasOwnerInterface;
+use Vrok\Doctrine\HasReferenceInterface;
+use Vrok\Doctrine\Traits\AutoincrementId;
+use Vrok\Doctrine\Traits\CreationDate;
+use Vrok\Doctrine\Traits\ModificationDate;
+use Vrok\Doctrine\Traits\ObjectReference;
 
 /**
  * Represents a simple calendar entry.
@@ -22,12 +26,12 @@ use Vrok\Owner\HasOwnerInterface;
  * })
  * @ORM\DiscriminatorColumn(name="type", type="string")
  */
-abstract class AbstractCalendarEntry extends Entity implements HasOwnerInterface
+abstract class AbstractCalendarEntry extends Entity implements HasReferenceInterface
 {
-    use \Vrok\Doctrine\Traits\AutoincrementId;
-    use \Vrok\Doctrine\Traits\CreationDate;
-    use \Vrok\Doctrine\Traits\ModificationDate;
-    use \Vrok\Owner\HasOwnerTrait;
+    use AutoincrementId;
+    use CreationDate;
+    use ModificationDate;
+    use ObjectReference;
 
     /**
      * Gets the lower-case short name of the entry class as used in the discriminatorMap.

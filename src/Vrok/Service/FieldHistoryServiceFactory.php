@@ -24,7 +24,7 @@ class FieldHistoryServiceFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $em = $serviceLocator->get('Doctrine\ORM\EntityManager');
-        $as = $serviceLocator->get('zfcuser_auth_service');
+        $as = $serviceLocator->get('AuthenticationService');
 
         $service = new FieldHistory($em, $as);
         return $service;

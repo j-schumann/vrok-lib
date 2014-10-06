@@ -19,7 +19,7 @@ class PurgeValidations extends AbstractJob
      */
     public function execute()
     {
-        $manager = $this->getServiceLocator()->get('Vrok\Validation\Manager');
+        $manager = $this->getServiceLocator()->get('ValidationManager');
         $manager->purgeValidations();
     }
 

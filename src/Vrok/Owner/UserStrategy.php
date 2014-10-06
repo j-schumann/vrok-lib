@@ -7,9 +7,9 @@
 
 namespace Vrok\Owner;
 
+use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\User;
-use Vrok\User\Manager;
-use Zend\EventManager\EventInterface;
+use Vrok\Service\UserManager;
 
 /**
  * Strategy enabling User entities to be used as owners.
@@ -17,52 +17,20 @@ use Zend\EventManager\EventInterface;
 class UserStrategy implements StrategyInterface
 {
     /**
-     * Stores the listeners attached to the eventmanager.
-     *
-     * @var \Zend\Stdlib\CallbackHandler[]
-     */
-    protected $listeners = array();
-
-    /**
      * UserManager instance
      *
-     * @var Manager
+     * @var UserManager
      */
     protected $manager = null;
 
     /**
      * Class constructor - stores the given manager instance.
      *
-     * @param Manager $manager
+     * @param UserManager $manager
      */
-    public function __construct(Manager $manager)
+    public function __construct(UserManager $manager)
     {
         $this->manager = $manager;
-    }
-
-    /**
-     * Returns the owner instance.
-     *
-     * @param mixed $ownerIdentifier    primary key for fetching the owner object
-     * @return User
-     */
-    public function getOwner($ownerIdentifier)
-    {
-        $repository = $this->manager->getUserRepository();
-        return $repository->getById((int)$ownerIdentifier);
-    }
-
-    /**
-     * Returns the identifier to use in the owned entity.
-     * Only scalars are allowed, type should match the column type for the
-     * ownerIdentifier in the owned entity. Composite identifiers aren't supported.
-     *
-     * @todo validate $owner
-     * @param User $owner
-     */
-    public function getOwnerIdentifier(/*User*/ $owner)
-    {
-        return $owner->getId();
     }
 
     /**
@@ -79,11 +47,11 @@ class UserStrategy implements StrategyInterface
     /**
      * Returns the URL to the admin page to view or edit the owner.
      *
-     * @todo validate $owner
+     * @todo validate $owner zend guard
      * @param User $owner
      * @return string
      */
-    public function getOwnerAdminUrl(/*User*/ $owner)
+    public function getOwnerAdminUrl(EntityInterface $owner)
     {
         return $this->manager->getUserAdminUrl($owner->getId());
     }
@@ -92,11 +60,11 @@ class UserStrategy implements StrategyInterface
      * Returns a string with identifying information about the owner object,
      * e.g. username + email; account number etc.
      *
-     * @todo validate $owner
+     * @todo validate $owner zend guard
      * @param User $owner
      * @return object
      */
-    public function getOwnerPresentation(/*User*/ $owner)
+    public function getOwnerPresentation(EntityInterface $owner)
     {
         $name = $owner->getUsername();
         $email = $owner->getEmail();
@@ -111,29 +79,8 @@ class UserStrategy implements StrategyInterface
      * @param object $owner
      * @return bool
      */
-    public function isValidOwner($owner)
+    public function isValidOwner(EntityInterface $owner)
     {
         return $owner instanceof User;
-    }
-
-    /**
-     * Checks if the we are responsible for the queried owner class
-     * Attached to the shared eventmanager on module bootstrap.
-     *
-     * @param EventInterface $e
-     * @return self     or null if no User (sub)class is requested
-     */
-    public static function onGetOwnerStrategy(EventInterface $e)
-    {
-        $classes = $e->getParam('classes');
-        if (!in_array('Vrok\Entity\User', $classes)) {
-            return null;
-        }
-
-        $ownerService = $e->getTarget();
-        $serviceLocator = $ownerService->getServiceLocator();
-        $userManager = $serviceLocator->get('UserManager');
-
-        return new self($userManager);
     }
 }

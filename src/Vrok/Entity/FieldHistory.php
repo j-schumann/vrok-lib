@@ -4,6 +4,10 @@ namespace Vrok\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
+use Vrok\Doctrine\HasReferenceInterface;
+use Vrok\Doctrine\Traits\ModificationDate;
+// @todo http://www.doctrine-project.org/jira/browse/DDC-3334
+//use Vrok\Doctrine\Traits\ObjectReference;
 
 /**
  * Holds the last values of fields of another entity.
@@ -13,16 +17,17 @@ use Vrok\Doctrine\Entity;
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
  * @ORM\Table(name="field_history")
  */
-class FieldHistory extends Entity
+class FieldHistory extends Entity implements HasReferenceInterface
 {
-    use \Vrok\Doctrine\Traits\ModificationDate;
+    use ModificationDate;
+    //use ObjectReference;
 
     /**
      * Retrieve the stored value as object of the given class.
      *
      * @todo Extremely hacky.
-     * @param type $className
-     * @return type
+     * @param string $className
+     * @return object
      */
     public function getObjectValue($className)
     {
@@ -38,68 +43,98 @@ class FieldHistory extends Entity
         return \Vrok\Stdlib\Convert::objectToObject($object, $className);
     }
 
-// <editor-fold defaultstate="collapsed" desc="entity">
+    /**
+     * Retrieve the referenced object for the given entity.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     * @return \Vrok\Doctrine\EntityInterface   or null if no object referenced.
+     */
+    public function getReference(\Doctrine\ORM\EntityManager $em)
+    {
+        if (!$this->getReferenceClass() || !$this->getReferenceIdentifier()) {
+            return null;
+        }
+
+        $repo = $em->getRepository($this->getReferenceClass());
+        return $repo->find(json_decode($this->getReferenceIdentifier(), true));
+    }
+
+    /**
+     * Stores the reference to the given entity.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param \Vrok\Doctrine\EntityInterface $object
+     */
+    public function setReference(
+        \Doctrine\ORM\EntityManager $em,
+        \Vrok\Doctrine\EntityInterface $object
+    ) {
+        $this->setReferenceClass(get_class($object));
+        $this->setReferenceIdentifier(json_encode($object->getIdentifiers($em)));
+    }
+
+// <editor-fold defaultstate="collapsed" desc="referenceClass">
     /**
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", nullable=false)
+     * @ORM\Column(type="string", nullable=true)
      */
-    protected $entity;
+    protected $referenceClass = null;
 
     /**
-     * Returns the entity class  name.
+     * Returns the class of the referenced object.
      *
      * @return string
      */
-    public function getEntity()
+    public function getReferenceClass()
     {
-        return $this->entity;
+        return $this->referenceClass;
     }
 
     /**
-     * Sets the entity class name.
+     * Sets the class of the referenced object.
      *
-     * @param string $entity
+     * @param string $class
      * @return self
      */
-    public function setEntity($entity)
+    public function setReferenceClass($class)
     {
-        $this->entity = $entity;
+        $this->referenceClass = $class;
         return $this;
     }
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="identifier">
+// <editor-fold defaultstate="collapsed" desc="referenceIdentifier">
     /**
-     * Stores the primary key of the record.
-     * Must be a string to allow int/string and composite keys (those are json-encoded).
-     * Cannot be declared as type="json_array" as this would be stored as LONGTEXT and
-     * MySQL would fail creating the PK index with "no key length specified for TEXT/BLOB"
-     *
      * @var array
      * @ORM\Id
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    protected $identifier;
+    protected $referenceIdentifier = null;
 
     /**
-     * Returns the entity identifier (primary key).
+     * Returns the identifier values of the referenced object.
+     * Will be returned as json to avoid errors when the column is used as key:
+     * In the UnitOfWork Doctrine creates an idHash, if we would return an array here
+     * the implode() would throw "Notice: Array to string conversion"
      *
      * @return string
      */
-    public function getIdentifier()
+    public function getReferenceIdentifier()
     {
-        return json_decode($this->identifier, true);
+        return $this->referenceIdentifier;
     }
 
     /**
-     * Sets the entity identifier (primary key).
+     * Sets the reference objects identifier(s).
+     * The parameter must be a json-encoded array as retrieved by
+     * $classMetaData->getIdentifiers($entity).
      *
-     * @param mixed $value
-     * @return self
+     * @param string $identifier
+     * return self
      */
-    public function setIdentifier($value)
+    public function setReferenceIdentifier($identifier)
     {
-        $this->identifier = json_encode($value);
+        $this->referenceIdentifier = $identifier;
         return $this;
     }
 // </editor-fold>

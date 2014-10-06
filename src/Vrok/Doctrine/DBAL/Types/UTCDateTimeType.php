@@ -52,4 +52,12 @@ class UTCDateTimeType extends DateTimeType
 
         return $val;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getName()
+    {
+        return 'datetime';
+    }
 }

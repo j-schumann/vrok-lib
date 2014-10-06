@@ -8,35 +8,32 @@
 namespace Vrok\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Vrok\Doctrine\Entity as VrokEntity;
-use Vrok\Owner\HasOwnerInterface;
+use Vrok\Doctrine\Entity;
+use Vrok\Doctrine\HasReferenceInterface;
+use Vrok\Doctrine\Traits\AutoincrementId;
+use Vrok\Doctrine\Traits\CreationDate;
+use Vrok\Doctrine\Traits\ObjectReference;
 
 /**
  * Validation object for confirming changes/action etc. via a token sent by
  * email.
  *
- * @ORM\Entity(repositoryClass="Vrok\Entity\ValidationRepository")
+ * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
  * @ORM\Table(name="validations")
  * @ORM\AttributeOverrides({
- *      @ORM\AttributeOverride(name="ownerClass",
- *          column=@ORM\Column(
- *              type="string",
- *              nullable = false
- *          )
+ *      @ORM\AttributeOverride(name="referenceClass",
+ *          column=@ORM\Column(type="string", nullable=false)
  *      ),
- *      @ORM\AttributeOverride(name="ownerIdentifier",
- *          column=@ORM\Column(
- *              type="integer",
- *              nullable = false
- *          )
- *      )
+ *      @ORM\AttributeOverride(name="referenceIdentifier",
+ *          column=@ORM\Column(type="string", length=255, nullable=false)
+ *      ),
  * })
  */
-class Validation extends VrokEntity implements HasOwnerInterface
+class Validation extends Entity implements HasReferenceInterface
 {
-    use \Vrok\Doctrine\Traits\AutoincrementId;
-    use \Vrok\Doctrine\Traits\CreationDate;
-    use \Vrok\Owner\HasOwnerTrait;
+    use AutoincrementId;
+    use CreationDate;
+    use ObjectReference;
 
 // <editor-fold defaultstate="collapsed" desc="type">
     /**

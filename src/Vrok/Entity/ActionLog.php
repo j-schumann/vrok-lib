@@ -9,6 +9,8 @@ namespace Vrok\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
+use Vrok\Doctrine\Traits\AutoincrementId;
+use Vrok\Doctrine\Traits\CreationDate;
 
 /**
  * Log entry for all actions that occur in the system.
@@ -21,8 +23,8 @@ use Vrok\Doctrine\Entity;
  */
 class ActionLog extends Entity
 {
-    use \Vrok\Doctrine\Traits\AutoincrementId;
-    use \Vrok\Doctrine\Traits\CreationDate;
+    use AutoincrementId;
+    use CreationDate;
 
 // <editor-fold defaultstate="collapsed" desc="action">
     /**

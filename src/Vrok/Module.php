@@ -54,6 +54,9 @@ class Module implements
                     return $helper;
                 },
             ),
+            'invokables' => array(
+                'currentUser' => 'Vrok\Mvc\Controller\Plugin\CurrentUser',
+            ),
         );
     }
 
@@ -67,16 +70,6 @@ class Module implements
     {
         return array(
             'factories' => array(
-                'Vrok\Owner\OwnerService' => function($sm) {
-                    $service = new \Vrok\Owner\OwnerService();
-
-                    $config = $sm->get('Config');
-                    if (!empty($config['owner_service']['allowed_owners'])) {
-                        $allowedOwners = $config['owner_service']['allowed_owners'];
-                        $service->setAllowedOwners($allowedOwners);
-                    }
-                    return $service;
-                },
                 'Vrok\Service\Email' => function($sm) {
                     $vhm = $sm->get('ViewHelperManager');
                     $transport = $sm->get('Zend\Mail\Transport');
@@ -99,6 +92,18 @@ class Module implements
                     }
                     return $service;
                 },
+                'Vrok\Service\Owner' => function($sm) {
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $service = new \Vrok\Service\Owner($em);
+
+                    $config = $sm->get('Config');
+                    if (!empty($config['owner_service']['allowed_owners'])) {
+                        $allowedOwners = $config['owner_service']['allowed_owners'];
+                        $service->setAllowedOwners($allowedOwners);
+                    }
+
+                    return $service;
+                },
                 'Vrok\Service\Todo' => function($sm) {
                     $service = new \Vrok\Service\Todo();
                     $service->setServiceLocator($sm);
@@ -109,8 +114,8 @@ class Module implements
                     }
                     return $service;
                 },
-                'Vrok\User\Manager' => function($sm) {
-                    $manager = new \Vrok\User\Manager();
+                'Vrok\Service\UserManager' => function($sm) {
+                    $manager = new \Vrok\Service\UserManager();
 
                     $config = $sm->get('Config');
                     if (!empty($config['user_manager'])) {
@@ -118,8 +123,8 @@ class Module implements
                     }
                     return $manager;
                 },
-                'Vrok\Validation\Manager' => function($sm) {
-                    $manager = new \Vrok\Validation\Manager();
+                'Vrok\Service\ValidationManager' => function($sm) {
+                    $manager = new \Vrok\Service\ValidationManager();
 
                     $config = $sm->get('Config');
                     if (!empty($config['validation_manager']['timeouts'])) {
@@ -135,6 +140,20 @@ class Module implements
                     }
                     return \Zend\Mail\Transport\Factory::create($spec);
                 },
+
+                // override the default factory to drop the adapterchain and instead
+                // uses our simple adapter that also implements ValidatableAdapterInterface
+                'Zend\Authentication\AuthenticationService' => function ($sm) {
+                    return new \Zend\Authentication\AuthenticationService(
+                        // stores the user ID in the session and retrieves the object
+                        // from the DB
+                        $sm->get('Vrok\Authentication\Storage\Doctrine'),
+
+                        // checks for username or email as identity, checks if the
+                        // user is active & validated
+                        $sm->get('Vrok\Authentication\Adapter\Doctrine')
+                    );
+                },
             ),
         );
     }
@@ -148,7 +167,15 @@ class Module implements
     {
         return array(
             'factories' => array(
-                'fullUrl'  => function($helperPluginManager) {
+                'currentUser' => function($helperPluginManager) {
+                    $serviceLocator = $helperPluginManager->getServiceLocator();
+                    $authService = $serviceLocator->get('AuthenticationService');
+
+                    $helper = new \Vrok\View\Helper\CurrentUser();
+                    $helper->setAuthService($authService);
+                    return $helper;
+                },
+                'fullUrl' => function($helperPluginManager) {
                     $serviceLocator = $helperPluginManager->getServiceLocator();
                     $config = $serviceLocator->get('Config');
                     if (empty($config['general']['full_url'])) {
@@ -169,13 +196,23 @@ class Module implements
      */
     public function onBootstrap(EventInterface $e)
     {
+        /* @var $e \Zend\Mvc\MvcEvent */
         $application = $e->getApplication();
         $sharedEvents = $application->getEventManager()->getSharedManager();
+        $sm = $application->getServiceManager();
 
         // we want to lazy load the strategy object only when needed, so we use a
         // closure here
-        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function($e) {
-            return \Vrok\Owner\UserStrategy::onGetOwnerStrategy($e);
+        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function($e) use ($sm) {
+            // @todo strategy nicht via event laden sondern über config?
+            // @todo strategy als service einrichten?
+            $classes = $e->getParam('classes');
+            if (!in_array('Vrok\Entity\User', $classes)) {
+                return null;
+            }
+
+            $userManager = $sm->get('UserManager');
+            return new \Vrok\Owner\UserStrategy($userManager);
         });
 
         // Listen to the CRON events, they are rare, don't instantiate any objects yet

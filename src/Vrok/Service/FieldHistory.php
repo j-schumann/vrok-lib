@@ -7,10 +7,11 @@
 
 namespace Vrok\Service;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManager;
+use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\FieldHistory as HistoryEntity;
+use Vrok\Entity\Filter\FieldHistoryFilter;
 use Vrok\Entity\User;
-use Vrok\Stdlib\Guard\ObjectGuardTrait;
 use Zend\Authentication\AuthenticationServiceInterface;
 
 /**
@@ -19,26 +20,24 @@ use Zend\Authentication\AuthenticationServiceInterface;
  */
 class FieldHistory
 {
-    use ObjectGuardTrait;
-
     /**
      * @var AuthenticationServiceInterface
      */
     protected $authService = null;
 
     /**
-     * @var ObjectManager
+     * @var EntityManager
      */
     protected $entityManager = null;
 
     /**
      * Class constructor - stores the dependencies.
      *
-     * @param ObjectManager $entityManager
+     * @param EntityManager $entityManager
      * @param AuthenticationServiceInterface $authService
      */
     public function __construct(
-            ObjectManager $entityManager,
+            EntityManager $entityManager,
             AuthenticationServiceInterface $authService
     ) {
         $this->entityManager = $entityManager;
@@ -48,28 +47,23 @@ class FieldHistory
     /**
      * Creates or updates the history entry for the given entity/field.
      *
-     * @param object|string $entity
+     * @param EntityInterface $entity
      * @param string $field
      * @param mixed $value
      * @param bool $flush   if true the current unitOfWork is committed to the DB
      */
-    public function logChange($entity, $field, $value, $flush = false)
+    public function logChange(EntityInterface $entity, $field, $value, $flush = false)
     {
-        $this->guardForObject($entity);
-        $entityName = get_class($entity);
-        $meta = $this->entityManager->getClassMetadata($entityName);
-        $identifier = $meta->getIdentifierValues($entity);
+        $filter = $this->getHistoryFilter();
+        $filter->byObject($entity);
+        $filter->byField($field);
 
-        $log = $this->getHistoryRepository()->find(array(
-            'entity'     => $entityName,
-            'field'      => $field,
-            'identifier' => json_encode($identifier),
-        ));
+        $log = $filter->getQuery()->getOneOrNullResult();
         if (!$log) {
             $log = new HistoryEntity();
-            $log->setEntity($entityName);
+            $log->setReference($this->entityManager, $entity);
             $log->setField($field);
-            $log->setIdentifier($identifier);
+            $this->entityManager->persist($log);
         }
 
         $log->setValue($value);
@@ -79,7 +73,6 @@ class FieldHistory
             $log->setUser($user);
         }
 
-        $this->entityManager->persist($log);
         if ($flush) {
             $this->entityManager->flush();
         }
@@ -89,11 +82,11 @@ class FieldHistory
      * Logs multiple changes to the given entity at once.
      *
      * @see logChange
-     * @param mixed $entity
+     * @param EntityInterface $entity
      * @param array $changeset
      * @param bool $flush   if true the current unitOfWork is committed to the DB
      */
-    public function logChangeset($entity, array $changeset, $flush = false)
+    public function logChangeset(EntityInterface $entity, array $changeset, $flush = false)
     {
         // changeset is array(field => array(oldValue, newValue))
         foreach ($changeset as $field => $values) {
@@ -110,34 +103,53 @@ class FieldHistory
      * If a field name is given only the record for this field is returned,
      * else the array of all logged field changes for the entity.
      *
-     * @param object $entity
+     * @param EntityInterface $entity
      * @param string $field
      * @return HistoryEntity[]
      */
-    public function getHistory($entity, $field = null)
+    public function getHistory(EntityInterface $entity, $field = null)
     {
-        $this->guardForObject($entity);
-        $entityName = get_class($entity);
-        $meta = $this->entityManager->getClassMetadata($entityName);
-        $identifier = $meta->getIdentifierValues($entity);
-
-        $criteria = array(
-            'entity'     => $entityName,
-            'identifier' => json_encode($identifier),
-        );
+        $filter = $this->getHistoryFilter();
+        $filter->byObject($entity);
 
         if ($field) {
-            $criteria['field'] = $field;
-            return $this->getHistoryRepository()->find($criteria);
+            $filter->byField($field);
+            return $filter->getQuery()->getOneOrNullResult();
         }
 
-        $logs = $this->getHistoryRepository()->findBy($criteria);
+        $logs = $filter->getResult();
         foreach ($logs as $k => $log) {
             $logs[$log->getField()] = $log;
             unset($logs[$k]);
         }
 
         return $logs;
+    }
+
+    /**
+     * Removes all log entries for the given entity.
+     * Attention: Does not flush!
+     *
+     * @param EntityInterface $entity
+     */
+    public function purgeEntityHistory(EntityInterface $entity)
+    {
+        $filter = $this->getHistoryFilter();
+        $filter->byObject($entity);
+        $filter->delete();
+        return $filter->getQuery()->execute();
+    }
+
+    /**
+     * Retrieve a new filter instance to search for history entries.
+     *
+     * @param string $alias
+     * @return FieldHistoryFilter
+     */
+    public function getHistoryFilter($alias = 'h')
+    {
+        $qb = $this->getHistoryRepository()->createQueryBuilder($alias);
+        return new FieldHistoryFilter($qb);
     }
 
     /**

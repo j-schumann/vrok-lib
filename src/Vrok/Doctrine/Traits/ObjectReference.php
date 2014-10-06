@@ -5,28 +5,14 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Entity;
-
-use Doctrine\ORM\Mapping as ORM;
-use Vrok\Doctrine\Entity;
-use Vrok\Doctrine\HasReferenceInterface;
-use Vrok\Doctrine\Traits\CreationDate;
-use Vrok\Doctrine\Traits\ModificationDate;
-// @todo http://www.doctrine-project.org/jira/browse/DDC-3334
-//use Vrok\Doctrine\Traits\ObjectReference;
+namespace Vrok\Doctrine\Traits;
 
 /**
- * Stores a single meta value for an object.
- *
- * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
- * @ORM\Table(name="meta_objects")
+ * Allows the implementing entity to reference any given record without requiring an
+ * explicit relation. Allows polymorphic references.
  */
-class ObjectMeta extends Entity implements HasReferenceInterface
+trait ObjectReference
 {
-    use CreationDate;
-    use ModificationDate;
-    //use ObjectReference;
-
     /**
      * Retrieve the referenced object for the given entity.
      *
@@ -60,7 +46,6 @@ class ObjectMeta extends Entity implements HasReferenceInterface
 // <editor-fold defaultstate="collapsed" desc="referenceClass">
     /**
      * @var string
-     * @ORM\Id
      * @ORM\Column(type="string", nullable=true)
      */
     protected $referenceClass = null;
@@ -90,7 +75,6 @@ class ObjectMeta extends Entity implements HasReferenceInterface
 // <editor-fold defaultstate="collapsed" desc="referenceIdentifier">
     /**
      * @var array
-     * @ORM\Id
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $referenceIdentifier = null;
@@ -119,65 +103,6 @@ class ObjectMeta extends Entity implements HasReferenceInterface
     public function setReferenceIdentifier($identifier)
     {
         $this->referenceIdentifier = $identifier;
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="name">
-    /**
-     * @var string
-     * @ORM\Id
-     * @ORM\Column(type="string", nullable=false, unique=false)
-     */
-    protected $name;
-
-    /**
-     * Returns the meta name.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Sets the meta name.
-     *
-     * @param string $name
-     * @return self
-     */
-    public function setName($name)
-    {
-        $this->name = (string) $name;
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="value">
-    /**
-     * @var string
-     * @ORM\Column(type="text", length=65535, nullable=true)
-     */
-    protected $value;
-
-    /**
-     * Returns the meta value.
-     *
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
-     * Sets the meta value.
-     *
-     * @param string $value
-     * @return self
-     */
-    public function setValue($value)
-    {
-        $this->value = (string) $value;
         return $this;
     }
 // </editor-fold>

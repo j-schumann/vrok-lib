@@ -14,14 +14,14 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
         \Zend\Mvc\Application::init(Bootstrap::getConfig());
 
         $serviceManager = Bootstrap::getServiceManager();
-        $this->ownerService = $serviceManager->get('Vrok\Owner\OwnerService');
+        $this->ownerService = $serviceManager->get('Vrok\Service\Owner');
     }
 
     public function testServiceShortNameIsAvailable()
     {
         $serviceManager = Bootstrap::getServiceManager();
         $service = $serviceManager->get('OwnerService');
-        $this->assertInstanceOf('Vrok\Owner\OwnerService', $service);
+        $this->assertInstanceOf('Vrok\Service\Owner', $service);
     }
 
     public function testStrategyEventIsTriggered()
