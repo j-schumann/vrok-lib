@@ -132,28 +132,6 @@ class Module implements
                     }
                     return $manager;
                 },
-                'Zend\Mail\Transport' => function($sm) {
-                    $spec = array();
-                    $config = $sm->get('Config');
-                    if (!empty($config['email_service']['transport'])) {
-                        $spec = $config['email_service']['transport'];
-                    }
-                    return \Zend\Mail\Transport\Factory::create($spec);
-                },
-
-                // override the default factory to drop the adapterchain and instead
-                // uses our simple adapter that also implements ValidatableAdapterInterface
-                'Zend\Authentication\AuthenticationService' => function ($sm) {
-                    return new \Zend\Authentication\AuthenticationService(
-                        // stores the user ID in the session and retrieves the object
-                        // from the DB
-                        $sm->get('Vrok\Authentication\Storage\Doctrine'),
-
-                        // checks for username or email as identity, checks if the
-                        // user is active & validated
-                        $sm->get('Vrok\Authentication\Adapter\Doctrine')
-                    );
-                },
             ),
         );
     }
@@ -213,14 +191,6 @@ class Module implements
 
             $userManager = $sm->get('UserManager');
             return new \Vrok\Owner\UserStrategy($userManager);
-        });
-
-        // Listen to the CRON events, they are rare, don't instantiate any objects yet
-        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily', function($e) {
-	    return \Vrok\SlmQueue\Job\PurgeValidations::onCronDaily($e);
-        });
-        $sharedEvents->attach('Vrok\Controller\CronController', 'cronDaily', function($e) {
-            return \Vrok\SlmQueue\Job\CheckTodos::onCronDaily($e);
         });
     }
 }

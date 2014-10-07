@@ -38,7 +38,7 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
         echo $this->format($flashMessenger->getCurrentWarningMessages(), 'warning');
         echo $this->format($flashMessenger->getCurrentErrorMessages(), 'error');
 
-        // we don't want to carry messages that were that in this page call
+        // we don't want to carry messages that were in this page call
         // onto the next page
         $flashMessenger->clearCurrentMessagesFromContainer();
     }
