@@ -25,10 +25,11 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
     use EventManagerAwareTrait;
     use ServiceLocatorAwareTrait;
 
-    const EVENT_CREATE_GROUP_POST = 'createGroup.post';
-    const EVENT_CREATE_USER       = 'createUser';
-    const EVENT_CREATE_USER_POST  = 'createUser.post';
-    const EVENT_LOGOUT            = 'logout';
+    const EVENT_CREATE_GROUP_POST    = 'createGroup.post';
+    const EVENT_CREATE_USER          = 'createUser';
+    const EVENT_CREATE_USER_POST     = 'createUser.post';
+    const EVENT_GET_POST_LOGIN_ROUTE = 'getPostLoginRoute';
+    const EVENT_LOGOUT               = 'logout';
 
     /**
      * Do not only trigger under the identifier \Vrok\Service\UserManager but also
@@ -296,6 +297,36 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
             AuthValidator::GENERAL            => 'validate.authentication.failed',
         ));
         return $validator;
+    }
+
+    /**
+     * Retrieve the route to which the user should be redirected after login.
+     * Defaults to his account.
+     * This is only for the default routes, e.g. for different user groups, when
+     * he requested a specific page prior login the loginRedirector helper will
+     * redirect to that page instead of the default route.
+     *
+     * @return string
+     * @triggers getPostLoginRoute
+     */
+    public function getPostLoginRoute()
+    {
+        // @todo konfigurierbar machen
+        $route = 'account';
+
+        $user = $this->getCurrentUser();
+        if (!$user) {
+            return $route;
+        }
+
+        $results = $this->getEventManager()->trigger(
+            self::EVENT_GET_POST_LOGIN_ROUTE,
+            $user
+        );
+
+        return is_string($results->last())
+            ? $results->last()
+            : $route;
     }
 
     /**
