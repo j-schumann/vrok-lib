@@ -71,6 +71,9 @@ class FormDecorator extends AbstractHelper
         $elementHelper    = $this->getElementHelper();
         $fieldsetHelper   = $this->getFieldsetHelper();
 
+        $class = $form->getAttribute('class');
+        //if (!$class)
+        //$form->setAttribute('class', $class.' col-md-5');
         $markup = $formHelper->openTag($form);
 
         foreach ($form->getIterator() as $elementOrFieldset) {

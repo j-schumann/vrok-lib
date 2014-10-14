@@ -106,7 +106,7 @@ class TodoFilter extends AbstractFilter
      */
     public function byUser(\Vrok\Entity\User $user, $status = null)
     {
-        $this->qb->join($this->alias.'.userTodos ut')
+        $this->qb->join($this->alias.'.userTodos', 'ut')
                  ->where('ut.user = :user')
                  ->setParameter('user', $user);
 

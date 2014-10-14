@@ -12,6 +12,7 @@ use Zend\Form\View\Helper\AbstractHelper;
 use Zend\Form\View\Helper\FormLabel;
 use Zend\Form\View\Helper\FormElement;
 use Zend\Form\View\Helper\FormElementErrors;
+use Zend\View\Helper\Partial;
 
 /**
  * View helper that renders a single form element into a container including
@@ -32,6 +33,13 @@ class FormElementDecorator extends AbstractHelper
      * @var FormLabel
      */
     protected $labelHelper;
+
+    /**
+     * Label helper instance
+     *
+     * @var Partial
+     */
+    protected $partialHelper;
 
     /**
      * Element helper instance
@@ -90,10 +98,17 @@ class FormElementDecorator extends AbstractHelper
             ));
         }
 
+        $ph = $this->getPartialHelper();
+        return $ph('vrok/partials/form/element', [
+            'element' => $element,
+
+        ]);
+
         $type = $element->getAttribute('type');
         $elementMarkup     = $this->getElementMarkup($element);
         $errorsMarkup      = $this->getErrorsMarkup($element);
-        $labelMarkup       = $this->getLabelMarkup($element);
+        $labelOpen         = $this->getLabelOpen($element);
+        $labelClose        = $this->getLabelClose($element);
 
         $descriptionMarkup = '';
         //$tooltipMarkup     = '';
@@ -113,7 +128,7 @@ class FormElementDecorator extends AbstractHelper
             $tooltipMarkup = $tooltipHelper($tooltip);
         }*/
 
-        $containerClass = "element-container element-$type";
+        $containerClass = "form-group element-container element-$type";
 
         if (count($element->getMessages())) {
             $containerClass .= ' input-error';
@@ -130,10 +145,10 @@ class FormElementDecorator extends AbstractHelper
         }
 
         if ($type === 'checkbox') {
-            $markup .= $elementMarkup.$labelMarkup.$descriptionMarkup;
+            $markup .= $labelOpen.$elementMarkup.$labelClose.$descriptionMarkup;
         }
         else {
-            $markup .= $labelMarkup.$descriptionMarkup.$elementMarkup;
+            $markup .= $labelOpen.$labelClose.$descriptionMarkup.$elementMarkup;
         }
 
         $markup .= $errorsMarkup;
@@ -157,6 +172,9 @@ class FormElementDecorator extends AbstractHelper
      */
     protected function getElementMarkup(ElementInterface $element)
     {
+        $class = $element->getAttribute('class');
+        $class .= ' form-control';
+        $element->setAttribute('class', $class);
         $elementHelper = $this->getElementHelper($element);
         return $elementHelper->render($element);
     }
@@ -196,7 +214,7 @@ class FormElementDecorator extends AbstractHelper
      * @param ElementInterface $element
      * @return string
      */
-    protected function getLabelMarkup(ElementInterface $element)
+    protected function getLabelOpen(ElementInterface $element)
     {
         $label = $element->getLabel();
         if (!$label || $element->getAttribute('type') === 'hidden') {
@@ -208,23 +226,35 @@ class FormElementDecorator extends AbstractHelper
             $label = $translator->translate($label, $this->getTranslatorTextDomain());
         }
 
-        $labelHelper = $this->getLabelHelper();
+        $labelAttributes = $element->getLabelAttributes();
+        $labelAttributes['class'] = isset($labelAttributes['class'])
+            ? $labelAttributes['class']
+            : '';
+        $labelAttributes['class'] .= ' control-label col-md-4';
+
         if (count($element->getMessages())) {
-            $labelAttributes = $element->getLabelAttributes();
-            $labelAttributes['class'] = isset($labelAttributes['class'])
-                    ? $labelAttributes['class'].' error'
-                    : 'error';
-            $element->setLabelAttributes($labelAttributes);
+            $labelAttributes['class'] .= ' error';
         }
+
+        $labelHelper = $this->getLabelHelper();
+        $attributeString = $labelHelper->createAttributesString($labelAttributes);
 
         $type = $element->getAttribute('type');
         if ($type === 'multi_checkbox' || $type === 'radio') {
-            $labelAttributes = $element->getLabelAttributes();
-            $attributeString = $labelHelper->createAttributesString($labelAttributes);
-            return "<legend $attributeString>$label</legend>";
+            return "<legend $attributeString>$label";
         }
 
-        return $labelHelper($element, $label);
+        return "<label $attributeString>$label";
+    }
+
+    protected function getLabelClose(ElementInterface $element)
+    {
+        $type = $element->getAttribute('type');
+        if ($type === 'multi_checkbox' || $type === 'radio') {
+            return '</legend>';
+        }
+
+        return '</label>';
     }
 
     /**
@@ -248,6 +278,24 @@ class FormElementDecorator extends AbstractHelper
 
         // we do not inject the translator as we translate the label ourself
         return $this->labelHelper;
+    }
+
+    protected function getPartialHelper()
+    {
+        if ($this->partialHelper) {
+            return $this->partialHelper;
+        }
+
+        if (method_exists($this->view, 'plugin')) {
+            $this->partialHelper = $this->view->plugin('partial');
+        }
+
+        if (!$this->partialHelper instanceof Partial) {
+            $this->partialHelper = new Partial();
+            $this->partialHelper->setView($this->view);
+        }
+
+        return $this->partialHelper;
     }
 
     /**

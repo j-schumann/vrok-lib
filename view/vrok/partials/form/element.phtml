@@ -1,0 +1,105 @@
+<?php
+// Twitter Bootstrap 3 compatible markup
+
+$type = $element->getAttribute('type');
+$containerId = 'container-'.$element->getAttribute('id');
+
+$containerClasses = [];
+if ($type === 'checkbox') {
+    $containerClasses[] = 'input-group checkbox';
+} else {//if ($type !== 'file') {
+    $containerClasses[] = 'form-group';
+}
+if (count($element->getMessages())) {
+    $containerClasses[] = 'input-error';
+}
+
+$containerOpen = '<div class="'.implode(' ', $containerClasses).'" id="'.$containerId.'">';
+$containerClose = '</div>';
+
+$labelOpen = '';
+$labelClose = '';
+$labelContent = '';
+
+$label = $this->element->getLabel();
+if ($label && $this->element->getAttribute('type') !== 'hidden') {
+    $labelAttributes = $this->element->getLabelAttributes();
+    $labelClasses = ['control-label'];
+
+    $required = $this->element->getAttribute('required');
+    if ($required === 'required' && empty($labelAttributes['class'])) {
+        $labelClasses[] = 'required';
+    }
+    if (isset($labelAttributes['class'])) {
+        $labelClasses[] = $labelAttributes['class'];
+    }
+    if (count($element->getMessages())) {
+        $labelClasses[] = 'error';
+    }
+    $labelAttributes['class'] = implode(' ', $labelClasses);
+    $labelAttributes['for'] = $this->element->getAttribute('id');
+
+    if ($type === 'multi_checkbox' || $type === 'radio') {
+        $labelOpen = '<legend '.$this->formLabel()->createAttributesString($labelAttributes).'>';
+    } else {
+        $labelOpen = '<label '.$this->formLabel()->createAttributesString($labelAttributes).'>';
+    }
+
+    if ($type === 'multi_checkbox' || $type === 'radio') {
+        $labelClose = '</legend>';
+    } else {
+        $labelClose = '</label>';
+    }
+
+    $labelContent = $this->translate($label);
+}
+
+$descriptionMarkup = '';
+$description = $this->element->getOption('description');
+if ($description) {
+    $descriptionMarkup = '<span class="help-block">'.$this->translate($description).'</span>';
+}
+
+if ($element instanceof \Vrok\Form\ElementInterface) {
+    $eh = $this->plugin($element->suggestViewHelper());
+}
+else {
+    $eh = $this->plugin('FormElement');
+}
+
+$elementClasses = [$this->element->getAttribute('class')];
+if ($type !== 'checkbox' && $type !== 'file') {
+    $elementClasses[] = 'form-control';
+}
+if ($type === 'submit') {
+   $elementClasses[] = 'btn btn-primary';
+}
+
+$this->element->setAttribute('class', implode(' ', $elementClasses));
+$elementMarkup = $eh($this->element);
+
+if ($type === 'checkbox') {
+    echo $containerOpen
+            .$labelOpen
+                .$elementMarkup
+                .$labelContent
+            .$labelClose
+            .$descriptionMarkup
+        .$containerClose;
+} elseif ($type === 'submit') {
+    echo $containerOpen
+            .$labelOpen
+                .$labelContent
+            .$labelClose
+            .$descriptionMarkup
+            .$elementMarkup
+        .$containerClose;
+} else {
+    echo $containerOpen
+            .$labelOpen
+                .$labelContent
+            .$labelClose
+            .$elementMarkup
+            .$descriptionMarkup
+        .$containerClose;
+}
