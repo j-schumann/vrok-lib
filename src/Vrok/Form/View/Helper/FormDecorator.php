@@ -103,6 +103,7 @@ class FormDecorator extends AbstractHelper
 
         if (!$this->elementHelper instanceof FormElementDecorator) {
             $this->elementHelper = new FormElementDecorator();
+            $this->elementHelper->setView($this->view);
         }
 
         if ($this->hasTranslator()) {
