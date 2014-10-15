@@ -101,7 +101,6 @@ class FormElementDecorator extends AbstractHelper
         $ph = $this->getPartialHelper();
         return $ph('vrok/partials/form/element', [
             'element' => $element,
-
         ]);
 
         $type = $element->getAttribute('type');
