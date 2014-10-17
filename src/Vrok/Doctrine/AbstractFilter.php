@@ -91,6 +91,21 @@ abstract class AbstractFilter
     }
 
     /**
+     * Retrieve the number of matching records for the current query.
+     *
+     * @return int
+     */
+    public function getCount()
+    {
+        // cloning of the QB does not work, so we store the old select part:
+        $old = $this->qb->getDQLPart('select');
+        $this->qb->select('count('.$this->alias.')');
+        $count = $this->qb->getQuery()->getSingleScalarResult();
+        $this->qb->add('select', $old[0]);
+        return $count;
+    }
+
+    /**
      * Executes the constructed query and returns the result.
      *
      * @return array

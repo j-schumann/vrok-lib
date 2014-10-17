@@ -7,11 +7,11 @@ $containerId = 'container-'.$element->getAttribute('id');
 $containerClasses = [];
 if ($type === 'checkbox') {
     $containerClasses[] = 'input-group checkbox';
-} else {//if ($type !== 'file') {
+} else {
     $containerClasses[] = 'form-group';
 }
 if (count($element->getMessages())) {
-    $containerClasses[] = 'input-error';
+    $containerClasses[] = 'has-error';
 }
 
 $containerOpen = '<div class="'.implode(' ', $containerClasses).'" id="'.$containerId.'">';
@@ -78,12 +78,19 @@ if ($type === 'submit') {
 $this->element->setAttribute('class', implode(' ', $elementClasses));
 $elementMarkup = $eh($this->element);
 
+
+$errorMarkup = '';
+if (count($element->getMessages())) {
+    $errorMarkup = $this->formElementErrors()->render($element, array('class' => 'errors'));
+}
+
 if ($type === 'checkbox') {
     echo $containerOpen
             .$labelOpen
                 .$elementMarkup
                 .$labelContent
             .$labelClose
+            .$errorMarkup
             .$descriptionMarkup
         .$containerClose;
 } elseif ($type === 'submit') {
@@ -91,8 +98,9 @@ if ($type === 'checkbox') {
             .$labelOpen
                 .$labelContent
             .$labelClose
-            .$descriptionMarkup
             .$elementMarkup
+            .$descriptionMarkup
+            .$errorMarkup
         .$containerClose;
 } else {
     echo $containerOpen
@@ -100,6 +108,7 @@ if ($type === 'checkbox') {
                 .$labelContent
             .$labelClose
             .$elementMarkup
+            .$errorMarkup
             .$descriptionMarkup
         .$containerClose;
 }

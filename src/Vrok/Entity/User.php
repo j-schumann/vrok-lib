@@ -9,6 +9,7 @@ namespace Vrok\Entity;
 
 use BjyAuthorize\Provider\Role\ProviderInterface as RoleProviderInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
 use Vrok\Doctrine\Traits\AutoincrementId;
@@ -442,6 +443,30 @@ class User extends Entity implements RoleProviderInterface
     public function getGroups()
     {
         return $this->groups;
+    }
+
+    /**
+     * Required for the hydrator.
+     *
+     * @param Collection $groups
+     */
+    public function addGroups(Collection $groups)
+    {
+        foreach ($groups as $group) {
+            $this->groups->add($group);
+        }
+    }
+
+    /**
+     * Required for the hydrator.
+     *
+     * @param Collection $groups
+     */
+    public function removeGroups(Collection $groups)
+    {
+        foreach ($groups as $group) {
+            $this->groups->removeElement($group);
+        }
     }
 // </editor-fold>
 }
