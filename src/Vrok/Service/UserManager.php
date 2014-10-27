@@ -198,6 +198,24 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
     }
 
     /**
+     * Tries to login the given user.
+     * Returns the user object on success, else the array with the error message(s).
+     *
+     * @param string $username
+     * @param string $password
+     * @return User|array
+     */
+    public function login($username, $password)
+    {
+        $validator = $this->getAuthValidator();
+        if ($validator->isValid($password, ['username' => $username])) {
+            return $this->getCurrentUser();
+        }
+
+        return $validator->getMessages();
+    }
+
+    /**
      * Logs the current user out.
      *
      * @return boolean

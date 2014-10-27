@@ -78,10 +78,9 @@ if ($type === 'submit') {
 $this->element->setAttribute('class', implode(' ', $elementClasses));
 $elementMarkup = $eh($this->element);
 
-
 $errorMarkup = '';
 if (count($element->getMessages())) {
-    $errorMarkup = $this->formElementErrors()->render($element, array('class' => 'errors'));
+    $errorMarkup = $this->formElementErrors()->render($element, array('class' => 'errors help-block'));
 }
 
 if ($type === 'checkbox') {

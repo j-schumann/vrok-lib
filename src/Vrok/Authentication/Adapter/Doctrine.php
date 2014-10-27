@@ -76,7 +76,7 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
 
             $user->setIsRandomPassword($isRandom);
             $user->setPasswordDate($passwordDate);
-            $em->persist($user);
+            $em->flush();
         }
 
         return $this->getResult(self::MSG_SUCCESS, $user->getId());
