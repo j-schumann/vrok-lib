@@ -57,6 +57,30 @@ class Group extends Entity implements HierarchicalRoleInterface
     {
         return $this->children;
     }
+
+    /**
+     * Required for the hydrator.
+     *
+     * @param array|ArrayCollection $children
+     */
+    public function addChildren($children)
+    {
+        foreach($children as $child) {
+            $this->children->add($child);
+        }
+    }
+
+    /**
+     * Required for the hydrator.
+     *
+     * @param array|ArrayCollection $children
+     */
+    public function removeChildren($children)
+    {
+        foreach($children as $child) {
+            $this->children->removeElement($child);
+        }
+    }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="description">
     /**

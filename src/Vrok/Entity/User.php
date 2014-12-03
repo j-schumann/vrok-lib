@@ -453,6 +453,7 @@ class User extends Entity implements RoleProviderInterface
     public function addGroups(Collection $groups)
     {
         foreach ($groups as $group) {
+            $group->addMember($this); // update owning side
             $this->groups->add($group);
         }
     }
@@ -465,6 +466,7 @@ class User extends Entity implements RoleProviderInterface
     public function removeGroups(Collection $groups)
     {
         foreach ($groups as $group) {
+            $group->removeMember($this); // update owning side
             $this->groups->removeElement($group);
         }
     }

@@ -252,7 +252,7 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
         $mail->setSubject('mail.user.randomPassword.subject');
 
         $viewHelperManager = $this->getServiceLocator()->get('viewhelpermanager');
-        $urlHelper = $viewHelperManager->get('noAliasUrl');
+        $urlHelper = $viewHelperManager->get('url');
         $fullUrlHelper = $viewHelperManager->get('FullUrl');
         $url = $urlHelper('account/login');
 
