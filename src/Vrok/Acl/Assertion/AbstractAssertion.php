@@ -46,7 +46,7 @@ abstract class AbstractAssertion implements AssertionInterface
      */
     protected function getIdentity()
     {
-        $this->getUserManager()->getCurrentUser();
+        return $this->getUserManager()->getCurrentUser();
     }
 
     /**
