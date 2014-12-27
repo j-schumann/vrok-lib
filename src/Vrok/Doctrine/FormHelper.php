@@ -18,6 +18,7 @@ use Zend\InputFilter\InputFilterProviderInterface;
 class FormHelper implements InputFilterProviderInterface
 {
     const ERROR_ISEMPTY      = 'validate.field.isEmpty';
+    const ERROR_NOTFLOAT     = 'validate.field.notFloat';
     const ERROR_NOTINT       = 'validate.field.notInt';
     const ERROR_TOOLONG      = 'validate.field.tooLong';
     const ERROR_INVALIDDATE  = 'validate.field.invalidDate';
@@ -378,6 +379,12 @@ class FormHelper implements InputFilterProviderInterface
                     'name' => 'Vrok\Filter\DateSelect',
                 );
                 break;
+
+            case 'decimal':
+                $filters['numberParse'] = array(
+                    'name' => 'Zend\I18n\Filter\NumberParse',
+                );
+                break;
         }
 
         return $filters;
@@ -408,6 +415,18 @@ class FormHelper implements InputFilterProviderInterface
                             \Zend\Validator\Date::FALSEFORMAT => self::ERROR_INVALIDDATE,
                             \Zend\Validator\Date::INVALID => self::ERROR_INVALIDDATE,
                             \Zend\Validator\Date::INVALID_DATE => self::ERROR_INVALIDDATE,
+                        ),
+                    ),
+                );
+                break;
+
+            case 'decimal':
+                $validators['float'] = array(
+                    'name'                   => 'Zend\I18n\Validator\Float',
+                    'break_chain_on_failure' => true,
+                    'options'                => array(
+                        'messages' => array(
+                            \Zend\I18n\Validator\Float::NOT_FLOAT => self::ERROR_NOTFLOAT,
                         ),
                     ),
                 );
