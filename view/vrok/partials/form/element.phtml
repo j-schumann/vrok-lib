@@ -14,6 +14,11 @@ if (count($element->getMessages())) {
     $containerClasses[] = 'has-error';
 }
 
+// for twitter bootstrap:
+if ($type === 'radio') {
+    $containerClasses[] = 'radio';
+}
+
 $containerOpen = '<div class="'.implode(' ', $containerClasses).'" id="'.$containerId.'">';
 $containerClose = '</div>';
 
@@ -68,7 +73,7 @@ else {
 }
 
 $elementClasses = [$this->element->getAttribute('class')];
-if ($type !== 'checkbox' && $type !== 'file') {
+if ($type !== 'checkbox' && $type !== 'file' && $type !== 'radio') {
     $elementClasses[] = 'form-control';
 }
 if ($type === 'submit') {
