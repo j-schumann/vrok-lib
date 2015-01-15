@@ -329,8 +329,10 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
      */
     public function getPostLoginRoute()
     {
-        // @todo konfigurierbar machen
-        $route = 'account';
+        $config = $this->getServiceLocator()->get('config');
+        $route = empty($config['user_manager']['post_login_route'])
+            ? 'account'
+            : $config['user_manager']['post_login_route'];
 
         $user = $this->getCurrentUser();
         if (!$user) {
