@@ -86,19 +86,7 @@ class Message extends ZendMessage
      */
     public function setTextBody($text, $appendSignature = true, $translate = true)
     {
-        if (!is_string($text) && !is_array($text)) {
-            throw new Exception\InvalidArgumentException('$text must be a string or array');
-        }
-
-        if ($translate) {
-            $text = $this->translate($text);
-        }
-        if ($appendSignature) {
-            $text .= $this->getSignature('text');
-        }
-
-        $part = new MimePart($text);
-        $part->type = Mime::TYPE_TEXT.'; charset=UTF-8';
+        $part = $this->getTextPart($text, $translate, $appendSignature);
 
         $message = new MimeMessage();
         $message->addPart($part);
@@ -118,6 +106,77 @@ class Message extends ZendMessage
      */
     public function setHtmlBody($html, $translate = true, $appendSignature = false)
     {
+        $part = $this->getHtmlPart($html, $translate, $appendSignature);
+
+        $message = new MimeMessage();
+        $message->addPart($part);
+
+        return $this->setBody($message);
+    }
+
+    /**
+     * Creates a multipart/alternative message containing the HTML and text
+     * content and adds it to the multipart/mixed body to allow further
+     * attachments.
+     *
+     * @param MimePart $text
+     * @param MimePart $html
+     */
+    public function setAlternativeBody(MimePart $text, MimePart $html)
+    {
+        $alternatives = new \Zend\Mime\Message();
+        $alternatives->setParts(array($text, $html));
+
+        $alternativesPart = new \Zend\Mime\Part($alternatives->generateMessage());
+        $alternativesPart->type = "multipart/alternative;\n boundary=\""
+                .$alternatives->getMime()->boundary()."\"";
+
+        $body = new \Zend\Mime\Message();
+        $body->addPart($alternativesPart);
+
+        $this->setBody($body);
+    }
+
+    /**
+     * Creates a Mime part for the given text content.
+     *
+     * @param string|array $text
+     * @param bool $translate
+     * @param bool $appendSignature
+     * @return MimePart
+     * @throws Exception\InvalidArgumentException
+     */
+    public function getTextPart($text, $translate = true, $appendSignature = true)
+    {
+        if (!is_string($text) && !is_array($text)) {
+            throw new Exception\InvalidArgumentException('$text must be a string or array');
+        }
+
+        if ($translate) {
+            $text = $this->translate($text);
+        }
+
+        if ($appendSignature) {
+            $text .= $this->getSignature('text');
+        }
+
+        $part = new MimePart($text);
+        $part->type = Mime::TYPE_TEXT.'; charset=UTF-8';
+
+        return $part;
+    }
+
+    /**
+     * Creates a Mime part for the given HTML content.
+     *
+     * @param string|array $html
+     * @param bool $translate
+     * @param bool $appendSignature
+     * @return MimePart
+     * @throws InvalidArgumentException
+     */
+    public function getHtmlPart($html, $translate = true, $appendSignature = false)
+    {
         if (!is_string($html) && !is_array($html)) {
             throw new InvalidArgumentException('$html must be a string or array');
         }
@@ -125,6 +184,7 @@ class Message extends ZendMessage
         if ($translate) {
             $html = $this->translate($html);
         }
+
         if ($appendSignature) {
             $html .= $this->getSignature('html');
         }
@@ -140,10 +200,7 @@ class Message extends ZendMessage
         $part = new MimePart($html);
         $part->type = Mime::TYPE_HTML.'; charset=UTF-8';
 
-        $message = new MimeMessage();
-        $message->addPart($part);
-
-        return $this->setBody($message);
+        return $part;
     }
 
     /**

@@ -26,7 +26,11 @@ $labelOpen = '';
 $labelClose = '';
 $labelContent = '';
 
-$label = $this->element->getLabel();
+// we don't rely on getLabel() here as this only returns strings. If we set the
+// label via setOptions() as an array containing the translation string and the
+// parameters it is still in the options but not set as label
+$label = $this->element->getLabel() ?: $this->element->getOption('label');
+
 if ($label && $this->element->getAttribute('type') !== 'hidden') {
     $labelAttributes = $this->element->getLabelAttributes();
     $labelClasses = ['control-label'];

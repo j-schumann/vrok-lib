@@ -270,4 +270,14 @@ class Meta
     {
         return $this->entityManager->getRepository('Vrok\Entity\SystemMeta');
     }
+
+    /**
+     * Returns the EntityManager used.
+     *
+     * @return \Doctrine\Orm\EntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->entityManager;
+    }
 }

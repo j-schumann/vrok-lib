@@ -62,7 +62,7 @@ class Translator extends ZendTranslator
         if (null !== ($fallbackLocale = $this->getFallbackLocale())
             && $locale !== $fallbackLocale
         ) {
-            return $this->translate($message, $textDomain, $fallbackLocale);
+            return $this->translate([$message, $params], $textDomain, $fallbackLocale);
         }
 
         return $message;

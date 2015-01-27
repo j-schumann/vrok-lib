@@ -227,15 +227,29 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      *
      * @param Entity $instance
      * @param array $formData
+     * @param array $changeset  if given the resulting changeset of the update
+     *     is stored in the referenced array
      * @return Entity
      */
-    public function updateInstance(Entity $instance, array $formData)
+    public function updateInstance(Entity $instance, array $formData, array &$changeset = null)
     {
+        if ($changeset !== null) {
+            $old = $this->getInstanceData($instance);
+        }
         $hydrator = new \DoctrineModule\Stdlib\Hydrator\DoctrineObject(
                 $this->getEntityManager());
         $object = $hydrator->hydrate($formData, $instance);
 
         $this->getEntityManager()->persist($object);
+
+        if ($changeset !== null) {
+            $new = $this->getInstanceData($object);
+            foreach ($old as $k => $v) {
+                if ($old[$k] != $new[$k]) {
+                    $changeset[$k] = [$old[$k], $new[$k]];
+                }
+            }
+        }
 
         // in rare cases when we create a new instance and set the same
         // identifiers as an already existing record uses, the hdydrator will
