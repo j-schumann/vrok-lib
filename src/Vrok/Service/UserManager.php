@@ -30,6 +30,8 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
     const EVENT_CREATE_USER_POST     = 'createUser.post';
     const EVENT_GET_POST_LOGIN_ROUTE = 'getPostLoginRoute';
     const EVENT_LOGOUT               = 'logout';
+    const EVENT_DELETE_ACCOUNT_PRE   = 'deleteAccount.pre';
+    const EVENT_DELETE_ACCOUNT_POST  = 'deleteAccount.post';
 
     /**
      * Do not only trigger under the identifier \Vrok\Service\UserManager but also
@@ -133,6 +135,41 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
         $ms->clearObjectMeta($user);
 
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * Called when the currently logged in user wants to delete his account.
+     *
+     * @return \Zend\EventManager\ResponseCollection
+     */
+    public function deleteAccount()
+    {
+        $user = $this->getCurrentUser();
+        if (!$user) {
+            throw new Exception\RuntimeException('Not logged in!');
+        }
+
+        // ask if someone wants to prevent the deletion
+        $results = $this->getEventManager()->trigger(
+            self::EVENT_DELETE_ACCOUNT_PRE,
+            $user
+        );
+
+        // if the event is stopped the deletion is prohibited, return the
+        // results, they should contain messages explaining the reasons.
+        if ($results->stopped()) {
+            return $results;
+        }
+
+        $this->softDeleteUser($user);
+        $this->logout();
+        // allow cleanup actions and messages
+        $results = $this->getEventManager()->trigger(
+            self::EVENT_DELETE_ACCOUNT_POST,
+            $user
+        );
+
+        return $results;
     }
 
     /**

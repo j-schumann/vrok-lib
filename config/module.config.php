@@ -99,6 +99,7 @@ return array(
         'invokables' => array(
             'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
 
+            'currencyFormat' => '\Vrok\I18n\View\Helper\CurrencyFormat',
             'durationFormat' => '\Vrok\I18n\View\Helper\DurationFormat',
             'translatePlural' => '\Vrok\I18n\View\Helper\TranslatePlural',
 
