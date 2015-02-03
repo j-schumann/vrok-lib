@@ -70,6 +70,15 @@ class Module implements
     {
         return array(
             'factories' => array(
+                'Vrok\Asset\ViewScriptResolver' => function($sm) {
+                    $config = $sm->get('Config');
+                    $map    = array();
+                    if (isset($config['asset_manager']['resolver_configs']['view_scripts'])) {
+                        $map = $config['asset_manager']['resolver_configs']['view_scripts'];
+                    }
+                    $vm = $sm->get('ViewManager');
+                    return new \Vrok\Asset\ViewScriptResolver($vm, $map);
+                },
                 'Vrok\Service\Email' => function($sm) {
                     $vhm = $sm->get('ViewHelperManager');
                     $transport = $sm->get('Zend\Mail\Transport');

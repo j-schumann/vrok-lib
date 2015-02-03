@@ -10,6 +10,7 @@ namespace Vrok\Service;
 use Doctrine\ORM\EntityManager;
 use Vrok\Entity\Group as GroupEntity;
 use Vrok\Entity\User as UserEntity;
+use Vrok\Stdlib\PasswordStrength;
 use Zend\Authentication\Validator\Authentication as AuthValidator;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
@@ -55,6 +56,18 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
      * @var string
      */
     protected $userSearchRoute = 'user/search';
+
+    /**
+     * Thresholds above which a password receives the according rating.
+     *
+     * @var array
+     */
+    protected $passwordStrengthThresholds = array(
+        'weak'  => 15,
+        'ok'    => 20,
+        'good'  => 25,
+        'great' => 30,
+    );
 
     /**
      * Creates a new UserEntity instance and sets the provided fields.
@@ -455,6 +468,51 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
     }
 
     /**
+     * Sets the thresholds to use when rating passwords.
+     *
+     * @param array $thresholds
+     */
+    public function setPasswordStrengthThresholds(array $thresholds)
+    {
+        $this->passwordStrengthThresholds
+                = array_merge($this->passwordStrengthThresholds, $thresholds);
+    }
+
+    /**
+     * Retrieve the current password strength thresholds.
+     *
+     * @return array
+     */
+    public function getPasswordStrengthThresholds()
+    {
+        return $this->passwordStrengthThresholds;
+    }
+
+    /**
+     * Calculates the password strength and returns it together with a rating
+     * between BAD and GREAT and a translation message for this rating.
+     *
+     * @param string $password
+     * @return array    [strength => float, rating => string, ratingText => string]
+     * @see Vrok\Stdlib\PasswordStrength
+     */
+    public function ratePassword($password)
+    {
+        $calc = new PasswordStrength();
+        $calc->setThresholds($this->getPasswordStrengthThresholds());
+
+        $strength = $calc->getStrength($password);
+        $rating = $calc->getRating($strength);
+        $ratingText = 'message.passwordRating.'.$rating;
+
+        return array(
+            'strength'   => $strength,
+            'rating'     => $rating,
+            'ratingText' => $ratingText,
+        );
+    }
+
+    /**
      * Retrieve a new user filter instance.
      *
      * @param string $alias     the alias for the user record
@@ -510,6 +568,10 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
         }
         if (!empty($config['search_route'])) {
             $this->setUserAdminRoute($config['search_route']);
+        }
+
+        if (!empty($config['password_strength_thresholds'])) {
+            $this->setPasswordStrengthThresholds($config['password_strength_thresholds']);
         }
     }
 }

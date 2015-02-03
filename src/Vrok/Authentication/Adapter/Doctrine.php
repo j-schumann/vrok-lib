@@ -14,11 +14,11 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
- * Checks the database for a match of the given identity and validates the users state
- * and credential.
+ * Checks the database for a match of the given identity and validates the users
+ * state and credential.
  *
- * @todo do not use servicelocator but inject the usermanager. (we need the user repo,
- * the em to persist, the temp ban repo)
+ * @todo do not use servicelocator but inject the usermanager. (we need the user
+ * repository, the entityManager to persist, the temp ban repo)
  */
 class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
 {

@@ -86,7 +86,7 @@ class ErrorHandler
         // if we are not on the command line and want to see errors continue
         // with the default error handling
         $display = ini_get('display_errors');
-        if (php_sapi_name() != 'cli' && ($display == 'on' || $display == '1')) {
+        if (php_sapi_name() !== 'cli' && ($display === 'on' || $display == 1)) {
             return false;
         }
 
@@ -143,7 +143,7 @@ class ErrorHandler
         // because the exception handler cannot "return false" to resume the
         // default handling we have to display the error ourselves
         $display = ini_get('display_errors');
-        if ($display == 'on' || $display == '1') {
+        if ($display === 'on' || $display == 1) {
             echo "Uncaught exception '".get_class($e)."' with message '"
                 .$e->getMessage()."' in ".$e->getFile().":".$e->getLine()
                 ." Stack trace: ".$e->getTraceAsString();
@@ -164,7 +164,7 @@ class ErrorHandler
         // if we are not on the command line and display_errors is enabled
         // -> do nothing
         $display = ini_get('display_errors');
-        if (php_sapi_name() != 'cli' && ($display == 'on' || $display == '1')) {
+        if (php_sapi_name() !== 'cli' && ($display === 'on' || $display == 1)) {
             return;
         }
 
@@ -209,13 +209,13 @@ class ErrorHandler
     public function redirect()
     {
         // no redirects on the commandline
-        if (php_sapi_name() == 'cli') {
+        if (php_sapi_name() === 'cli') {
             return;
         }
 
         // prevent redirect loops
         if (!empty($_SERVER['REQUEST_URI'])
-            && $_SERVER['REQUEST_URI'] == $this->redirectUrl
+            && $_SERVER['REQUEST_URI'] === $this->redirectUrl
         ) {
             return;
         }

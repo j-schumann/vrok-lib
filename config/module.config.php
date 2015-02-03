@@ -5,6 +5,9 @@
 return array(
 // <editor-fold defaultstate="collapsed" desc="asset_manager">
     'asset_manager' => array(
+        'resolvers' => array(
+            'Vrok\Asset\ViewScriptResolver' => 3001,
+        ),
         'resolver_configs' => array(
             'paths' => array(
                 __DIR__ . '/../public',

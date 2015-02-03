@@ -16,20 +16,45 @@ namespace Vrok\Stdlib;
  * @link http://cubicspot.blogspot.de/2012/01/how-to-calculate-password-strength-part.html
  * @link http://cubicspot.blogspot.de/2012/06/how-to-calculate-password-strength-part.html
  */
-abstract class PasswordStrength
+class PasswordStrength
 {
-    const RATING_BAD       = 'bad';
-    const RATING_OK        = 'ok';
-    const RATING_GOOD      = 'good';
-    const RATING_VERY_GOOD = 'veryGood';
-    const RATING_GREAT     = 'great';
+    const RATING_BAD   = 'bad';
+    const RATING_WEAK  = 'weak';
+    const RATING_OK    = 'ok';
+    const RATING_GOOD  = 'good';
+    const RATING_GREAT = 'great';
 
-    // constants defining what reating is given to strength value,
-    // could be adjusted to keep track with future computation power
-    const THRESHOLD_OK        = 15;
-    const THRESHOLD_GOOD      = 20;
-    const THRESHOLD_VERY_GOOD = 25;
-    const THRESHOLD_GREAT     = 30;
+    /**
+     * Thresholds above which a password is rated OK/GOOD etc.
+     *
+     * @var array
+     */
+    protected $thresholds = array(
+        self::RATING_WEAK  => 15,
+        self::RATING_OK    => 20,
+        self::RATING_GOOD  => 25,
+        self::RATING_GREAT => 30,
+    );
+
+    /**
+     * Returns the current threshold settings.
+     *
+     * @return array
+     */
+    public function getThresholds()
+    {
+        return $this->thresholds;
+    }
+
+    /**
+     * Allows to set the threshold values for each rating.
+     *
+     * @param array $thresholds
+     */
+    public function setThresholds(array $thresholds)
+    {
+        $this->thresholds = array_merge($this->thresholds, $thresholds);
+    }
 
     /**
      * Converts the given strength value into a human readable rating.
@@ -37,22 +62,22 @@ abstract class PasswordStrength
      * @param float $strength
      * @return string
      */
-    public static function getRating($strength)
+    public function getRating($strength)
     {
-        if ($strength > self::THRESHOLD_GREAT) {
+        if ($strength >= $this->thresholds[self::RATING_GREAT]) {
             return self::RATING_GREAT;
         }
 
-        if ($strength > self::THRESHOLD_VERY_GOOD) {
-            return self::RATING_VERY_GOOD;
-        }
-
-        if ($strength > self::THRESHOLD_GOOD) {
+        if ($strength >= $this->thresholds[self::RATING_GOOD]) {
             return self::RATING_GOOD;
         }
 
-        if ($strength > self::THRESHOLD_OK) {
+        if ($strength >= $this->thresholds[self::RATING_OK]) {
             return self::RATING_OK;
+        }
+
+        if ($strength >= $this->thresholds[self::RATING_WEAK]) {
+            return self::RATING_WEAK;
         }
 
         return self::RATING_BAD;
@@ -67,7 +92,7 @@ abstract class PasswordStrength
      * @param string $password
      * @return float
      */
-    public static function getStrength($password)
+    public function getStrength($password)
     {
         $y = strlen($password);
 
@@ -95,7 +120,7 @@ abstract class PasswordStrength
         }
 
         // NIST password strength rules allow up to 6 extra bits for mixed case
-        // and non-alphabetic.
+        // and non-alphabetic characters
         $lower = preg_match('/[a-z]/', $password);
         $upper = preg_match('/[A-Z]/', $password);
         $numeric = preg_match('/\d/', $password);
@@ -141,8 +166,8 @@ abstract class PasswordStrength
      * @param string $password
      * @return string
      */
-    public static function ratePassword($password)
+    public function ratePassword($password)
     {
-        return self::getRating(self::getStrength($password));
+        return $this->getRating($this->getStrength($password));
     }
 }
