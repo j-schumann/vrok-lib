@@ -26,8 +26,19 @@ class UserRepository extends EntityRepository
                 $spec['type'] = 'Zend\Form\Element\Hidden';
                 break;
 
+            case 'createdAt':
+                unset($spec['attributes']['required']);
+                $spec['attributes']['disabled'] = 'disabled';
+                break;
+
             case 'email':
                 $spec['type'] = 'Zend\Form\Element\Email';
+                break;
+
+            case 'lastLogin':
+                // no break
+            case 'lastSession':
+                $spec['attributes']['disabled'] = 'disabled';
                 break;
 
             case 'password':
@@ -47,6 +58,10 @@ class UserRepository extends EntityRepository
 
         switch ($fieldName) {
             case 'createdAt':
+                // no break
+            case 'lastLogin':
+                // no break
+            case 'lastSession':
                 // the field is filled automatically, we keep the column
                 // definition NOT NULL but allow empty values in forms/filters
                 $spec['required'] = false;

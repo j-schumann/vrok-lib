@@ -34,6 +34,9 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
     const EVENT_DELETE_ACCOUNT_PRE   = 'deleteAccount.pre';
     const EVENT_DELETE_ACCOUNT_POST  = 'deleteAccount.post';
 
+    const VALIDATION_ACCOUNT = 'confirmAccount';
+    const VALIDATION_EMAIL   = 'confirmEmail';
+
     /**
      * Do not only trigger under the identifier \Vrok\Service\UserManager but also
      * use the short name used as serviceManager alias.
@@ -258,11 +261,17 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
     public function login($username, $password)
     {
         $validator = $this->getAuthValidator();
-        if ($validator->isValid($password, ['username' => $username])) {
-            return $this->getCurrentUser();
+        if (!$validator->isValid($password, ['username' => $username])) {
+            return $validator->getMessages();
         }
 
-        return $validator->getMessages();
+        $now = new \DateTime();
+        $user = $this->getCurrentUser();
+        $user->setLastLogin($now);
+        $user->setLastSession($now);
+        $this->getEntityManager()->flush();
+
+        return $user;
     }
 
     /**
