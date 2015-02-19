@@ -51,8 +51,8 @@ class TranslatePlural extends AbstractTranslatorHelper
             $strings = $messages[0];
             $params = $messages[1];
         }
-
-        $domainObject = $translator->getTextDomain($textDomain, $locale);
+        
+        $domainObject = $translator->getTranslator()->getTextDomain($textDomain, $locale);
         $index = $domainObject->getPluralRule()->evaluate($number);
 
         return $translator->translate(array($strings[$index], $params),

@@ -168,9 +168,11 @@ class Translator extends ZendTranslator
         }
         $locale = $locale ?: $this->getLocale();
 
-        return isset($this->messages[$textDomain][$locale])
-            ? $this->messages[$textDomain][$locale]
-            : null;
+        if (!isset($this->messages[$textDomain][$locale])) {
+            $this->loadMessages($textDomain, $locale);
+        }
+
+        return $this->messages[$textDomain][$locale];
     }
 
     /**

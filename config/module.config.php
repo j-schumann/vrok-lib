@@ -59,6 +59,11 @@ return array(
         ),
     ),
 // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="listeners">
+    'listeners' => array(
+        'Vrok\Service\UserManager',
+    ),
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="owner_service">
     'owner_service' => array(
         'allowed_owners' => array(

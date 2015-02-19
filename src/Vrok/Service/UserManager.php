@@ -10,10 +10,15 @@ namespace Vrok\Service;
 use Doctrine\ORM\EntityManager;
 use Vrok\Entity\Group as GroupEntity;
 use Vrok\Entity\User as UserEntity;
+use Vrok\Entity\Validation;
 use Vrok\Stdlib\PasswordStrength;
 use Zend\Authentication\Validator\Authentication as AuthValidator;
+use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\ListenerAggregateInterface;
+use Zend\EventManager\ListenerAggregateTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -21,21 +26,29 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * Contains processes for creating and managing Attendant objects and their
  * associated actions.
  */
-class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInterface
+class UserManager implements
+    EventManagerAwareInterface,
+    ListenerAggregateInterface,
+    ServiceLocatorAwareInterface
 {
     use EventManagerAwareTrait;
+    use ListenerAggregateTrait;
     use ServiceLocatorAwareTrait;
 
-    const EVENT_CREATE_GROUP_POST    = 'createGroup.post';
-    const EVENT_CREATE_USER          = 'createUser';
-    const EVENT_CREATE_USER_POST     = 'createUser.post';
-    const EVENT_GET_POST_LOGIN_ROUTE = 'getPostLoginRoute';
-    const EVENT_LOGOUT               = 'logout';
-    const EVENT_DELETE_ACCOUNT_PRE   = 'deleteAccount.pre';
-    const EVENT_DELETE_ACCOUNT_POST  = 'deleteAccount.post';
+    const EVENT_CREATE_GROUP_POST       = 'createGroup.post';
+    const EVENT_CREATE_USER             = 'createUser';
+    const EVENT_CREATE_USER_POST        = 'createUser.post';
+    const EVENT_GET_POST_LOGIN_ROUTE    = 'getPostLoginRoute';
+    const EVENT_LOGOUT                  = 'logout';
+    const EVENT_DELETE_ACCOUNT_PRE      = 'deleteAccount.pre';
+    const EVENT_DELETE_ACCOUNT_POST     = 'deleteAccount.post';
+    const EVENT_USER_VALIDATED          = 'userValidated';
+    const EVENT_USER_VALIDATION_EXPIRED = 'userValidationExpired';
 
-    const VALIDATION_ACCOUNT = 'confirmAccount';
-    const VALIDATION_EMAIL   = 'confirmEmail';
+    const MSG_USER_VALIDATED = 'message.user.validationSuccessful';
+
+    const VALIDATION_USER  = 'validateUser';
+    const VALIDATION_EMAIL = 'confirmEmail';
 
     /**
      * Do not only trigger under the identifier \Vrok\Service\UserManager but also
@@ -71,6 +84,94 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
         'good'  => 25,
         'great' => 30,
     );
+
+    /**
+     * {@inheritDoc}
+     */
+    public function attach(EventManagerInterface $events)
+    {
+        $sharedEvents = $events->getSharedManager();
+
+        $sharedEvents->attach(
+            'ValidationManager',
+            \Vrok\Service\ValidationManager::EVENT_VALIDATION_SUCCESSFUL,
+            array($this, 'onValidationSuccessful')
+        );
+        $sharedEvents->attach(
+            'ValidationManager',
+            \Vrok\Service\ValidationManager::EVENT_VALIDATION_EXPIRED,
+            array($this, 'onValidationExpired')
+        );
+    }
+
+    /**
+     * Called when a validation was successfully confirmed.
+     *
+     * @triggers userValidated
+     * @param EventInterface $e
+     */
+    public function onValidationSuccessful(EventInterface $e)
+    {
+        $validation = $e->getTarget();
+        /* @var $validation Validation */
+        if ($validation->getType() !== self::VALIDATION_USER) {
+            return;
+        }
+
+        $user = $validation->getReference($this->getEntityManager());
+        if (!$user) {
+            return;
+        }
+        /* @var $user UserEntity */
+
+        // don't change the "activated" flag as it has a different meaning
+        // (e.g admin activation required or other requirements)
+        $user->setIsValidated(true);
+
+        // persist the change just in case there is no listener or something fails
+        $this->getEntityManager()->flush();
+
+        $this->getEventManager()->trigger(
+            self::EVENT_USER_VALIDATED,
+            $user
+        );
+
+        $this->getServiceLocator()->get('ControllerPluginManager')
+                ->get('flashMessenger')->addSuccessMessage(self::MSG_USER_VALIDATED);
+
+        // tell the ValidationController to redirect to the confirmation page
+        return $this->getServiceLocator()->get('ControllerPluginManager')
+                ->get('redirect')->toRoute('account/login');
+    }
+
+    /**
+     * Called when a validation expired.
+     *
+     * @triggers userValidationExpired
+     * @param EventInterface $e
+     */
+    public function onValidationExpired(EventInterface $e)
+    {
+        $validation = $e->getTarget();
+        if ($validation->getType() !== self::VALIDATION_USER) {
+            return;
+        }
+
+        $user = $validation->getReference($this->getEntityManager());
+        if (!$user) {
+            return;
+        }
+        /* @var $user UserEntity */
+
+        // expiration implies deletion, no additional event needef
+        $this->getEventManager()->trigger(
+            self::EVENT_USER_VALIDATION_EXPIRED,
+            $user
+        );
+
+        $this->getEntityManager()->remove($user);
+        // flushed by the ValidationManager
+    }
 
     /**
      * Creates a new UserEntity instance and sets the provided fields.
@@ -177,12 +278,15 @@ class UserManager implements EventManagerAwareInterface, ServiceLocatorAwareInte
             return $results;
         }
 
+        $data = $this->getUserRepository()->getInstanceData($user);
+
         $this->softDeleteUser($user);
         $this->logout();
         // allow cleanup actions and messages
         $results = $this->getEventManager()->trigger(
             self::EVENT_DELETE_ACCOUNT_POST,
-            $user
+            $user,
+            ['data' => $data]
         );
 
         return $results;
