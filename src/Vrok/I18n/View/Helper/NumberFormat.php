@@ -53,7 +53,7 @@ class NumberFormat extends ZendFormat
                 $locale,
                 $formatStyle
             );
-\Zend\Debug\Debug::dump($decimals);
+
             if ($decimals !== null) {
 
                 if (is_array($decimals)) {
