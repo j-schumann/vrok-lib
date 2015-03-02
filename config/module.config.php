@@ -109,6 +109,7 @@ return array(
 
             'currencyFormat' => '\Vrok\I18n\View\Helper\CurrencyFormat',
             'durationFormat' => '\Vrok\I18n\View\Helper\DurationFormat',
+            'numberFormat' => '\Vrok\I18n\View\Helper\NumberFormat',
             'translatePlural' => '\Vrok\I18n\View\Helper\TranslatePlural',
 
             'formDecorator' => 'Vrok\Form\View\Helper\FormDecorator',
