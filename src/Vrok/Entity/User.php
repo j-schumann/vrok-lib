@@ -273,7 +273,7 @@ class User extends Entity implements RoleProviderInterface
     }
 
     /**
-     * Sets wether or not the users password is a automatically generated one.
+     * Sets whether or not the users password is a automatically generated one.
      *
      * @param bool $isRandomPassword
      * @return self
@@ -379,7 +379,7 @@ class User extends Entity implements RoleProviderInterface
     protected $isActive = false;
 
     /**
-     * Gets wether the user is active or not.
+     * Gets whether the user is active or not.
      *
      * @return bool
      */
@@ -389,7 +389,7 @@ class User extends Entity implements RoleProviderInterface
     }
 
     /**
-     * Sets wether the user is active or not.
+     * Sets whether the user is active or not.
      *
      * @param bool $isActive
      * @return self
@@ -408,7 +408,7 @@ class User extends Entity implements RoleProviderInterface
     protected $isValidated = false;
 
     /**
-     * Gets wether the user is validated or not.
+     * Gets whether the user is validated or not.
      *
      * @return bool
      */
@@ -418,7 +418,7 @@ class User extends Entity implements RoleProviderInterface
     }
 
     /**
-     * Sets wether the user is validated or not.
+     * Sets whether the user is validated or not.
      *
      * @param bool $isValidated
      * @return self

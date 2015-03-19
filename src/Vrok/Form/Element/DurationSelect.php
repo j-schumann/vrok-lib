@@ -252,7 +252,7 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * Sets wether to show the hour select or not.
+     * Sets whether to show the hour select or not.
      *
      * @param bool $value
      */
@@ -292,7 +292,7 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * Sets wether to show the minute select or not.
+     * Sets whether to show the minute select or not.
      *
      * @param bool $value
      */
