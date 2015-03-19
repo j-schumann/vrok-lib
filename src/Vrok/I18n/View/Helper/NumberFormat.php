@@ -46,7 +46,7 @@ class NumberFormat extends ZendFormat
             $decimals = $this->getDecimals();
         }
 
-        $formatterId = md5($formatStyle . "\0" . $locale . "\0" . $decimals);
+        $formatterId = md5($formatStyle . "\0" . $locale . "\0" . json_encode($decimals));
 
         if (!isset($this->formatters[$formatterId])) {
             $this->formatters[$formatterId] = new NumberFormatter(
