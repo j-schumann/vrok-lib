@@ -128,8 +128,8 @@ class Message extends ZendMessage
         $alternatives->setParts(array($text, $html));
 
         $alternativesPart = new \Zend\Mime\Part($alternatives->generateMessage());
-        $alternativesPart->type = "multipart/alternative;\n boundary=\""
-                .$alternatives->getMime()->boundary()."\"";
+        $alternativesPart->type = "multipart/alternative"
+        $alternativesPart->boundary = $alternatives->getMime()->boundary();
 
         $body = new \Zend\Mime\Message();
         $body->addPart($alternativesPart);

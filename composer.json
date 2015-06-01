@@ -7,11 +7,11 @@
 
     "require": {
         "php": ">=5.4",
-        "doctrine/doctrine-orm-module": "dev-master",
+        "doctrine/doctrine-orm-module": "~0.9",
         "gedmo/doctrine-extensions": "~2.3.9",
         "ircmaxell/password-compat": "~1.0.3",
         "rwoverdijk/assetmanager": "~1.4.1",
-        "zendframework/zendframework": "~2.3.3"
+        "zendframework/zendframework": "~2.4.0"
     },
     "autoload": {
         "psr-0": {
