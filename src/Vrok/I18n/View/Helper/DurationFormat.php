@@ -7,7 +7,7 @@
 
 namespace Vrok\I18n\View\Helper;
 
-use Vrok\Stdlib\DateInterval;
+use DateInterval;
 use Vrok\Stdlib\DateInterval as VrokInterval;
 use Zend\I18n\View\Helper\AbstractTranslatorHelper;
 
