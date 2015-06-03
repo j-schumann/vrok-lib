@@ -365,9 +365,9 @@ class FormHelper implements InputFilterProviderInterface
 
         if ($mapping['nullable'] === true) {
             $filters['null'] = array(
-                'name' => 'Zend\Filter\Null',
+                'name' => 'Zend\Filter\ToNull',
                 'options' => array(
-                    'type' => \Zend\Filter\Null::TYPE_STRING,
+                    'type' => \Zend\Filter\ToNull::TYPE_STRING,
                 ),
             );
         }
