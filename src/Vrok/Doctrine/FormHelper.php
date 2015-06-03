@@ -341,9 +341,9 @@ class FormHelper implements InputFilterProviderInterface
             'allowEmpty' => !$this->associationIsRequired($association),
             'filters'    => array(
                 'null' => array(
-                    'name' => 'Zend\Filter\Null',
+                    'name' => 'Zend\Filter\ToNull',
                     'options' => array(
-                        'type' => \Zend\Filter\Null::TYPE_STRING,
+                        'type' => \Zend\Filter\ToNull::TYPE_STRING,
                     ),
                 ),
             ),
@@ -422,11 +422,11 @@ class FormHelper implements InputFilterProviderInterface
 
             case 'decimal':
                 $validators['float'] = array(
-                    'name'                   => 'Zend\I18n\Validator\Float',
+                    'name'                   => 'Zend\I18n\Validator\IsFloat',
                     'break_chain_on_failure' => true,
                     'options'                => array(
                         'messages' => array(
-                            \Zend\I18n\Validator\Float::NOT_FLOAT => self::ERROR_NOTFLOAT,
+                            \Zend\I18n\Validator\IsFloat::NOT_FLOAT => self::ERROR_NOTFLOAT,
                         ),
                     ),
                 );
@@ -434,11 +434,11 @@ class FormHelper implements InputFilterProviderInterface
 
             case 'integer':
                 $validators['int'] = array(
-                    'name'                   => 'Zend\I18n\Validator\Int',
+                    'name'                   => 'Zend\I18n\Validator\IsInt',
                     'break_chain_on_failure' => true,
                     'options'                => array(
                         'messages' => array(
-                            \Zend\I18n\Validator\Int::NOT_INT => self::ERROR_NOTINT,
+                            \Zend\I18n\Validator\IsInt::NOT_INT => self::ERROR_NOTINT,
                         ),
                     ),
                 );
