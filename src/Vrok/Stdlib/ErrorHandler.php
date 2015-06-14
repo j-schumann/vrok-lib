@@ -130,8 +130,12 @@ class ErrorHandler
      *
      * @param Exception $e
      */
-    public function exceptionHandler(Exception $e)
+    public function exceptionHandler(Exception $e, $nested = false)
     {
+        if ($e->getPrevious() instanceof Exception) {
+            $this->exceptionHandler($e->getPrevious(), true);
+        }
+
         $this->errorHandler(
             0, // custom errno
             $e->getMessage(),
@@ -139,6 +143,10 @@ class ErrorHandler
             $e->getLine(),
             $e // errcontext
         );
+
+        if ($nested) {
+            return;
+        }
 
         // because the exception handler cannot "return false" to resume the
         // default handling we have to display the error ourselves
