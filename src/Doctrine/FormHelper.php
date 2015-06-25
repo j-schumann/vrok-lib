@@ -447,16 +447,17 @@ class FormHelper implements InputFilterProviderInterface
             case 'string':
                 // no break
             case 'text':
-                $validators['stringLength'] = array(
+                $validators['stringLength'] = [
                     'name'                   => 'Zend\Validator\StringLength',
                     'break_chain_on_failure' => true,
-                    'options'                => array(
+                    'options'                => [
                         'max'      => $this->getLength($mapping),
-                        'messages' => array(
-                            \Zend\Validator\StringLength::TOO_LONG => self::ERROR_TOOLONG,
-                        ),
-                    ),
-                );
+                        'messages' => [
+                            \Zend\Validator\StringLength::TOO_LONG =>
+                                    self::ERROR_TOOLONG,
+                        ],
+                    ],
+                ];
                 break;
         }
 
@@ -490,15 +491,15 @@ class FormHelper implements InputFilterProviderInterface
      */
     public function getNotEmptyValidatorSpecification()
     {
-        return array(
+        return [
             'name'                   => 'Zend\Validator\NotEmpty',
             'break_chain_on_failure' => true,
-            'options' => array(
-                'messages' => array(
+            'options' => [
+                'messages' => [
                     \Zend\Validator\NotEmpty::IS_EMPTY => self::ERROR_ISEMPTY,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     /**

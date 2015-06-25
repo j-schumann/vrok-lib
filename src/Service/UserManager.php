@@ -157,13 +157,15 @@ class UserManager implements
             return;
         }
 
+        // failsave, do not delete if meanwhile validated (e.g. validation
+        // was not deleted or validated by admin)
         $user = $validation->getReference($this->getEntityManager());
-        if (!$user) {
+        if (!$user || $user->getIsValidated()) {
             return;
         }
         /* @var $user UserEntity */
 
-        // expiration implies deletion, no additional event needef
+        // expiration implies deletion, no additional event needed
         $this->getEventManager()->trigger(
             self::EVENT_USER_VALIDATION_EXPIRED,
             $user
