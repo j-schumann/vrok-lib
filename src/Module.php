@@ -81,8 +81,7 @@ class Module implements
                 },
                 'Vrok\Service\Email' => function($sm) {
                     $vhm = $sm->get('ViewHelperManager');
-                    $transport = $sm->get('Zend\Mail\Transport');
-                    $service = new \Vrok\Service\Email($transport, $vhm);
+                    $service = new \Vrok\Service\Email($vhm);
 
                     $config = $sm->get('Config');
                     if (!empty($config['email_service'])) {
