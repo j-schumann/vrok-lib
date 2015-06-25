@@ -14,8 +14,8 @@
         "zendframework/zendframework": "~2.5.1"
     },
     "autoload": {
-        "psr-0": {
-            "Vrok": "src/"
+        "psr-4": {
+            "Vrok\\": "src/"
         }
     }
 }

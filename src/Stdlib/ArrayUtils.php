@@ -29,4 +29,17 @@ abstract class ArrayUtils
         $arr = array_reverse($arr, true);
         return $arr;
     }
+
+    /**
+     * Calculates the average of the values in the given array.
+     *
+     * @param array $array
+     * @return float
+     */
+    public static function array_average(array $array)
+    {
+        return count($array)
+            ? array_sum($array) / count($array)
+            : 0;
+    }
 }
