@@ -39,9 +39,9 @@ class Email
     protected $layout = '';
 
     /**
-     * @var TransportInterface
+     * @var array
      */
-    protected $transport = null;
+    protected $transportOptions = null;
 
     /**
      * View helper service locator.
@@ -55,9 +55,8 @@ class Email
      *
      * @param ViewHelperManager $vhm
      */
-    public function __construct(TransportInterface $transport, ViewHelperManager $vhm)
+    public function __construct(ViewHelperManager $vhm)
     {
-        $this->transport = $transport;
         $this->viewHelperManager = $vhm;
     }
 
@@ -87,14 +86,7 @@ class Email
      */
     public function sendMail(ZendMessage $mail)
     {
-        // fixes errors in long running processes, e.g. queue worker, where
-        // the SMTP server disconnects after some minutes and the transport
-        // does not recognize this but returns "Could not read from [mailserver]"
-        if (is_callable([$this->transport, 'disconnect'])) {
-            $this->transport->disconnect();
-        }
-
-        $this->transport->send($mail);
+        $this->getTransport()->send($mail);
     }
 
     /**
@@ -115,6 +107,39 @@ class Email
         if (isset($options['layout'])) {
             $this->setLayout($options['layout']);
         }
+        if (isset($options['transport'])) {
+            $this->setTransportOptions($options['transport']);
+        }
+    }
+
+    /**
+     * Retrieve the options to use for mail transport.
+     *
+     * @return array
+     */
+    public function getTransportOptions()
+    {
+        return $this->transportOptions;
+    }
+
+    /**
+     * Sets the options to use for mail transport.
+     *
+     * @param array $options
+     */
+    public function setTransportOptions(array $options)
+    {
+        $this->transportOptions = $options;
+    }
+
+    /**
+     * Creates a new transport instance with the configured options.
+     *
+     * @return TransportInterface
+     */
+    public function getTransport()
+    {
+        return \Zend\Mail\Transport\Factory::create($this->transportOptions);
     }
 
     /**
