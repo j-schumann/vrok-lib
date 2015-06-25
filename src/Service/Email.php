@@ -87,6 +87,13 @@ class Email
      */
     public function sendMail(ZendMessage $mail)
     {
+        // fixes errors in long running processes, e.g. queue worker, where
+        // the SMTP server disconnects after some minutes and the transport
+        // does not recognize this but returns "Could not read from [mailserver]"
+        if (is_callable([$this->transport, 'disconnect'])) {
+            $this->transport->disconnect();
+        }
+
         $this->transport->send($mail);
     }
 
