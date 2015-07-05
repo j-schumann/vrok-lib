@@ -24,7 +24,7 @@ class TodoListener implements EventManagerAwareInterface
 
     const EVENT_TODO_POSTUPDATE   = 'todo.postUpdate';
 
-    protected $changeset = array();
+    protected $changeset = [];
 
     /**
      * Caches the changeset as it is only available in the preUpdate event, not postUpdate.
@@ -50,10 +50,10 @@ class TodoListener implements EventManagerAwareInterface
         $this->getEventManager()->trigger(
             self::EVENT_TODO_POSTUPDATE,
             $todo,
-            array(
+            [
                 'changeset' => $this->changeset,
                 'event'     => $event,
-            )
+            ]
         );
     }
 }

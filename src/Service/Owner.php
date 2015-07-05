@@ -41,14 +41,14 @@ class Owner implements EventManagerAwareInterface
      *
      * @var array
      */
-    protected $allowedOwners = array();
+    protected $allowedOwners = [];
 
     /**
      * Hash containing all used strategies to avoid triggering the event multiple times.
      *
      * @var array
      */
-    protected $strategies = array();
+    protected $strategies = [];
 
     /**
      * Class constructor - stores the dependency.
@@ -131,7 +131,7 @@ class Owner implements EventManagerAwareInterface
         $results = $this->getEventManager()->triggerUntil(
             self::EVENT_GET_OWNER_STRATEGY,
             $this,
-            array('classes' => $classes),
+            ['classes' => $classes],
             function($result) {
                 return $result instanceof StrategyInterface;
             }
@@ -187,7 +187,7 @@ class Owner implements EventManagerAwareInterface
     {
         return isset($this->allowedOwners[$entityClass])
             ? $this->allowedOwners[$entityClass]
-            : array();
+            : [];
     }
 
     /**
@@ -199,7 +199,7 @@ class Owner implements EventManagerAwareInterface
     public function addAllowedOwner($entityClass, $ownerClass)
     {
         if (!isset($this->allowedOwners[$entityClass])) {
-            $this->allowedOwners[$entityClass] = array();
+            $this->allowedOwners[$entityClass] = [];
         }
 
         $this->allowedOwners[$entityClass][$ownerClass] = $ownerClass;
@@ -209,7 +209,7 @@ class Owner implements EventManagerAwareInterface
      * Sets multiple entity=>owner relations at once.
      *
      * @todo use zend guard for traversable
-     * @param array $allowedOwners  array(entity => array(owner, ...), ...)
+     * @param array $allowedOwners  [entity => [owner, ...], ...]
      */
     public function setAllowedOwners(array $allowedOwners)
     {

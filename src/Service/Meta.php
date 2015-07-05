@@ -32,7 +32,7 @@ class Meta
      *
      * @var array
      */
-    protected $defaults = array();
+    protected $defaults = [];
 
     /**
      * Internal cache, to reduce database traffic for often required elements.
@@ -40,7 +40,7 @@ class Meta
      *
      * @var array
      */
-    protected $internalCache = array();
+    protected $internalCache = [];
 
     /**
      * Sets the required dependency.

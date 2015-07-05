@@ -54,9 +54,9 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
     /**
      * List of timeouts in seconds until the validations of a type expire.
      *
-     * @var int[]   array(type => timeout, ...)
+     * @var int[]   [type => timeout, ...]
      */
-    protected $timeouts = array();
+    protected $timeouts = [];
 
     /**
      * Creates a new validation of the given type for the given owner.
@@ -148,7 +148,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
         $this->getEventManager()->trigger(
             self::EVENT_VALIDATION_FAILED,
             $this,
-            array('validation' => $validation,)
+            ['validation' => $validation,]
         );
     }
 
@@ -166,10 +166,10 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
             return $url($this->confirmationRoute);
         }
 
-        return $url($this->confirmationRoute.'/params', array(
+        return $url($this->confirmationRoute.'/params', [
             'id'    => $validation ? $validation->getId() : null,
             'token' => $validation ? $validation->getToken() : null,
-        ));
+        ]);
     }
 
     /**

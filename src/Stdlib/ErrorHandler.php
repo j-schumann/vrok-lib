@@ -20,7 +20,7 @@ class ErrorHandler
      *
      * @var array
      */
-    public $errorLevels = array(
+    public $errorLevels = [
         0                   => 'Uncaught Exception',
         E_ERROR             => 'E_ERROR',
         E_WARNING           => 'E_WARNING',
@@ -38,7 +38,7 @@ class ErrorHandler
         E_DEPRECATED        => 'E_DEPRECATED',
         E_USER_DEPRECATED   => 'E_USER_DEPRECATED',
         E_ALL               => 'E_ALL'
-    );
+    ];
 
     /**
      * Path to the folder where the log file(s) should be stored.
@@ -65,9 +65,9 @@ class ErrorHandler
         $this->logfolder = $logfolder;
         $this->redirectUrl = $redirectUrl;
 
-        set_error_handler(array($this, 'errorHandler'), E_ALL);
-        set_exception_handler(array($this, 'exceptionHandler'));
-        register_shutdown_function(array($this, 'shutdownHandler'));
+        set_error_handler([$this, 'errorHandler'], E_ALL);
+        set_exception_handler([$this, 'exceptionHandler']);
+        register_shutdown_function([$this, 'shutdownHandler']);
     }
 
     /**

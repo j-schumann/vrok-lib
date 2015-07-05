@@ -27,8 +27,8 @@ class Random
      */
     public static function getRandomBytes($byteCount, $outputType = null)
     {
-        $sources = array();
-        foreach(array('getFromOpenSSL', 'getFromMcrypt', 'getFromCOM') as $func) {
+        $sources = [];
+        foreach(['getFromOpenSSL', 'getFromMcrypt', 'getFromCOM'] as $func) {
             $bytes = self::$func($byteCount);
             if ($bytes) {
                 $sources[] = $bytes;

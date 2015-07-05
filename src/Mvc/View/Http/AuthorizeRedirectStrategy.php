@@ -51,8 +51,16 @@ class AuthorizeRedirectStrategy implements
      */
     public function attach(EventManagerInterface $events)
     {
-        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH, array($this, 'onDispatch'), 5000);
-        $this->listeners[] = $events->attach(MvcEvent::EVENT_DISPATCH_ERROR, array($this, 'onDispatchError'), -5000);
+        $this->listeners[] = $events->attach(
+            MvcEvent::EVENT_DISPATCH,
+            [$this, 'onDispatch'],
+            5000
+        );
+        $this->listeners[] = $events->attach(
+            MvcEvent::EVENT_DISPATCH_ERROR,
+            [$this, 'onDispatchError'],
+            -5000
+        );
     }
 
     /**
@@ -83,10 +91,10 @@ class AuthorizeRedirectStrategy implements
 
             $translator = $this->getServiceLocator()
                     ->get('Zend\I18n\Translator\TranslatorInterface');
-            $message = $translator->translate(array(
+            $message = $translator->translate([
                 'message.user.activityTimeout',
                 floor($this->getTtl() / 60)
-            ));
+            ]);
 
             $cm = $this->getServiceLocator()->get('ControllerPluginManager');
             $messenger = $cm->get('flashMessenger');
@@ -131,10 +139,10 @@ class AuthorizeRedirectStrategy implements
         }
 
         // Common view variables
-        $viewVariables = array(
-           'error'      => $event->getParam('error'),
+        $viewVariables = [
+            'error'      => $event->getParam('error'),
            'identity'   => $event->getParam('identity'),
-        );
+        ];
 
         switch ($event->getError()) {
             case Controller::ERROR:
