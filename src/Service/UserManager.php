@@ -78,12 +78,12 @@ class UserManager implements
      *
      * @var array
      */
-    protected $passwordStrengthThresholds = array(
+    protected $passwordStrengthThresholds = [
         'weak'  => 15,
         'ok'    => 20,
         'good'  => 25,
         'great' => 30,
-    );
+    ];
 
     /**
      * {@inheritDoc}
@@ -95,12 +95,12 @@ class UserManager implements
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_SUCCESSFUL,
-            array($this, 'onValidationSuccessful')
+            [$this, 'onValidationSuccessful']
         );
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_EXPIRED,
-            array($this, 'onValidationExpired')
+            [$this, 'onValidationExpired']
         );
     }
 
@@ -216,10 +216,10 @@ class UserManager implements
         $this->getEventManager()->trigger(
             self::EVENT_CREATE_USER,
             $this,
-            array(
+            [
                 'user' => $user,
                 'data' => $data,
-            )
+            ]
         );
 
         $repository->updateInstance($user, $data);
@@ -348,12 +348,12 @@ class UserManager implements
     public function getUserByIdentity($identity)
     {
         $repository = $this->getUserRepository();
-        $user = $repository->findOneBy(array('username' => $identity));
+        $user = $repository->findOneBy(['username' => $identity]);
         if ($user) {
             return $user;
         }
 
-        return $repository->findOneBy(array('email' => $identity));
+        return $repository->findOneBy(['email' => $identity]);
     }
 
     /**
@@ -421,12 +421,12 @@ class UserManager implements
         $fullUrlHelper = $viewHelperManager->get('FullUrl');
         $url = $urlHelper('account/login');
 
-        $mail->setHtmlBody(array('mail.user.randomPassword.body', array(
+        $mail->setHtmlBody(['mail.user.randomPassword.body', [
             'displayName' => $user->getDisplayName(),
             'username'    => $user->getUsername(),
             'password'    => $password,
             'loginUrl'    => $fullUrlHelper('https').$url,
-        )));
+        ]]);
 
         $mail->addTo($user->getEmail(), $user->getDisplayName());
         $emailService->sendMail($mail);
@@ -470,15 +470,12 @@ class UserManager implements
         $validator->setCredential('password');
         $validator->setAdapter($this->getAuthAdapter());
         $validator->setService($this->getAuthService());
-        $validator->setMessages(array(
-            // we do not differ between not allowed because of invalid password or
-            // because the user is not active/validated or the identity was not found
-            // to not give information about existing users / registered emails
+        $validator->setMessages([
             AuthValidator::CREDENTIAL_INVALID => 'validate.authentication.failed',
             AuthValidator::IDENTITY_NOT_FOUND => 'validate.authentication.failed',
             AuthValidator::UNCATEGORIZED      => 'validate.authentication.uncategorizedFailure',
             AuthValidator::GENERAL            => 'validate.authentication.failed',
-        ));
+        ]);
         return $validator;
     }
 
@@ -579,7 +576,7 @@ class UserManager implements
     public function getUserAdminUrl($userId)
     {
         $url = $this->getServiceLocator()->get('ControllerPluginManager')->get('url');
-        return $url->fromRoute($this->getUserAdminRoute(), array('id' => $userId));
+        return $url->fromRoute($this->getUserAdminRoute(), ['id' => $userId]);
     }
 
     /**
@@ -620,11 +617,11 @@ class UserManager implements
         $rating = $calc->getRating($strength);
         $ratingText = 'message.passwordRating.'.$rating;
 
-        return array(
+        return [
             'strength'   => $strength,
             'rating'     => $rating,
             'ratingText' => $ratingText,
-        );
+        ];
     }
 
     /**

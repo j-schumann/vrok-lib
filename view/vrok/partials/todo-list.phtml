@@ -10,8 +10,8 @@
             </span>
             <?php if (!empty($todo['deadline'])) : ?>
             <div class="todo-deadline">
-                <?php echo $this->translate(array('view.todo.until', $this->dateFormat($todo['deadline'],
-                    \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::SHORT))); ?>
+                <?php echo $this->translate(['view.todo.until', $this->dateFormat($todo['deadline'],
+                    \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::SHORT)]); ?>
             </div>
             <?php endif; ?>
         </dd>

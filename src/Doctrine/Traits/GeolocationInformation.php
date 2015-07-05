@@ -29,7 +29,7 @@ trait GeolocationInformation
      */
     public function getGeolocation()
     {
-        return array('lat' => $this->latitude, 'lon' => $this->longitude);
+        return ['lat' => $this->latitude, 'lon' => $this->longitude];
     }
 
 // <editor-fold defaultstate="collapsed" desc="latitude">

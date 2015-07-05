@@ -89,7 +89,7 @@ $elementMarkup = $eh($this->element);
 
 $errorMarkup = '';
 if (count($element->getMessages())) {
-    $errorMarkup = $this->formElementErrors()->render($element, array('class' => 'errors help-block'));
+    $errorMarkup = $this->formElementErrors()->render($element, ['class' => 'errors help-block']);
 }
 
 if ($type === 'checkbox') {

@@ -199,14 +199,14 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      */
     public function buildTodoList($todos, User $user)
     {
-        $list = array();
+        $list = [];
         foreach($todos as $todo) {
             $todo->setHelpers(
                 $todo->getReference($this->getEntityManager()),
                 $this->getServiceLocator()->get('viewhelpermanager')->get('url')
             );
 
-            $list[] = array(
+            $list[] = [
 /* aktuell nicht nötig/benutzt:
                 'title'       => $todo->getTitle(),
                 'actionUrl'   => $todo->isUserAssigned($user)
@@ -217,7 +217,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
                 'deadline'    => $todo->getDeadline(),
                 'isOpen'      => $todo->isOpen(),
                 'status'      => $todo->getStatus(),
-            );
+            ];
         }
 
         return $list;
@@ -233,12 +233,12 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     public function getUserTodoList(User $assignee, User $user = null)
     {
         $filter = $this->getTodoFilter('t');
-        $filter->byUser($assignee, array(
+        $filter->byUser($assignee, [
                 UserTodo::STATUS_ASSIGNED,
                 UserTodo::STATUS_OPEN,
                 // @todo implement confirmation of todos with changed state
                 //UserTodo::STATUS_UNCONFIRMED,
-            ))
+            ])
             ->orderByField('deadline', 'ASC');
 
         $todos = $filter->getResult();
@@ -257,9 +257,9 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
         $todos = $this->getUserTodoList($assignee, $user);
         $partial = $this->getServiceLocator()->get('viewhelpermanager')->get('partial');
 
-        return $partial($this->getPartial(), array(
+        return $partial($this->getPartial(), [
             'todos' => $todos,
-        ));
+        ]);
     }
 
     /**
@@ -280,7 +280,7 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
     {
         $filter = $this->getTodoFilter();
         $filter->byDeadline(new \DateTime(), '<')
-               ->byStatus(array(TodoEntity::STATUS_OPEN, TodoEntity::STATUS_ASSIGNED));
+               ->byStatus([TodoEntity::STATUS_OPEN, TodoEntity::STATUS_ASSIGNED]);
 
         $todos = $filter->getResult();
         foreach($todos as $todo) {

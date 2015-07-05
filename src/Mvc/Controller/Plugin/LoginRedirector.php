@@ -70,17 +70,17 @@ class LoginRedirector extends AbstractPlugin
         if ($this->request->isXmlHttpRequest()) {
             // this "script" result is only supported by Vrok.Tools.processResponse
             // in vrok-lib.js
-            return new JsonModel(array(
+            return new JsonModel([
                 'script' => "window.location.href='$url';",
-            ));
+            ]);
         }
 
         // store the complete URI including GET params to allow redirection back to this
         // page after the login. POST is ignored and must be repeated.
         $session = $this->getSession();
-        $session['returnAfterLogin'] = array(
+        $session['returnAfterLogin'] = [
             'uri' => $this->request->getUriString(),
-        );
+        ];
 
         $response = new Response();
         $response->getHeaders()->addHeaderLine('Location', $url);
@@ -109,7 +109,7 @@ class LoginRedirector extends AbstractPlugin
         }
         else {
             $response->getHeaders()->addHeaderLine('Location', $session['returnAfterLogin']);
-            $session->exchangeArray(array());
+            $session->exchangeArray([]);
         }
 
         return $response;

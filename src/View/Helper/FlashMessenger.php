@@ -59,7 +59,7 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
         }
 
         // Flatten message array
-        $messagesToPrint = array();
+        $messagesToPrint = [];
 
         $translator = $this->getTranslator();
         $translatorTextDomain = $this->getTranslatorTextDomain();

@@ -29,12 +29,12 @@ class PasswordStrength
      *
      * @var array
      */
-    protected $thresholds = array(
+    protected $thresholds = [
         self::RATING_WEAK  => 15,
         self::RATING_OK    => 20,
         self::RATING_GOOD  => 25,
         self::RATING_GREAT => 30,
-    );
+    ];
 
     /**
      * Returns the current threshold settings.

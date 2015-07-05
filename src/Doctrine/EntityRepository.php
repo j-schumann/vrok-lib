@@ -173,7 +173,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      */
     public function getInputFilterSpecification()
     {
-        $spec = array();
+        $spec = [];
         foreach($this->_class->getFieldNames() as $fieldName) {
             $spec[$fieldName] = $this->getInputSpecification($fieldName);
         }

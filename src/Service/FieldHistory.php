@@ -88,7 +88,7 @@ class FieldHistory
      */
     public function logChangeset(EntityInterface $entity, array $changeset, $flush = false)
     {
-        // changeset is array(field => array(oldValue, newValue))
+        // changeset is [field => [oldValue, newValue]]
         foreach ($changeset as $field => $values) {
             $this->logChange($entity, $field, $values[0]);
         }

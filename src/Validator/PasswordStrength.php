@@ -24,10 +24,10 @@ class PasswordStrength extends AbstractValidator
     /**
      * @var array
      */
-    protected $messageTemplates = array(
+    protected $messageTemplates = [
         self::INVALID  => "Invalid type given. String expected",
         self::TOO_WEAK => "The given password is too weak",
-    );
+    ];
 
     /**
      * The minimum password strength required to be valid.
@@ -41,7 +41,7 @@ class PasswordStrength extends AbstractValidator
      *
      * @param  int|array|\Traversable $options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         if (!is_array($options)) {
             $temp['threshold'] = array_shift(func_get_args());

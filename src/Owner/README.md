@@ -31,16 +31,16 @@ all its subclasses.
 
 If you add a new entity that may be used as owner or that may have an owner add
 it to your modules configuration as follows:
-array (
-    'owner_service' => array(
-        'allowed_owners' => array(
-            '\New\Entity\Class' => array(
+[
+    'owner_service' => [
+        'allowed_owners' => [
+            '\New\Entity\Class' => [
                 '\Existing\Owner\Class',
                 '\Other\Existing\Owner',
-            ),
-            '\Existing\Entity\Class' => array(
+            ],
+            '\Existing\Entity\Class' => [
                 '\New\Owner\Class',
-            ),
-        ),
-    ),
-),
+            ],
+        ],
+    ],
+],
