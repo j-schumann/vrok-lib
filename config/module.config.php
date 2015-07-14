@@ -2,20 +2,19 @@
 /**
  * Vrok-Lib config
  */
-return array(
+return [
 // <editor-fold defaultstate="collapsed" desc="asset_manager">
-    'asset_manager' => array(
-        'resolvers' => array(
+    'asset_manager' => [
+        'resolvers' => [
             'Vrok\Asset\ViewScriptResolver' => 3001,
-        ),
-        'resolver_configs' => array(
-            'paths' => array(
+        ],
+        'resolver_configs' => [
+            'paths' => [
                 __DIR__ . '/../public',
-            ),
-            'map' => array(
-                        ),
-        ),
-    ),
+            ],
+            'map' => [],
+        ],
+    ],
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="controller_plugins">
     'controller_plugins' => array(
@@ -115,6 +114,7 @@ return array(
             'formDecorator' => 'Vrok\Form\View\Helper\FormDecorator',
             'formElementDecorator' => 'Vrok\Form\View\Helper\FormElementDecorator',
             'formDurationSelect' => 'Vrok\Form\View\Helper\FormDurationSelect',
+            'formInterval' => 'Vrok\Form\View\Helper\FormInterval',
         ),
     ),
 // </editor-fold>
@@ -125,4 +125,4 @@ return array(
         ),
     ),
 // </editor-fold>
-);
+];

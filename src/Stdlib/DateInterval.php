@@ -221,6 +221,53 @@ class DateInterval extends BaseInterval
     }
 
     /**
+     *
+     * @return string
+     */
+    public function getIntervalSpec()
+    {
+        $spec = 'P';
+
+        $y = $this->getYears(self::OPTION_FULL);
+        if ($y) {
+            $spec .= $y.'Y';
+        }
+
+        $m = $this->getMonths(false, self::OPTION_FULL);
+        if ($m) {
+            $spec .= $m.'M';
+        }
+
+        $d = $this->getDays(false, self::OPTION_FULL);
+        if ($d) {
+            $spec .= $d.'D';
+        }
+
+        $h = $this->getHours(false, self::OPTION_FULL);
+        if ($h) {
+            $spec .= 'T'.$h.'H';
+        }
+
+        $i = $this->getMinutes(false, self::OPTION_FULL);
+        if ($i) {
+            if (!$h) {
+                $spec .= 'T';
+            }
+            $spec .= $i.'M';
+        }
+
+        $s = $this->getSeconds(false);
+        if ($s) {
+            if (!$h && !$i) {
+                $spec .= 'T';
+            }
+            $spec .= $s.'M';
+        }
+
+        return $spec;
+    }
+
+    /**
      * Evaluates the roundOption.
      *
      * @param int|float $value
