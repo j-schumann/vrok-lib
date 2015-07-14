@@ -86,6 +86,12 @@ class Email
      */
     public function sendMail(ZendMessage $mail)
     {
+        // when we send a mail and after a long time (e.g. in a background queue
+        // process) another mail it probably fails with exceptions like
+        // "Could not read from in-v3.mailjet.com" because the server closed
+        // the connection. Zend\Mail\Protocol\Smtp->rset() is called when using
+        // SMTP but does not reopen a closed connection, so we always use a new
+        // transport object here because not all transports support disconnect()
         $this->getTransport()->send($mail);
     }
 
