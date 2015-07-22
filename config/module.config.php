@@ -114,6 +114,7 @@ return [
             'formDecorator' => 'Vrok\Form\View\Helper\FormDecorator',
             'formElementDecorator' => 'Vrok\Form\View\Helper\FormElementDecorator',
             'formDurationSelect' => 'Vrok\Form\View\Helper\FormDurationSelect',
+            'formInterval' => 'Vrok\Form\View\Helper\FormInterval',
         ),
     ),
 // </editor-fold>

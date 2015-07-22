@@ -17,12 +17,12 @@ use Zend\InputFilter\InputFilterProviderInterface;
  */
 class FormHelper implements InputFilterProviderInterface
 {
-    const ERROR_ISEMPTY      = 'validate.field.isEmpty';
-    const ERROR_NOTFLOAT     = 'validate.field.notFloat';
-    const ERROR_NOTINT       = 'validate.field.notInt';
-    const ERROR_TOOLONG      = 'validate.field.tooLong';
-    const ERROR_INVALIDDATE  = 'validate.field.invalidDate';
-    const ERROR_INVALIDEMAIL = 'validate.field.invalidEmail';
+    const ERROR_ISEMPTY             = 'validate.field.isEmpty';
+    const ERROR_NOTFLOAT            = 'validate.field.notFloat';
+    const ERROR_NOTINT              = 'validate.field.notInt';
+    const ERROR_TOOLONG             = 'validate.field.tooLong';
+    const ERROR_INVALIDDATE         = 'validate.field.invalidDate';
+    const ERROR_INVALIDEMAIL        = 'validate.field.invalidEmail';
 
     /**
      * ORM metadata descriptor for a entity class

@@ -5,3 +5,13 @@
     opacity: 0.5;
     border-radius: inherit;
 }
+
+/* \Vrok\Form\Element\Interval */
+.form-control.interval-amount {
+    width: 60%;
+    display: inline;
+}
+.form-control.interval-type {
+    width: 39%;
+    display: inline;
+}

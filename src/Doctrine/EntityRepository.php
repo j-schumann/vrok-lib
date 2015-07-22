@@ -177,8 +177,8 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         foreach($this->_class->getFieldNames() as $fieldName) {
             $spec[$fieldName] = $this->getInputSpecification($fieldName);
         }
-        foreach($this->_class->getAssociationNames() as $associationName) {
-            $spec[$associationName] = $this->getInputSpecification($associationName);
+        foreach($this->_class->getAssociationNames() as $association) {
+            $spec[$association] = $this->getInputSpecification($association);
         }
         return $spec;
     }

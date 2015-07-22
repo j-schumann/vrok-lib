@@ -418,7 +418,7 @@ class DurationSelect extends Select implements
             'name' => $this->getName(),
             'required' => false,
             'validators' => array(
-                'inArray' => array(
+                'callback' => array(
                     'name'                   => 'Zend\Validator\Callback',
                     'break_chain_on_failure' => true,
                     'options'                => array(
