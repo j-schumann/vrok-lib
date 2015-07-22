@@ -2,20 +2,19 @@
 /**
  * Vrok-Lib config
  */
-return array(
+return [
 // <editor-fold defaultstate="collapsed" desc="asset_manager">
-    'asset_manager' => array(
-        'resolvers' => array(
+    'asset_manager' => [
+        'resolvers' => [
             'Vrok\Asset\ViewScriptResolver' => 3001,
-        ),
-        'resolver_configs' => array(
-            'paths' => array(
+        ],
+        'resolver_configs' => [
+            'paths' => [
                 __DIR__ . '/../public',
-            ),
-            'map' => array(
-                        ),
-        ),
-    ),
+            ],
+            'map' => [],
+        ],
+    ],
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="controller_plugins">
     'controller_plugins' => array(
@@ -41,7 +40,7 @@ return array(
             'vrok_entities' => array(
                 'class' => 'Doctrine\ORM\Mapping\Driver\AnnotationDriver',
                 'cache' => 'array',
-                'paths' => array(__DIR__ . '/../src/Entity')
+                'paths' => array(__DIR__ . '/../src/Vrok/Entity')
             ),
             'orm_default' => array(
                 'drivers' => array(
@@ -125,4 +124,4 @@ return array(
         ),
     ),
 // </editor-fold>
-);
+];
