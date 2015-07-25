@@ -6,6 +6,16 @@
     border-radius: inherit;
 }
 
+a.hoverable {
+    text-decoration: none !important;
+}
+.hoverable .hover-action {
+    visibility: hidden;
+}
+.hoverable:hover .hover-action {
+    visibility: visible;
+}
+
 /* \Vrok\Form\Element\Interval */
 .form-control.interval-amount {
     width: 60%;

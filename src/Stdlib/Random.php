@@ -38,7 +38,7 @@ class Random
         // /dev/random is blocking, only use it if none of the other sources
         // is available
         if (!count($sources)) {
-            $bytes = $this->getFromDev($byteCount);
+            $bytes = self::getFromDev($byteCount);
             if ($bytes) {
                 $sources[] = $bytes;
             }
@@ -89,7 +89,7 @@ class Random
         // the types return more characters than bytes are needed, save entropy!
         switch(strtolower($type)) {
             case self::OUTPUT_HEX:
-                $byteCount = $length / 2;
+                $byteCount = ceil($length / 2);
                 break;
 
             case self::OUTPUT_ALNUM:
@@ -158,7 +158,7 @@ class Random
 
         $handle = @fopen('/dev/random', 'rb');
         if ($handle) {
-            $this->sources[] = fread($this->_unixHandle, $byteCount);
+            $value = fread($handle, $byteCount);
             fclose($handle);
         }
 

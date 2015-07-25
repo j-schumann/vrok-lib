@@ -7,12 +7,14 @@
 
 namespace Vrok\File\Parser;
 
+use Vrok\File\Csv as CsvFile;
 use Vrok\File\Exception;
+use Vrok\Stdlib\StringUtils;
 
 /**
  * Allows to parse a CSV file and map csv columns to db table columns.
  */
-class Csv extends \Vrok\File\Csv
+class Csv extends CsvFile
 {
     /**
      * Indicates if only columns defined in the map will be returned.
@@ -34,14 +36,14 @@ class Csv extends \Vrok\File\Csv
      *
      * @var array
      */
-    protected $map = array();
+    protected $map = [];
 
     /**
      * Holds the parsed data with the final header as indexes.
      *
      * @var array
      */
-    protected $data = array();
+    protected $data = [];
 
     /**
      * Class constructor, stores the filename and checks the file.
@@ -54,12 +56,12 @@ class Csv extends \Vrok\File\Csv
     {
         if (!is_string($filename) || !strlen($filename)) {
             throw new Exception\InvalidArgumentException(
-                'Given file name is invalid or empty: "'.$filename.'"');
+                "Given file name is invalid or empty: '$filename'");
         }
 
         if (!file_exists($filename) || !is_readable($filename)) {
             throw new Exception\RuntimeException(
-                'CSV file for parsing doesn\'t exist or is not readable: '.$filename);
+                "CSV file for parsing doesn't exist or is not readable: '$filename'");
         }
 
         $this->filename = $filename;
@@ -85,7 +87,7 @@ class Csv extends \Vrok\File\Csv
             $this->escape)) !== false)
         {
             if ($lineCount++ == 0) {
-                $line[0] = \Custom_String_Helper::removeBOM($line[0]);
+                $line[0] = StringUtils::removeBOM($line[0]);
                 $this->setHeader($line);
 
                 if ($this->hasHeader) {
@@ -115,10 +117,10 @@ class Csv extends \Vrok\File\Csv
      * @param array $line
      * @return void
      */
-    protected function setHeader($line)
+    protected function setHeader(array $line = null)
     {
         // The CSV file has no header => simply use the map as header
-        if (!$this->hasHeader) {
+        if (!$this->hasHeader || !$line) {
             $this->header = $this->map;
             return;
         }
@@ -145,7 +147,7 @@ class Csv extends \Vrok\File\Csv
      */
     protected function parseLine($line)
     {
-        $row = array();
+        $row = [];
         foreach ($line as $column => $value) {
             // the column index is set in the header -> use the new index, else keep
             $index = isset($this->header[$column]) ? $this->header[$column] : $index;
@@ -155,7 +157,6 @@ class Csv extends \Vrok\File\Csv
             if ($this->mappedOnly && !in_array($index, $this->map)) {
                 continue;
             }
-//            $value = str_replace($this->escape.$this->escape, $this->escape, $value);
 
             $row[$index] = $value;
         }
@@ -167,14 +168,9 @@ class Csv extends \Vrok\File\Csv
      * Allows to inject a map. Only necessary before calling parse().
      *
      * @param array $map
-     * @throws Exception\InvalidArgumentException   when the $map is no array
      */
-    public function setMap($map)
+    public function setMap(array $map)
     {
-        if (!is_array($map)) {
-            throw new Exception\InvalidArgumentException('Map is no array!');
-        }
-
         $this->map = $map;
     }
 

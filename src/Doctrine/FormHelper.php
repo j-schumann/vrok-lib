@@ -72,27 +72,27 @@ class FormHelper implements InputFilterProviderInterface
 
         $mapping = $this->metadata->getFieldMapping($fieldName);
 
-        $definition = array(
+        $definition = [
             'type'       => $this->getElementType($mapping),
             'name'       => $fieldName,
             'attributes' => $this->getAttributes($mapping),
-            'options'    => array(
+            'options'    => [
                 'label' => $this->getLabel($fieldName),
-            ),
-        );
+            ],
+        ];
 
         switch ($mapping['type']) {
             case 'date':
                 $definition['options']['render_delimiters'] = false;
-                $definition['options']['day_attributes'] = array(
+                $definition['options']['day_attributes'] = [
                     'class' => 'dateselect-day',
-                );
-                $definition['options']['month_attributes'] = array(
+                ];
+                $definition['options']['month_attributes'] = [
                     'class' => 'dateselect-month',
-                );
-                $definition['options']['year_attributes'] = array(
+                ];
+                $definition['options']['year_attributes'] = [
                     'class' => 'dateselect-year',
-                );
+                ];
                 if (!$this->elementIsRequired($mapping)) {
                     $definition['options']['create_empty_option'] = true;
                 }
@@ -129,10 +129,10 @@ class FormHelper implements InputFilterProviderInterface
             $property = $identifiers[0];
         }
 
-        $definition = array(
+        $definition = [
             'type'    => 'Vrok\Form\Element\ObjectSelect',
             'name'    => $fieldName,
-            'options' => array(
+            'options' => [
                 'object_manager'     => $this->entityManager,
                 'target_class'       => $association['targetEntity'],
                 'property'           => $property,
@@ -142,11 +142,11 @@ class FormHelper implements InputFilterProviderInterface
                 // to force the user to select one and not only use the first
                 // one that is automatically selected
                 'display_empty_item' => true,
-            ),
-            'attributes' => array(
+            ],
+            'attributes' => [
                 'multiple' => $this->associationIsMultiple($association),
-            ),
-        );
+            ],
+        ];
 
         if ($this->associationIsRequired($association)) {
             $definition['attributes']['required'] = 'required';
@@ -163,10 +163,10 @@ class FormHelper implements InputFilterProviderInterface
      */
     protected function associationIsMultiple($association)
     {
-        $multiple = array(
+        $multiple = [
             \Doctrine\ORM\Mapping\ClassMetadata::ONE_TO_MANY,
             \Doctrine\ORM\Mapping\ClassMetadata::MANY_TO_MANY,
-        );
+        ];
 
         return in_array($association['type'], $multiple);
     }
@@ -247,7 +247,7 @@ class FormHelper implements InputFilterProviderInterface
      */
     protected function getAttributes(array $mapping)
     {
-        $attributes = array();
+        $attributes = [];
         if ($this->elementIsRequired($mapping)) {
             $attributes['required'] = 'required';
         }
@@ -293,7 +293,7 @@ class FormHelper implements InputFilterProviderInterface
      */
     public function getInputFilterSpecification()
     {
-        $spec = array();
+        $spec = [];
         foreach($this->metadata->getFieldNames() as $fieldName) {
             $spec[$fieldName] = $this->getInputSpecification($fieldName);
         }
@@ -315,13 +315,13 @@ class FormHelper implements InputFilterProviderInterface
 
         $mapping = $this->metadata->getFieldMapping($fieldName);
 
-        return array(
+        return [
             'name'       => $fieldName,
             'required'   => $this->elementIsRequired($mapping),
             'allowEmpty' => $mapping['nullable'],
             'filters'    => $this->getFilters($mapping),
             'validators' => $this->getValidators($mapping),
-        );
+        ];
     }
 
     /**
@@ -335,20 +335,20 @@ class FormHelper implements InputFilterProviderInterface
     {
         $association = $this->metadata->associationMappings[$associationName];
 
-        return array(
+        return [
             'name'       => $associationName,
             'required'   => $this->associationIsRequired($association),
             'allowEmpty' => !$this->associationIsRequired($association),
-            'filters'    => array(
-                'null' => array(
+            'filters'    => [
+                'null' => [
                     'name' => 'Zend\Filter\ToNull',
-                    'options' => array(
+                    'options' => [
                         'type' => \Zend\Filter\ToNull::TYPE_STRING,
-                    ),
-                ),
-            ),
+                    ],
+                ],
+            ],
             // @todo object exists validator?
-        );
+        ];
     }
 
     /**
@@ -359,31 +359,33 @@ class FormHelper implements InputFilterProviderInterface
      */
     public function getFilters(array $mapping)
     {
-        $filters = array(
-            'stringTrim' => array('name' => 'Zend\Filter\StringTrim',),
-        );
+        $filters = [
+            'stringTrim' => [
+                'name' => 'Zend\Filter\StringTrim',
+            ],
+        ];
 
         if ($mapping['nullable'] === true) {
-            $filters['null'] = array(
-                'name' => 'Zend\Filter\ToNull',
-                'options' => array(
+            $filters['null'] = [
+                'name'    => 'Zend\Filter\ToNull',
+                'options' => [
                     'type' => \Zend\Filter\ToNull::TYPE_STRING,
-                ),
-            );
+                ],
+            ];
         }
 
         switch($mapping['type']) {
             case 'date':
-                $filters['dateSelect'] = array(
+                $filters['dateSelect'] = [
                     // special filter to return NULL if no subelement is set
                     'name' => 'Vrok\Filter\DateSelect',
-                );
+                ];
                 break;
 
             case 'decimal':
-                $filters['numberParse'] = array(
+                $filters['numberParse'] = [
                     'name' => 'Zend\I18n\Filter\NumberParse',
-                );
+                ];
                 break;
         }
 
@@ -398,7 +400,7 @@ class FormHelper implements InputFilterProviderInterface
      */
     public function getValidators(array $mapping)
     {
-        $validators = array();
+        $validators = [];
 
         if ($this->elementIsRequired($mapping)) {
             $validators['notEmpty'] = $this->getNotEmptyValidatorSpecification();
@@ -407,41 +409,43 @@ class FormHelper implements InputFilterProviderInterface
         switch($mapping['type'])
         {
             case 'date':
-                $validators['date'] = array(
+                $validators['date'] = [
                     'name'                   => 'Zend\Validator\Date',
                     'break_chain_on_failure' => true,
-                    'options'                => array(
-                        'messages' => array(
+                    'options'                => [
+                        'messages' => [
                             \Zend\Validator\Date::FALSEFORMAT => self::ERROR_INVALIDDATE,
                             \Zend\Validator\Date::INVALID => self::ERROR_INVALIDDATE,
                             \Zend\Validator\Date::INVALID_DATE => self::ERROR_INVALIDDATE,
-                        ),
-                    ),
-                );
+                        ],
+                    ],
+                ];
                 break;
 
             case 'decimal':
-                $validators['float'] = array(
+                $validators['float'] = [
                     'name'                   => 'Zend\I18n\Validator\IsFloat',
                     'break_chain_on_failure' => true,
-                    'options'                => array(
-                        'messages' => array(
-                            \Zend\I18n\Validator\IsFloat::NOT_FLOAT => self::ERROR_NOTFLOAT,
-                        ),
-                    ),
-                );
+                    'options'                => [
+                        'messages' => [
+                            \Zend\I18n\Validator\IsFloat::NOT_FLOAT
+                                    => self::ERROR_NOTFLOAT,
+                        ],
+                    ],
+                ];
                 break;
 
             case 'integer':
-                $validators['int'] = array(
+                $validators['int'] = [
                     'name'                   => 'Zend\I18n\Validator\IsInt',
                     'break_chain_on_failure' => true,
-                    'options'                => array(
-                        'messages' => array(
-                            \Zend\I18n\Validator\IsInt::NOT_INT => self::ERROR_NOTINT,
-                        ),
-                    ),
-                );
+                    'options'                => [
+                        'messages' => [
+                            \Zend\I18n\Validator\IsInt::NOT_INT
+                                    => self::ERROR_NOTINT,
+                        ],
+                    ],
+                ];
                 break;
 
             case 'string':
@@ -509,31 +513,31 @@ class FormHelper implements InputFilterProviderInterface
      */
     public function getEmailValidatorSpecification()
     {
-        return array(
+        return [
             'name'                   => 'Zend\Validator\EmailAddress',
             'break_chain_on_failure' => true,
-            'options'                => array(
+            'options'                => [
                 'useDomainCheck' => true,
-                'messages'       => array(
+                'messages'       => [
                     // we don't want all the different technical messages
                     // the user should know what his own email address is.
                     // When setting the same message for each error this message
-                    // is only shown once instead of multiple messages instead
-                    \Zend\Validator\EmailAddress::INVALID_FORMAT => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\EmailAddress::INVALID_LOCAL_PART => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\EmailAddress::INVALID_HOSTNAME => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\EmailAddress::INVALID_SEGMENT => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\EmailAddress::QUOTED_STRING => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::LOCAL_NAME_NOT_ALLOWED => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::INVALID_HOSTNAME => self::ERROR_INVALIDEMAIL,
+                    // is only shown once instead of multiple messages
+                    \Zend\Validator\EmailAddress::INVALID_FORMAT      => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\EmailAddress::INVALID_LOCAL_PART  => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\EmailAddress::INVALID_HOSTNAME    => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\EmailAddress::INVALID_SEGMENT     => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\EmailAddress::QUOTED_STRING       => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\Hostname::LOCAL_NAME_NOT_ALLOWED  => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\Hostname::INVALID_HOSTNAME        => self::ERROR_INVALIDEMAIL,
                     \Zend\Validator\Hostname::INVALID_HOSTNAME_SCHEMA => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::UNDECIPHERABLE_TLD => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::UNKNOWN_TLD => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::IP_ADDRESS_NOT_ALLOWED => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::INVALID_DASH => self::ERROR_INVALIDEMAIL,
-                    \Zend\Validator\Hostname::INVALID_URI => self::ERROR_INVALIDEMAIL,
-                ),
-            ),
-        );
+                    \Zend\Validator\Hostname::UNDECIPHERABLE_TLD      => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\Hostname::UNKNOWN_TLD             => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\Hostname::IP_ADDRESS_NOT_ALLOWED  => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\Hostname::INVALID_DASH            => self::ERROR_INVALIDEMAIL,
+                    \Zend\Validator\Hostname::INVALID_URI             => self::ERROR_INVALIDEMAIL,
+                ],
+            ],
+        ];
     }
 }

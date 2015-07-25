@@ -36,6 +36,13 @@ class Interval extends Element implements
     ];
 
     /**
+     * Contains the options to show in the select.
+     *
+     * @var array
+     */
+    protected $typeOptions = ['S', 'M', 'H', 'D'];
+
+    /**
      * input element that contains the integer part (interval length)
      *
      * @var Text
@@ -94,6 +101,10 @@ class Interval extends Element implements
 
         if (isset($options['type_attributes'])) {
             $this->setTypeAttributes($options['type_attributes']);
+        }
+
+        if (isset($options['type_options'])) {
+            $this->setTypeOptions($options['type_options']);
         }
 
         return $this;
@@ -237,13 +248,29 @@ class Interval extends Element implements
     }
 
     /**
+     * Sets the allowed options to select from.
+     *
+     * @param $options array ['S', 'M', 'H', 'D'] or a combination of these
+     * @return array
+     */
+    public function setTypeOptions(array $options)
+    {
+        $this->typeOptions = $options;
+    }
+
+    /**
      * Retrieve the allowed options to select from.
      *
      * @return array
      */
     public function getTypeValueOptions()
     {
-        return self::$typeValueOptions;
+        $result = [];
+        foreach ($this->typeOptions as $key) {
+            $result[$key] = self::$typeValueOptions[$key];
+        }
+
+        return $result;
     }
 
     /**

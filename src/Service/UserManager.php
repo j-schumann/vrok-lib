@@ -196,8 +196,8 @@ class UserManager implements
             $data['displayName'] = $data['username'];
         }
 
-        // set a default password for the InputFilter to pass, necessary when a random
-        // password should be set
+        // set a default password for the InputFilter to pass, necessary when a
+        // random password should be set
         if (empty($data['password'])) {
             // don't use "empty" etc as we are not sure if the random password
             // is really set afterwards, maybe no DB transaction is used

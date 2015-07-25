@@ -59,7 +59,7 @@ class Csv
      *
      * @var array
      */
-    protected $header = array();
+    protected $header = [];
 
     /**
      * Allows injection of a new delimiter char.
@@ -102,6 +102,6 @@ class Csv
      */
     public function setHasHeader($hasHeader = true)
     {
-        $this->hasHeader = $hasHeader;
+        $this->hasHeader = (bool)$hasHeader;
     }
 }

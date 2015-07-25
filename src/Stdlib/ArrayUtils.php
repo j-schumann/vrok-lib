@@ -42,4 +42,46 @@ abstract class ArrayUtils
             ? array_sum($array) / count($array)
             : 0;
     }
+
+    /**
+     * Calculates the median of the values in the given array.
+     *
+     * @param array $array
+     * @return float
+     * @throws \DomainException if the array is empty
+     */
+    public static function array_median(array $array)
+    {
+        // @todo perhaps all non numeric values should filtered out of $array here?
+        $count = count($array);
+        if ($count === 0) {
+            throw new \DomainException('Median of an empty array is undefined');
+        }
+
+        sort($array, SORT_NUMERIC);
+        $middle = floor($count / 2);
+
+        if($count % 2) { // odd number, middle is the median
+            return $array[$middle];
+        }
+
+        // even number, calculate avg of 2 medians
+        $low = $array[$middle - 1];
+        $high = $array[$middle];
+        return ($low + $high) / 2;
+    }
+    
+    /**
+     * Removes the given value from the given array. If the value exists multiple times,
+     * all instances are removed.
+     *
+     * @param array $arr
+     * @param mixed $value
+     */
+    public static function unsetValue(array &$arr, $value)
+    {
+        foreach(array_keys($arr, $value, true) as $key) {
+            unset($arr[$key]);
+        }
+    }
 }

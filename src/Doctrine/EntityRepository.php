@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityRepository as DoctrineRepository;
 use Vrok\Doctrine\FormHelper;
 use Vrok\Stdlib\Guard\ObjectGuardTrait;
 use Vrok\Stdlib\Guard\InstanceOfGuardTrait;
+use Vrok\Stdlib\Random;
 use Zend\InputFilter\InputFilterProviderInterface;
 
 /**
@@ -272,5 +273,61 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         $hydrator = new \DoctrineModule\Stdlib\Hydrator\DoctrineObject(
                 $this->getEntityManager());
         return $hydrator->extract($instance);
+    }
+
+    /**
+     * Sets the given field of the given entity to a random token of the defined
+     * length.
+     * Attention: flush the EM before using, uses native queries and table locks
+     *
+     * @param EntityInterface $entity
+     * @param string $field
+     * @param int $length
+     * @throws Exception\RuntimeException
+     */
+    public function setRandomToken(EntityInterface $entity, $field, $length = 48)
+    {
+        $em = $this->getEntityManager();
+        $table = $this->getClassMetadata()->getTableName();
+        $connection = $em->getConnection();
+        /* @var $connection \Doctrine\DBAL\Connection */
+
+        // we can not use doctrines locking mechanisms as they can only lock
+        // existing entities but we also need to prevent other processes from
+        // inserting a new entity with the same token, thus we lock the complete
+        // table here.
+        // We could catch the UniqueConstraintViolationException when using the
+        // entityManager to insert the token but this also closes the entity
+        // manager so we cannot retry with a new token
+        $connection->exec("LOCK TABLES $table WRITE;");
+
+        $result = $connection->fetchAll("SELECT $field FROM $table;");
+        $tokenList = array_map('current', $result);
+
+        $i = 0;
+        do {
+            $rnd = Random::getRandomToken($length);
+        } while(in_array($rnd, $tokenList) && ++$i < 10);
+
+        if ($i >= 10) {
+            $connection->exec('UNLOCK TABLES;');
+            throw new Exception\RuntimeException("Generation of a unique token"
+                . " for field '$field' in table '$table' failed $i times,"
+                . " please increase the possible range / token length!");
+        }
+
+        $identifiers = $entity->getIdentifiers($em);
+        $clauses = [];
+        foreach($identifiers as $column => $value) {
+            $clauses[] = "$column = '$value'";
+        }
+        $cond = implode(' AND ', $clauses);
+
+        // we cannot use the entityManager here as he would implicitly use
+        // transactions causing the release of the table lock -> native query
+        $connection->executeUpdate("UPDATE $table SET $field='$rnd' WHERE $cond;");
+
+        $connection->exec('UNLOCK TABLES;');
+        $em->refresh($entity);
     }
 }
