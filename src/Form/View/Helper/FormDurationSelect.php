@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -27,19 +28,20 @@ class FormDurationSelect extends AbstractHelper
     protected $pattern = '%hours% : %minutes%';
 
     /**
-     * FormSelect helper
+     * FormSelect helper.
      *
      * @var FormSelect
      */
     protected $selectHelper;
 
     /**
-     * Invoke helper as function
+     * Invoke helper as function.
      *
      * Proxies to {@link render()}.
      *
      * @param ElementInterface $element
      * @param string           $pattern
+     *
      * @return string
      */
     public function __invoke(
@@ -56,10 +58,12 @@ class FormDurationSelect extends AbstractHelper
     }
 
     /**
-     * Render a the two select elements
+     * Render a the two select elements.
      *
-     * @param  ElementInterface $element
+     * @param ElementInterface $element
+     *
      * @return string
+     *
      * @throws \Zend\Form\Exception\InvalidArgumentException
      * @throws \Zend\Form\Exception\DomainException
      */
@@ -106,6 +110,7 @@ class FormDurationSelect extends AbstractHelper
             $selectHelper->render($hourElement),
             $this->pattern
         );
+
         return str_replace(
             '%minutes%',
             $selectHelper->render($minuteElement),
@@ -114,7 +119,7 @@ class FormDurationSelect extends AbstractHelper
     }
 
     /**
-     * Retrieve the FormSelect helper
+     * Retrieve the FormSelect helper.
      *
      * @return FormSelect
      */

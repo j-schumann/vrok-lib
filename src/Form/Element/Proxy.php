@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,11 +18,11 @@ class Proxy extends DoctrineProxy
     public function reloadValueOptions()
     {
         // loadValueOptions use the already loaded objects -> reload them first
-        $this->objects = array();
+        $this->objects = [];
 
         $this->loadObjects();
 
-        $this->valueOptions = array();
+        $this->valueOptions = [];
         $this->loadValueOptions();
     }
 

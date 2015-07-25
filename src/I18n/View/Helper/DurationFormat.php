@@ -1,4 +1,5 @@
 <?php
+
 /*
  *  @copyright   (c) 2014-2015, Vrok
  *  @license     http://customlicense CustomLicense
@@ -17,7 +18,7 @@ use Zend\I18n\View\Helper\AbstractTranslatorHelper;
  * can combine days+hours into hours or split hours into days+hours.
  * Uses the translation for localized output, respecting singular/plural.
  * Supported options are:
- *    showYears, showMonths, showDays, showHours, showMinutes, showSeconds
+ *    showYears, showMonths, showDays, showHours, showMinutes, showSeconds.
  */
 class DurationFormat extends AbstractTranslatorHelper
 {
@@ -32,9 +33,10 @@ class DurationFormat extends AbstractTranslatorHelper
      * Formats a number of hours in human readable form.
      * If no value is given the helper is returned.
      *
-     * @param  mixed $value
-     * @param  array $options
-     * @param  string $locale
+     * @param mixed  $value
+     * @param array  $options
+     * @param string $locale
+     *
      * @return mixed
      */
     public function __invoke($value = null, array $options = [], $locale = null)
@@ -49,8 +51,9 @@ class DurationFormat extends AbstractTranslatorHelper
     /**
      * Shortcut function - format the duration to only show the sum of hours&minutes.
      *
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $locale
+     *
      * @return string
      */
     public function hoursAndMinutes($value, $locale = null)
@@ -63,7 +66,7 @@ class DurationFormat extends AbstractTranslatorHelper
                 'showDays'    => false,
                 'showHours'   => true,
                 'shouMinutes' => true,
-                'showSeconds' => false
+                'showSeconds' => false,
             ],
             $locale
         );
@@ -72,10 +75,12 @@ class DurationFormat extends AbstractTranslatorHelper
     /**
      * Formats a number of hours in human readable form.
      *
-     * @param  mixed $value
-     * @param  array $options
-     * @param  string $locale
+     * @param mixed  $value
+     * @param array  $options
+     * @param string $locale
+     *
      * @return mixed
+     *
      * @throws \InvalidArgumentException
      */
     public function formatDuration($value, array $options = [], $locale = null)
@@ -86,11 +91,10 @@ class DurationFormat extends AbstractTranslatorHelper
             $value = VrokInterval::fromArray($value);
         }
 
-        if (! $value instanceof VrokInterval) {
+        if (!$value instanceof VrokInterval) {
             if ($value instanceof DateInterval) {
                 $value = VrokInterval::convert($value);
-            }
-            else {
+            } else {
                 // @todo custom exception interface
                 throw new \InvalidArgumentException('Value can not be parsed as interval!');
             }
@@ -113,36 +117,36 @@ class DurationFormat extends AbstractTranslatorHelper
         // else as "13 months"
 
         $fullYearsOnly = $showMonths || $showDays || $showHours || $showMinutes || showSeconds;
-        $y = $showYears
+        $y             = $showYears
             ? $value->getYears($fullYearsOnly ? 'full' : 'round')
             : 0;
 
-        $allMonths = !$showYears;
+        $allMonths      = !$showYears;
         $fullMonthsOnly = $showDays || $showHours || $showMinutes || showSeconds;
-        $m = $showMonths
+        $m              = $showMonths
             ? $value->getMonths($allMonths, $fullMonthsOnly ? 'full' : 'round')
             : 0;
 
-        $allDays = !$showYears && !$showMonths;
+        $allDays      = !$showYears && !$showMonths;
         $fullDaysOnly = $showHours || $showMinutes || showSeconds;
-        $d = $showDays
+        $d            = $showDays
             ? $value->getDays($allDays, $fullDaysOnly ? 'full' : 'round')
             : 0;
 
-        $allHours = !$showYears && !$showMonths && !$showDays;
+        $allHours      = !$showYears && !$showMonths && !$showDays;
         $fullHoursOnly = $showMinutes || showSeconds;
-        $h = $showHours
+        $h             = $showHours
             ? $value->getHours($allHours, $fullHoursOnly ? 'full' : 'round')
             : 0;
 
-        $allMinutes = !$showYears && !$showMonths && !$showDays && !$showHours;
+        $allMinutes      = !$showYears && !$showMonths && !$showDays && !$showHours;
         $fullMinutesOnly = $showSeconds;
-        $i = $showMinutes
+        $i               = $showMinutes
             ? $value->getMinutes($allMinutes, $fullMinutesOnly ? 'full' : 'round')
             : 0;
 
         $allSeconds = !$showYears && !$showMonths && !$showDays && !$showHours && !$showMinutes;
-        $s = $showSeconds
+        $s          = $showSeconds
             ? $value->getSeconds($allSeconds, 'full')
             : 0;
 
@@ -183,7 +187,8 @@ class DurationFormat extends AbstractTranslatorHelper
      * Translates singular/plural depending on the given value.
      *
      * @param array $translations
-     * @param type $value
+     * @param type  $value
+     *
      * @return string
      */
     protected function translate(array $translations, $value)

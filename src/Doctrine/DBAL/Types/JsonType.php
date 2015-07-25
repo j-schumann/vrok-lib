@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -14,6 +15,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
  * Extends the base class to use the varchar declaration instead of the clob declaration
  * if possible so we can use the column as/in keys. This is necessary as Doctrine does not
  * allow to set the index length even for BLOB/CLOB columns.
+ *
  * @link http://www.doctrine-project.org/jira/browse/DDC-2802
  */
 class JsonType extends BaseArrayType

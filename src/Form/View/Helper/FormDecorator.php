@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -20,32 +21,33 @@ use Zend\Form\View\Helper\FormCollection;
 class FormDecorator extends AbstractHelper
 {
     /**
-     * Element view helper instance
+     * Element view helper instance.
      *
      * @var FormElementDecorator
      */
     protected $elementHelper = null;
 
     /**
-     * FormCollection view helper instance
+     * FormCollection view helper instance.
      *
      * @var FormCollection
      */
     protected $fieldsetHelper = null;
 
     /**
-     * Form view helper instance
+     * Form view helper instance.
      *
      * @var Form
      */
     protected $formHelper = null;
 
     /**
-     * Invoke helper as functor
+     * Invoke helper as functor.
      *
      * Proxies to {@link render()}.
      *
-     * @param  FormInterface $form
+     * @param FormInterface $form
+     *
      * @return string|self
      */
     public function __invoke(FormInterface $form)
@@ -55,6 +57,7 @@ class FormDecorator extends AbstractHelper
         }
 
         $form->prepare();
+
         return $this->render($form);
     }
 
@@ -62,14 +65,15 @@ class FormDecorator extends AbstractHelper
      * Render a form by iterating through all fieldsets and elements and adding
      * open / close tags.
      *
-     * @param  FormInterface $form
+     * @param FormInterface $form
+     *
      * @return string
      */
     public function render(FormInterface $form)
     {
-        $formHelper       = $this->getFormHelper();
-        $elementHelper    = $this->getElementHelper();
-        $fieldsetHelper   = $this->getFieldsetHelper();
+        $formHelper     = $this->getFormHelper();
+        $elementHelper  = $this->getElementHelper();
+        $fieldsetHelper = $this->getFieldsetHelper();
 
         $markup = $formHelper->openTag($form);
 

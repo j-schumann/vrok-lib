@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -31,7 +32,7 @@ class Module implements
      */
     public function getConfig()
     {
-        return include __DIR__ . '/../config/module.config.php';
+        return include __DIR__.'/../config/module.config.php';
     }
 
     /**
@@ -42,22 +43,23 @@ class Module implements
      */
     public function getControllerPluginConfig()
     {
-        return array(
-            'factories' => array(
-                'loginRedirector' => function($controllerPluginManager) {
+        return [
+            'factories' => [
+                'loginRedirector' => function ($controllerPluginManager) {
                     $serviceLocator = $controllerPluginManager->getServiceLocator();
                     $url = $serviceLocator->get('viewhelpermanager')->get('url');
 
                     $helper = new \Vrok\Mvc\Controller\Plugin\LoginRedirector();
                     $helper->setUrlHelper($url);
                     $helper->setRequest($serviceLocator->get('Request'));
+
                     return $helper;
                 },
-            ),
-            'invokables' => array(
+            ],
+            'invokables' => [
                 'currentUser' => 'Vrok\Mvc\Controller\Plugin\CurrentUser',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -68,18 +70,19 @@ class Module implements
      */
     public function getServiceConfig()
     {
-        return array(
-            'factories' => array(
-                'Vrok\Asset\ViewScriptResolver' => function($sm) {
+        return [
+            'factories' => [
+                'Vrok\Asset\ViewScriptResolver' => function ($sm) {
                     $config = $sm->get('Config');
-                    $map    = array();
+                    $map = [];
                     if (isset($config['asset_manager']['resolver_configs']['view_scripts'])) {
                         $map = $config['asset_manager']['resolver_configs']['view_scripts'];
                     }
                     $vm = $sm->get('ViewManager');
+
                     return new \Vrok\Asset\ViewScriptResolver($vm, $map);
                 },
-                'Vrok\Service\Email' => function($sm) {
+                'Vrok\Service\Email' => function ($sm) {
                     $vhm = $sm->get('ViewHelperManager');
                     $service = new \Vrok\Service\Email($vhm);
 
@@ -90,7 +93,7 @@ class Module implements
 
                     return $service;
                 },
-                'Vrok\Service\Meta' => function($sm) {
+                'Vrok\Service\Meta' => function ($sm) {
                     $em = $sm->get('Doctrine\ORM\EntityManager');
                     $service = new \Vrok\Service\Meta($em);
 
@@ -98,9 +101,10 @@ class Module implements
                     if (!empty($config['meta_service']['defaults'])) {
                         $service->setDefaults($config['meta_service']['defaults']);
                     }
+
                     return $service;
                 },
-                'Vrok\Service\Owner' => function($sm) {
+                'Vrok\Service\Owner' => function ($sm) {
                     $em = $sm->get('Doctrine\ORM\EntityManager');
                     $service = new \Vrok\Service\Owner($em);
 
@@ -112,7 +116,7 @@ class Module implements
 
                     return $service;
                 },
-                'Vrok\Service\Todo' => function($sm) {
+                'Vrok\Service\Todo' => function ($sm) {
                     $service = new \Vrok\Service\Todo();
                     $service->setServiceLocator($sm);
 
@@ -120,28 +124,31 @@ class Module implements
                     if (!empty($config['todo_service']['timeouts'])) {
                         $service->setTimeouts($config['todo_service']['timeouts']);
                     }
+
                     return $service;
                 },
-                'Vrok\Service\UserManager' => function($sm) {
+                'Vrok\Service\UserManager' => function ($sm) {
                     $manager = new \Vrok\Service\UserManager();
 
                     $config = $sm->get('Config');
                     if (!empty($config['user_manager'])) {
                         $manager->setConfig($config['user_manager']);
                     }
+
                     return $manager;
                 },
-                'Vrok\Service\ValidationManager' => function($sm) {
+                'Vrok\Service\ValidationManager' => function ($sm) {
                     $manager = new \Vrok\Service\ValidationManager();
 
                     $config = $sm->get('Config');
                     if (!empty($config['validation_manager']['timeouts'])) {
                         $manager->setTimeouts($config['validation_manager']['timeouts']);
                     }
+
                     return $manager;
                 },
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -151,17 +158,18 @@ class Module implements
      */
     public function getViewHelperConfig()
     {
-        return array(
-            'factories' => array(
-                'currentUser' => function($helperPluginManager) {
+        return [
+            'factories' => [
+                'currentUser' => function ($helperPluginManager) {
                     $serviceLocator = $helperPluginManager->getServiceLocator();
                     $authService = $serviceLocator->get('AuthenticationService');
 
                     $helper = new \Vrok\View\Helper\CurrentUser();
                     $helper->setAuthService($authService);
+
                     return $helper;
                 },
-                'fullUrl' => function($helperPluginManager) {
+                'fullUrl' => function ($helperPluginManager) {
                     $serviceLocator = $helperPluginManager->getServiceLocator();
                     $config = $serviceLocator->get('Config');
                     if (empty($config['general']['full_url'])) {
@@ -169,10 +177,11 @@ class Module implements
                     }
 
                     $helper = new \Vrok\View\Helper\FullUrl($config['general']['full_url']);
+
                     return $helper;
                 },
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -183,21 +192,22 @@ class Module implements
     public function onBootstrap(EventInterface $e)
     {
         /* @var $e \Zend\Mvc\MvcEvent */
-        $application = $e->getApplication();
+        $application  = $e->getApplication();
         $sharedEvents = $application->getEventManager()->getSharedManager();
-        $sm = $application->getServiceManager();
+        $sm           = $application->getServiceManager();
 
         // we want to lazy load the strategy object only when needed, so we use a
         // closure here
-        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function($e) use ($sm) {
+        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function ($e) use ($sm) {
             // @todo strategy nicht via event laden sondern über config?
             // @todo strategy als service einrichten?
             $classes = $e->getParam('classes');
             if (!in_array('Vrok\Entity\User', $classes)) {
-                return null;
+                return;
             }
 
             $userManager = $sm->get('UserManager');
+
             return new \Vrok\Owner\UserStrategy($userManager);
         });
     }

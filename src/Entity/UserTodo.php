@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -47,11 +48,13 @@ class UserTodo extends Entity
      * Sets the referenced Todo.
      *
      * @param \Vrok\Entity\AbstractTodo $todo
+     *
      * @return self
      */
     public function setTodo(\Vrok\Entity\AbstractTodo $todo)
     {
         $this->todo = $todo;
+
         return $this;
     }
 // </editor-fold>
@@ -78,11 +81,13 @@ class UserTodo extends Entity
      * Sets the assigned user account.
      *
      * @param \Vrok\Entity\User $user
+     *
      * @return self
      */
     public function setUser(\Vrok\Entity\User $user)
     {
         $this->user = $user;
+
         return $this;
     }
 // </editor-fold>
@@ -107,11 +112,13 @@ class UserTodo extends Entity
      * Sets the status.
      *
      * @param string $status
+     *
      * @return self
      */
     public function setStatus($status)
     {
         $this->status = $status;
+
         return $this;
     }
 // </editor-fold>

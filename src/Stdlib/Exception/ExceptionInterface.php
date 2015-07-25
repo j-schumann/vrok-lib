@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -8,4 +9,5 @@
 namespace Vrok\Stdlib\Exception;
 
 interface ExceptionInterface
-{}
+{
+}

@@ -1,4 +1,5 @@
 <?php
+
 /*
  *  @copyright   (c) 2014-2015, Vrok
  *  @license     http://customlicense CustomLicense
@@ -17,13 +18,14 @@ use Zend\I18n\View\Helper\NumberFormat as ZendFormat;
 class NumberFormat extends ZendFormat
 {
     /**
-     * Format a number
+     * Format a number.
      *
-     * @param  int|float $number
-     * @param  int       $formatStyle
-     * @param  int       $formatType
-     * @param  string    $locale
-     * @param  int|array $decimals  e.g. 3 or [3, 4]
+     * @param int|float $number
+     * @param int       $formatStyle
+     * @param int       $formatType
+     * @param string    $locale
+     * @param int|array $decimals    e.g. 3 or [3, 4]
+     *
      * @return string
      */
     public function __invoke(
@@ -46,7 +48,7 @@ class NumberFormat extends ZendFormat
             $decimals = $this->getDecimals();
         }
 
-        $formatterId = md5($formatStyle . "\0" . $locale . "\0" . json_encode($decimals));
+        $formatterId = md5($formatStyle."\0".$locale."\0".json_encode($decimals));
 
         if (!isset($this->formatters[$formatterId])) {
             $this->formatters[$formatterId] = new NumberFormatter(
@@ -55,7 +57,6 @@ class NumberFormat extends ZendFormat
             );
 
             if ($decimals !== null) {
-
                 if (is_array($decimals)) {
                     $this->formatters[$formatterId]->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $decimals[0]);
                     $this->formatters[$formatterId]->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $decimals[1]);

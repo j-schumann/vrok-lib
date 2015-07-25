@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -20,23 +21,25 @@ class Csrf extends ZendCsrf
      *
      * @var array
      */
-    protected $csrfValidatorOptions = array(
-        'timeout'  => 600,
-        'messageTemplates' => array(
+    protected $csrfValidatorOptions = [
+        'timeout'          => 600,
+        'messageTemplates' => [
             \Zend\Validator\Csrf::NOT_SAME => 'validate.form.csrfInvalid',
-        ),
-    );
+        ],
+    ];
 
     /**
      * Override to allow setting only some options and to keep others at default, we don't
      * want to set the messageTemplates again each time.
      *
-     * @param  array $options
+     * @param array $options
+     *
      * @return Csrf
      */
     public function setCsrfValidatorOptions(array $options)
     {
         $this->csrfValidatorOptions = array_merge($this->csrfValidatorOptions, $options);
+
         return $this;
     }
 
@@ -47,29 +50,28 @@ class Csrf extends ZendCsrf
      */
     public function getInputSpecification()
     {
-        return array(
+        return [
             'name'     => $this->getName(),
             'required' => true,
-            'filters'  => array(
-                array('name' => 'Zend\Filter\StringTrim'),
-            ),
-            'validators' => array(
+            'filters'  => [
+                ['name' => 'Zend\Filter\StringTrim'],
+            ],
+            'validators' => [
                 // use our custom NotEmpty specification else a default NotEmpty
                 // instance would be created which does not use the translated messages
                 // and would use a general message not related to the CSRF field.
-                array(
+                [
                     'name'                   => 'Zend\Validator\NotEmpty',
                     'break_chain_on_failure' => true,
-                    'options'                => array(
-                        'messages' => array(
-                            \Zend\Validator\NotEmpty::IS_EMPTY
-                                    => 'validate.form.csrfInvalid',
-                        ),
-                    ),
-                ),
+                    'options'                => [
+                        'messages' => [
+                            \Zend\Validator\NotEmpty::IS_EMPTY => 'validate.form.csrfInvalid',
+                        ],
+                    ],
+                ],
 
                 $this->getCsrfValidator(),
-            ),
-        );
+            ],
+        ];
     }
 }

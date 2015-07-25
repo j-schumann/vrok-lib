@@ -1,4 +1,5 @@
 <?php
+
 /*
  *  @copyright   (c) 2014-2015, Vrok
  *  @license     http://customlicense CustomLicense
@@ -37,7 +38,7 @@ class ErrorHandler
         E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
         E_DEPRECATED        => 'E_DEPRECATED',
         E_USER_DEPRECATED   => 'E_USER_DEPRECATED',
-        E_ALL               => 'E_ALL'
+        E_ALL               => 'E_ALL',
     ];
 
     /**
@@ -62,7 +63,7 @@ class ErrorHandler
      */
     public function __construct($logfolder, $redirectUrl = '/error/')
     {
-        $this->logfolder = $logfolder;
+        $this->logfolder   = $logfolder;
         $this->redirectUrl = $redirectUrl;
 
         set_error_handler([$this, 'errorHandler'], E_ALL);
@@ -74,12 +75,13 @@ class ErrorHandler
      * Custom error handling function to allow logging of PHP errors in the
      * applications log file instead of the syslog or apache log file.
      *
-     * @param int $errno
+     * @param int    $errno
      * @param string $errstr
      * @param string $errfile
-     * @param int $errline
-     * @param mixed $errcontext
-     * @return boolean
+     * @param int    $errline
+     * @param mixed  $errcontext
+     *
+     * @return bool
      */
     public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
     {
@@ -94,7 +96,7 @@ class ErrorHandler
         // e.g. for deprecated warnings
         $return = false;
 
-        switch($errno) {
+        switch ($errno) {
             case E_WARNING:
             case E_NOTICE:
             case E_STRICT:
@@ -118,7 +120,7 @@ class ErrorHandler
         $this->logMessage($message);
 
         // return is set to true -> resume with normal error handling,
-        if ($return ) {
+        if ($return) {
             return false;
         }
 
@@ -126,7 +128,7 @@ class ErrorHandler
     }
 
     /**
-     * Proxies to the default error handler with the exception details
+     * Proxies to the default error handler with the exception details.
      *
      * @param Exception $e
      */
@@ -153,8 +155,8 @@ class ErrorHandler
         $display = ini_get('display_errors');
         if ($display === 'on' || $display == 1) {
             echo "Uncaught exception '".get_class($e)."' with message '"
-                .$e->getMessage()."' in ".$e->getFile().":".$e->getLine()
-                ." Stack trace: ".$e->getTraceAsString();
+                .$e->getMessage()."' in ".$e->getFile().':'.$e->getLine()
+                .' Stack trace: '.$e->getTraceAsString();
         }
     }
 
@@ -199,13 +201,13 @@ class ErrorHandler
         $environment = isset($_SERVER['SERVER_ADDR'])
             ? $_SERVER['SERVER_ADDR']
             : php_sapi_name();
-        $month = date('Y-m');
+        $month    = date('Y-m');
         $filename = $this->logfolder.DIRECTORY_SEPARATOR
                 .$environment.'-'.$month.'.log';
 
         $handle = fopen($filename, 'a+');
         if ($handle) {
-            $time = date("Y-m-d H:i:s");
+            $time = date('Y-m-d H:i:s');
             fwrite($handle, $time.': '.$message."\n");
             fclose($handle);
         }
@@ -230,8 +232,7 @@ class ErrorHandler
 
         if (!headers_sent()) {
             header('Location: '.$this->redirectUrl);
-        }
-        else {
+        } else {
             echo '<script type="text/javascript">window.location =  "'
                 .$this->redirectUrl.'";</script>';
         }

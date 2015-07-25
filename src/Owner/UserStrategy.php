@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,7 +18,7 @@ use Vrok\Service\UserManager;
 class UserStrategy implements StrategyInterface
 {
     /**
-     * UserManager instance
+     * UserManager instance.
      *
      * @var UserManager
      */
@@ -48,7 +49,9 @@ class UserStrategy implements StrategyInterface
      * Returns the URL to the admin page to view or edit the owner.
      *
      * @todo validate $owner zend guard
+     *
      * @param User $owner
+     *
      * @return string
      */
     public function getOwnerAdminUrl(EntityInterface $owner)
@@ -61,13 +64,16 @@ class UserStrategy implements StrategyInterface
      * e.g. username + email; account number etc.
      *
      * @todo validate $owner zend guard
+     *
      * @param User $owner
+     *
      * @return object
      */
     public function getOwnerPresentation(EntityInterface $owner)
     {
-        $name = $owner->getUsername();
+        $name  = $owner->getUsername();
         $email = $owner->getEmail();
+
         return $name == $email
             ? $email
             : "$name ($email)";
@@ -77,6 +83,7 @@ class UserStrategy implements StrategyInterface
      * Checks if the given object is a valid owner supported by this strategy.
      *
      * @param object $owner
+     *
      * @return bool
      */
     public function isValidOwner(EntityInterface $owner)

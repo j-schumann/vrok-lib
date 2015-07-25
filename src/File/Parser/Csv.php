@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -20,14 +21,14 @@ class Csv extends CsvFile
      * Indicates if only columns defined in the map will be returned.
      * Columns that are not within the map will be skipped if this is true.
      *
-     * @var boolean
+     * @var bool
      */
     protected $mappedOnly = false;
 
     /**
      * Allows to specify a mapping of columns to new indexes.
      * A) map = array(1 => 'Column A', 2 => 'Column B')
-     *    if no csv headers are given
+     *    if no csv headers are given.
      *
      * B) map = array('csvhead1' => 'Important Column', 'csvhead2' => 'Additional Column')
      *    if the csv headers should be renamed
@@ -49,8 +50,9 @@ class Csv extends CsvFile
      * Class constructor, stores the filename and checks the file.
      *
      * @param string $filename
-     * @throws Exception\InvalidArgumentException   when the filename is invalid/empty
-     * @throws Exception\RuntimeException   when the file does not exist / is not readable
+     *
+     * @throws Exception\InvalidArgumentException when the filename is invalid/empty
+     * @throws Exception\RuntimeException         when the file does not exist / is not readable
      */
     public function __construct($filename)
     {
@@ -81,11 +83,10 @@ class Csv extends CsvFile
     public function parse()
     {
         $this->file = fopen($this->filename, 'r');
-        $lineCount = 0;
+        $lineCount  = 0;
 
         while (($line = fgetcsv($this->file, 0, $this->delimiter, $this->enclosure,
-            $this->escape)) !== false)
-        {
+            $this->escape)) !== false) {
             if ($lineCount++ == 0) {
                 $line[0] = StringUtils::removeBOM($line[0]);
                 $this->setHeader($line);
@@ -115,13 +116,13 @@ class Csv extends CsvFile
      * Sets the header to use for data assignment, applies mapping.
      *
      * @param array $line
-     * @return void
      */
     protected function setHeader(array $line = null)
     {
         // The CSV file has no header => simply use the map as header
         if (!$this->hasHeader || !$line) {
             $this->header = $this->map;
+
             return;
         }
 

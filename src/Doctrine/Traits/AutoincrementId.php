@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -19,7 +20,7 @@ trait AutoincrementId
     /**
      * Returns the objects ID.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -27,14 +28,16 @@ trait AutoincrementId
     }
 
     /**
-     * Just to support some interfaces/hydrators
+     * Just to support some interfaces/hydrators.
      *
      * @param int $id
+     *
      * @return self
      */
     public function setId($id)
     {
         $this->id = $id;
+
         return $this;
     }
 }

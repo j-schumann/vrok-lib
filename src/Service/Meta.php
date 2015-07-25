@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -56,11 +57,13 @@ class Meta
      * Sets the default values to use for system meta.
      *
      * @param array $defaults
+     *
      * @return self
      */
     public function setDefaults(array $defaults)
     {
         $this->defaults = $defaults;
+
         return $this;
     }
 
@@ -70,6 +73,7 @@ class Meta
      * this type are returned.
      *
      * @param string $name
+     *
      * @return mixed
      */
     public function getDefault($name)
@@ -84,6 +88,7 @@ class Meta
      *
      * @param string $class
      * @param string $name
+     *
      * @return array
      */
     public function getObjectDefault($class, $name)
@@ -102,25 +107,28 @@ class Meta
      * Values are JSON encoded in the database and decoded by default (to avoid that set
      * $decode to false).
      *
-     * @param string $name          meta value name
-     * @param bool $decode          set to false if the value should not be decoded, this
-     *     is to allow custom decode param, use when setting custom encoded values
-     * @param type $skipInternal    set to true if the internal cache should not be used
-     *     but the database queried, the internal cache will be updated afterwards
+     * @param string $name         meta value name
+     * @param bool   $decode       set to false if the value should not be decoded, this
+     *                             is to allow custom decode param, use when setting custom encoded values
+     * @param type   $skipInternal set to true if the internal cache should not be used
+     *                             but the database queried, the internal cache will be updated afterwards
+     *
      * @return mixed
      */
     public function getValue($name, $decode = true, $skipInternal = false)
     {
         if (!$skipInternal && isset($this->internalCache[$name])) {
             $value = $this->internalCache[$name];
+
             return $decode ? json_decode($value, true) : $value;
         }
 
-        $sr = $this->getSystemRepository();
-        $sm = $sr->find($name);
+        $sr    = $this->getSystemRepository();
+        $sm    = $sr->find($name);
         $value = $sm ? $sm->getValue() : json_encode($this->getDefault($name));
 
         $this->internalCache[$name] = $value;
+
         return $decode ? json_decode($value, true) : $value;
     }
 
@@ -128,10 +136,10 @@ class Meta
      * Sets the given meta property.
      * Attention: does not flush the entityManager to avoid too much DB queries.
      *
-     * @param string $name      meta value name
-     * @param mixed $value      the value to store, will be JSON encoded, make sure no
-     *     objects are given
-     * @param bool $encoded     set to true if the value is already JSON encoded
+     * @param string $name    meta value name
+     * @param mixed  $value   the value to store, will be JSON encoded, make sure no
+     *                        objects are given
+     * @param bool   $encoded set to true if the value is already JSON encoded
      */
     public function setValue($name, $value, $encoded = false)
     {
@@ -158,21 +166,23 @@ class Meta
      * Values are JSON encoded in the database and decoded by default (to avoid that set
      * $decode to false).
      *
-     * @param EntityInterface $entity   the object for which the meta is retrieved
-     * @param string $name              meta field name
-     * @param bool $decode              set to false if the value should not be decoded,
-     *     this is to allow custom decode param, use when setting custom encoded values
-     * @param type $skipInternal        set to true if the internal cache should not be
-     *     used but the database queried, the internal cache will be updated afterwards
+     * @param EntityInterface $entity       the object for which the meta is retrieved
+     * @param string          $name         meta field name
+     * @param bool            $decode       set to false if the value should not be decoded,
+     *                                      this is to allow custom decode param, use when setting custom encoded values
+     * @param type            $skipInternal set to true if the internal cache should not be
+     *                                      used but the database queried, the internal cache will be updated afterwards
+     *
      * @return mixed
      */
     public function getObjectValue(EntityInterface $entity, $name, $decode = true, $skipInternal = false)
     {
-        $class = get_class($entity);
+        $class          = get_class($entity);
         $jsonIdentifier = json_encode($entity->getIdentifiers($this->entityManager));
 
         if (!$skipInternal && isset($this->internalCache[$class][$jsonIdentifier][$name])) {
             $value = $this->internalCache[$class][$jsonIdentifier][$name];
+
             return $decode ? json_decode($value, true) : $value;
         }
 
@@ -186,6 +196,7 @@ class Meta
             : json_encode($this->getObjectDefault($class, $name));
 
         $this->internalCache[$class][$jsonIdentifier][$name] = $value;
+
         return $decode ? json_decode($value, true) : $value;
     }
 
@@ -193,15 +204,15 @@ class Meta
      * Sets the given object meta property.
      * Attention: does not flush the entityManager to avoid too much DB queries.
      *
-     * @param EntityInterface $entity   the object for which the meta is stored
-     * @param string $name              meta value name
-     * @param mixed $value              the value to store, will be JSON encoded,
-     *     make sure no objects are given
-     * @param bool $encoded             set to true if the value is already JSON encoded
+     * @param EntityInterface $entity  the object for which the meta is stored
+     * @param string          $name    meta value name
+     * @param mixed           $value   the value to store, will be JSON encoded,
+     *                                 make sure no objects are given
+     * @param bool            $encoded set to true if the value is already JSON encoded
      */
     public function setObjectValue(EntityInterface $entity, $name, $value, $encoded = false)
     {
-        $class = get_class($entity);
+        $class          = get_class($entity);
         $jsonIdentifier = json_encode($entity->getIdentifiers($this->entityManager));
 
         if (!$encoded) {
@@ -243,16 +254,18 @@ class Meta
      * Retrieve a new filter instance to search for object meta entries.
      *
      * @param string $alias
+     *
      * @return ObjectMetaFilter
      */
     public function getObjectFilter($alias = 'o')
     {
         $qb = $this->getObjectRepository()->createQueryBuilder($alias);
+
         return new ObjectMetaFilter($qb);
     }
 
     /**
-     * Retrieve the repository for the object meta
+     * Retrieve the repository for the object meta.
      *
      * @return Vrok\Doctrine\EntityRepository
      */
@@ -262,7 +275,7 @@ class Meta
     }
 
     /**
-     * Retrieve the repository for the system meta
+     * Retrieve the repository for the system meta.
      *
      * @return Vrok\Doctrine\EntityRepository
      */

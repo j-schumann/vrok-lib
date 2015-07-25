@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -63,7 +64,8 @@ class Message extends ZendMessage
      * Translates and sets the subject.
      *
      * @param string $subject
-     * @param bool $translate   will try to translate the $html if true
+     * @param bool   $translate will try to translate the $html if true
+     *
      * @return self
      */
     public function setSubject($subject, $translate = true)
@@ -125,10 +127,10 @@ class Message extends ZendMessage
     public function setAlternativeBody(MimePart $text, MimePart $html)
     {
         $alternatives = new \Zend\Mime\Message();
-        $alternatives->setParts(array($text, $html));
+        $alternatives->setParts([$text, $html]);
 
-        $alternativesPart = new \Zend\Mime\Part($alternatives->generateMessage());
-        $alternativesPart->type = "multipart/alternative";
+        $alternativesPart           = new \Zend\Mime\Part($alternatives->generateMessage());
+        $alternativesPart->type     = 'multipart/alternative';
         $alternativesPart->boundary = $alternatives->getMime()->boundary();
 
         $body = new \Zend\Mime\Message();
@@ -141,9 +143,11 @@ class Message extends ZendMessage
      * Creates a Mime part for the given text content.
      *
      * @param string|array $text
-     * @param bool $translate
-     * @param bool $appendSignature
+     * @param bool         $translate
+     * @param bool         $appendSignature
+     *
      * @return MimePart
+     *
      * @throws Exception\InvalidArgumentException
      */
     public function getTextPart($text, $translate = true, $appendSignature = true)
@@ -160,7 +164,7 @@ class Message extends ZendMessage
             $text .= $this->getSignature('text');
         }
 
-        $part = new MimePart($text);
+        $part       = new MimePart($text);
         $part->type = Mime::TYPE_TEXT.'; charset=UTF-8';
 
         return $part;
@@ -170,9 +174,11 @@ class Message extends ZendMessage
      * Creates a Mime part for the given HTML content.
      *
      * @param string|array $html
-     * @param bool $translate
-     * @param bool $appendSignature
+     * @param bool         $translate
+     * @param bool         $appendSignature
+     *
      * @return MimePart
+     *
      * @throws InvalidArgumentException
      */
     public function getHtmlPart($html, $translate = true, $appendSignature = false)
@@ -191,13 +197,13 @@ class Message extends ZendMessage
 
         if ($this->layout) {
             $partial = $this->getPartialHelper();
-            $html = $partial($this->layout, array(
+            $html    = $partial($this->layout, [
                 'body'    => $html,
                 'subject' => $this->getSubject(),
-            ));
+            ]);
         }
 
-        $part = new MimePart($html);
+        $part       = new MimePart($html);
         $part->type = Mime::TYPE_HTML.'; charset=UTF-8';
 
         return $part;
@@ -208,11 +214,13 @@ class Message extends ZendMessage
      * parameters.
      *
      * @param string|array $message
+     *
      * @return string
      */
     protected function translate($message)
     {
         $translator = $this->getTranslateHelper();
+
         return $translator($message, $this->textDomain, $this->locale);
     }
 
@@ -220,6 +228,7 @@ class Message extends ZendMessage
      * Returns the default text or HTML signature.
      *
      * @param string $type
+     *
      * @return string
      */
     public function getSignature($type = 'text')
@@ -228,12 +237,14 @@ class Message extends ZendMessage
             case 'html':
             case Mime::TYPE_HTML:
                 $signature = $this->translate('mail.signature.html');
+
                 return $signature !== 'mail.signature.html'
                     ? '<br /><br />--<br />'.$signature
                     : '';
 
             default:
                 $signature = $this->translate('mail.signature.text');
+
                 return $signature !== 'mail.signature.text'
                     ? "\n\n--\n".$signature
                     : '';
@@ -251,14 +262,16 @@ class Message extends ZendMessage
     }
 
     /**
-     * Sets the HTML mail layout partial
+     * Sets the HTML mail layout partial.
      *
      * @param string $layout
+     *
      * @return self
      */
     public function setLayout($layout)
     {
         $this->layout = $layout;
+
         return $this;
     }
 
@@ -276,11 +289,13 @@ class Message extends ZendMessage
      * Sets the locale used.
      *
      * @param string $locale
+     *
      * @return self
      */
     public function setLocale($locale)
     {
         $this->locale = $locale;
+
         return $this;
     }
 
@@ -298,11 +313,13 @@ class Message extends ZendMessage
      * Sets the textDomain used.
      *
      * @param string $textDomain
+     *
      * @return self
      */
     public function setTextDomain($textDomain)
     {
         $this->textDomain = $textDomain;
+
         return $this;
     }
 

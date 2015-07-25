@@ -38,11 +38,13 @@ class CurrentUser extends AbstractHelper
      * Set authService.
      *
      * @param AuthenticationService $authService
+     *
      * @return self
      */
     public function setAuthService(AuthenticationService $authService)
     {
         $this->authService = $authService;
+
         return $this;
     }
 }

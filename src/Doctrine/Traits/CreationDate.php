@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -29,7 +30,8 @@ trait CreationDate
     /**
      * Sets the creation date.
      *
-     * @param  \DateTime $createdAt
+     * @param \DateTime $createdAt
+     *
      * @return self
      */
     public function setCreatedAt(\DateTime $createdAt = null)
@@ -40,6 +42,7 @@ trait CreationDate
         if ($createdAt) {
             $this->createdAt = $createdAt;
         }
+
         return $this;
     }
 }

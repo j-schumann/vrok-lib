@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -50,11 +51,13 @@ class SystemMeta extends Entity
      * Sets the meta name.
      *
      * @param string $name
+     *
      * @return self
      */
     public function setName($name)
     {
         $this->name = (string) $name;
+
         return $this;
     }
 // </editor-fold>
@@ -79,11 +82,13 @@ class SystemMeta extends Entity
      * Sets the meta value.
      *
      * @param string $value
+     *
      * @return self
      */
     public function setValue($value)
     {
         $this->value = (string) $value;
+
         return $this;
     }
 // </editor-fold>

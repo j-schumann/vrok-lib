@@ -1,4 +1,5 @@
 <?php
+
 /*
  *  @copyright   (c) 2014-2015, Vrok
  *  @license     http://customlicense CustomLicense
@@ -13,7 +14,7 @@ use DateInterval as BaseInterval;
 /**
  * Extends the default class by adding some convenience calculation functions.
  * Supports carry over points.
-  */
+ */
 class DateInterval extends BaseInterval
 {
     // hardcoded carry over points, the average year has 365.25 days, thus
@@ -35,6 +36,7 @@ class DateInterval extends BaseInterval
      *
      * @param Datetime $start
      * @param Datetime $end
+     *
      * @return self
      */
     public static function createDiff(Datetime $start, Datetime $end)
@@ -47,6 +49,7 @@ class DateInterval extends BaseInterval
      * functionality.
      *
      * @param BaseInterval $interval
+     *
      * @return self
      */
     public static function convert(BaseInterval $interval)
@@ -64,29 +67,31 @@ class DateInterval extends BaseInterval
      * Create a new interval instance from the array specification.
      *
      * @param array $data
+     *
      * @return self
      */
     public static function fromArray(array $data)
     {
         $interval = new self('PT0S');
         if (isset($data['years'])) {
-            $interval->y = (int)$data['years'];
+            $interval->y = (int) $data['years'];
         }
         if (isset($data['months'])) {
-            $interval->m = (int)$data['months'];
+            $interval->m = (int) $data['months'];
         }
         if (isset($data['days'])) {
-            $interval->d = (int)$data['days'];
+            $interval->d = (int) $data['days'];
         }
         if (isset($data['hours'])) {
-            $interval->h = (int)$data['hours'];
+            $interval->h = (int) $data['hours'];
         }
         if (isset($data['minutes'])) {
-            $interval->i = (int)$data['minutes'];
+            $interval->i = (int) $data['minutes'];
         }
         if (isset($data['seconds'])) {
-            $interval->s = (int)$data['seconds'];
+            $interval->s = (int) $data['seconds'];
         }
+
         return $interval;
     }
 
@@ -106,8 +111,7 @@ class DateInterval extends BaseInterval
         // if created by $dateA->diff($dateB) the days are set to the exact number
         if ($this->days) {
             $seconds += $this->days * self::SECONDS_PER_DAY;
-        }
-        else {
+        } else {
             $seconds += $this->y * self::SECONDS_PER_YEAR
                 + $this->m * self::SECONDS_PER_MONTH
                 + $this->d * self::SECONDS_PER_DAY;
@@ -119,109 +123,120 @@ class DateInterval extends BaseInterval
     /**
      * Retrieve the number of years in this interval.
      *
-     * @param string $round     whether to return the exact value or round/floor
+     * @param string $round whether to return the exact value or round/floor
+     *
      * @return int|float
      */
     public function getYears($round = self::OPTION_EXACT)
     {
         $s = $this->asSeconds();
+
         return $this->round($s / self::SECONDS_PER_YEAR, $round);
     }
 
     /**
      * Retrieve the number of months in this interval.
      *
-     * @param bool $complete    if true the whole interval is returned as months,
-     *     else only the months not adding up to years are returned
-     * @param string $round     whether to return the exact value or round/floor
+     * @param bool   $complete if true the whole interval is returned as months,
+     *                         else only the months not adding up to years are returned
+     * @param string $round    whether to return the exact value or round/floor
+     *
      * @return int|float
      */
     public function getMonths(
         $complete = true,
         $round = self::OPTION_EXACT
     ) {
-        $s = $this->asSeconds();
+        $s     = $this->asSeconds();
         $value = $complete
             ? $s
             : ($s - floor($s / self::SECONDS_PER_YEAR) * self::SECONDS_PER_YEAR);
+
         return $this->round($value / self::SECONDS_PER_MONTH, $round);
     }
 
     /**
      * Retrieve the number of days in this interval.
      *
-     * @param bool $complete    if true the whole interval is returned as days,
-     *     else only the days not adding up to months are returned
-     * @param string $round     whether to return the exact value or round/floor
+     * @param bool   $complete if true the whole interval is returned as days,
+     *                         else only the days not adding up to months are returned
+     * @param string $round    whether to return the exact value or round/floor
+     *
      * @return int|float
      */
     public function getDays(
         $complete = true,
         $round = self::OPTION_EXACT
     ) {
-        $s = $this->asSeconds();
+        $s     = $this->asSeconds();
         $value = $complete
             ? $s
             : ($s - floor($s / self::SECONDS_PER_MONTH) * self::SECONDS_PER_MONTH);
+
         return $this->round($value / self::SECONDS_PER_DAY, $round);
     }
 
     /**
      * Retrieve the number of hours in this interval.
      *
-     * @param bool $complete    if true the whole interval is returned as hours,
-     *     else only the hours not adding up to days are returned
-     * @param string $round     whether to return the exact value or round/floor
+     * @param bool   $complete if true the whole interval is returned as hours,
+     *                         else only the hours not adding up to days are returned
+     * @param string $round    whether to return the exact value or round/floor
+     *
      * @return int|float
      */
     public function getHours(
         $complete = true,
         $round = self::OPTION_EXACT
     ) {
-        $s = $this->asSeconds();
+        $s     = $this->asSeconds();
         $value = $complete
             ? $s
             : ($s - floor($s / self::SECONDS_PER_DAY) * self::SECONDS_PER_DAY);
+
         return $this->round($value / self::SECONDS_PER_HOUR, $round);
     }
 
     /**
      * Retrieve the number of minutes in this interval.
      *
-     * @param bool $complete    if true the whole interval is returned as minutes,
-     *     else only the minutes not adding up to hours are returned
-     * @param string $round     whether to return the exact value or round/floor
+     * @param bool   $complete if true the whole interval is returned as minutes,
+     *                         else only the minutes not adding up to hours are returned
+     * @param string $round    whether to return the exact value or round/floor
+     *
      * @return int|float
      */
     public function getMinutes(
         $complete = true,
         $round = self::OPTION_EXACT
     ) {
-        $s = $this->asSeconds();
+        $s     = $this->asSeconds();
         $value = $complete
             ? $s
             : ($s - floor($s / self::SECONDS_PER_HOUR) * self::SECONDS_PER_HOUR);
+
         return $this->round($value / self::SECONDS_PER_MINUTE, $round);
     }
 
     /**
      * Retrieve the number of seconds in this interval.
      *
-     * @param bool $complete    if true the whole interval is returned as seconds,
-     *     else only the seconds not adding up to minutes are returned
+     * @param bool $complete if true the whole interval is returned as seconds,
+     *                       else only the seconds not adding up to minutes are returned
+     *
      * @return int
      */
     public function getSeconds($complete = true)
     {
-        $s = $this->asSeconds();
+        $s     = $this->asSeconds();
         $value = $complete
             ? $s
             : ($s - floor($s / self::SECONDS_PER_MINUTE) * self::SECONDS_PER_MINUTE);
+
         return $value;
     }
 
     /**
-     *
      * @return string
      */
     public function getIntervalSpec()
@@ -271,7 +286,8 @@ class DateInterval extends BaseInterval
      * Evaluates the roundOption.
      *
      * @param int|float $value
-     * @param string $round
+     * @param string    $round
+     *
      * @return int|float
      */
     protected function round($value, $round)

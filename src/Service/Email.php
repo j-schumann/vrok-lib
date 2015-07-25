@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -64,8 +65,9 @@ class Email
      * Returns a new Message instance and presets the From header with the
      * configured default.
      *
-     * @param bool $useLayout   if set true the configured default layout is injected
-     *     into and used by the new message
+     * @param bool $useLayout if set true the configured default layout is injected
+     *                        into and used by the new message
+     *
      * @return Message
      */
     public function createMail($useLayout = true)
@@ -162,11 +164,13 @@ class Email
      * Sets the default address to use as sender for any new email.
      *
      * @param string $address
+     *
      * @return self
      */
     public function setDefaultSenderAddress($address)
     {
         $this->defaultSenderAddress = $address;
+
         return $this;
     }
 
@@ -184,11 +188,13 @@ class Email
      * Sets the default name to use as sender for any new email.
      *
      * @param string $name
+     *
      * @return self
      */
     public function setDefaultSenderName($name)
     {
         $this->defaultSenderName = $name;
+
         return $this;
     }
 
@@ -203,14 +209,16 @@ class Email
     }
 
     /**
-     * Sets the HTML mail layout partial
+     * Sets the HTML mail layout partial.
      *
      * @param string $layout
+     *
      * @return self
      */
     public function setLayout($layout)
     {
         $this->layout = $layout;
+
         return $this;
     }
 }

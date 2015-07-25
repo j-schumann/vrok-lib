@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -36,12 +37,12 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
      * is reset to false after calling prepare() in the viewScript.
      * getMessages() is quite expensive but gets the job done.
      *
-     * @return boolean  true if one or more elements have validation error
-     *     messages, else false
+     * @return bool true if one or more elements have validation error
+     *              messages, else false
      */
     public function hasErrors()
     {
-        return (bool)count($this->getMessages());
+        return (bool) count($this->getMessages());
     }
 
     /**
@@ -49,8 +50,11 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
      * composed elements and button values.
      *
      * @see self::filterData
+     *
      * @param array|Traversable $data
+     *
      * @return self
+     *
      * @throws \Zend\Form\Exception\InvalidArgumentException
      */
     public function setData($data)
@@ -84,14 +88,14 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
      * by the Zend\InputFilter\BaseInputFilter.
      *
      * @param array $data
+     *
      * @return array
      */
     protected function filterData(array $data)
     {
-        foreach($this->getElements() as $element) {
+        foreach ($this->getElements() as $element) {
             if ($element instanceof \Zend\Form\Element\Submit
-                || $element->getAttribute('type') === 'submit')
-            {
+                || $element->getAttribute('type') === 'submit') {
                 unset($data[$element->getName()]);
             }
         }
@@ -104,8 +108,7 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
      * returns null instead.
      *
      * @param ElementInterface $element
-     * @param type $data
-     * @return null
+     * @param type             $data
      */
     protected function filterArrayData(ElementInterface $element, $data)
     {
@@ -116,7 +119,7 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
         // fieldsets may have elements or nested fieldsets
         if ($element instanceof Fieldset) {
             // Fieldsets are to be recursed
-            foreach($element->getIterator() as $child) {
+            foreach ($element->getIterator() as $child) {
                 $name = $child->getName();
                 if (!isset($data[$name])) {
                     continue;
@@ -136,6 +139,6 @@ class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
             }
         }
 
-        return null;
+        return;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -18,7 +19,7 @@ use Zend\View\Model\JsonModel;
 class LoginRedirector extends AbstractPlugin
 {
     /**
-     * Route to the login form
+     * Route to the login form.
      *
      * @var string
      */
@@ -63,7 +64,7 @@ class LoginRedirector extends AbstractPlugin
     public function gotoLogin()
     {
         $helper = $this->urlHelper;
-        $url = $helper($this->loginRoute);
+        $url    = $helper($this->loginRoute);
 
         // we cannot redirect back after failed XHRs, we would need to check the referer
         // which must not be set or helpful
@@ -77,7 +78,7 @@ class LoginRedirector extends AbstractPlugin
 
         // store the complete URI including GET params to allow redirection back to this
         // page after the login. POST is ignored and must be repeated.
-        $session = $this->getSession();
+        $session                     = $this->getSession();
         $session['returnAfterLogin'] = [
             'uri' => $this->request->getUriString(),
         ];
@@ -85,6 +86,7 @@ class LoginRedirector extends AbstractPlugin
         $response = new Response();
         $response->getHeaders()->addHeaderLine('Location', $url);
         $response->setStatusCode(302);
+
         return $response;
     }
 
@@ -94,20 +96,20 @@ class LoginRedirector extends AbstractPlugin
      * him to the (given) default route.
      *
      * @param string $defaultRoute
+     *
      * @return Response
      */
     public function goBack($defaultRoute = 'account')
     {
-        $session = $this->getSession();
+        $session  = $this->getSession();
         $response = new Response();
         $response->setStatusCode(302);
 
         if (empty($session['returnAfterLogin'])) {
             $helper = $this->urlHelper;
-            $url = $helper($defaultRoute);
+            $url    = $helper($defaultRoute);
             $response->getHeaders()->addHeaderLine('Location', $url);
-        }
-        else {
+        } else {
             $response->getHeaders()->addHeaderLine('Location', $session['returnAfterLogin']);
             $session->exchangeArray([]);
         }
@@ -117,21 +119,25 @@ class LoginRedirector extends AbstractPlugin
 
     /**
      * @param \Zend\View\Helper\Url $urlHelper
+     *
      * @return self
      */
     public function setUrlHelper(\Zend\View\Helper\Url $urlHelper)
     {
         $this->urlHelper = $urlHelper;
+
         return $this;
     }
 
     /**
      * @param \Zend\Stdlib\RequestInterface $request
+     *
      * @return self
      */
     public function setRequest(\Zend\Http\Request $request)
     {
         $this->request = $request;
+
         return $this;
     }
 }

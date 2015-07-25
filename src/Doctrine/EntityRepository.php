@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -8,7 +9,6 @@
 namespace Vrok\Doctrine;
 
 use Doctrine\ORM\EntityRepository as DoctrineRepository;
-use Vrok\Doctrine\FormHelper;
 use Vrok\Stdlib\Guard\ObjectGuardTrait;
 use Vrok\Stdlib\Guard\InstanceOfGuardTrait;
 use Vrok\Stdlib\Random;
@@ -30,7 +30,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     protected $formHelper = null;
 
     /**
-     * Retrieve the number of all entities within this repository
+     * Retrieve the number of all entities within this repository.
      *
      * @return int
      */
@@ -42,6 +42,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
            ->from($this->getClassName(), 'e');
 
         $query = $qb->getQuery();
+
         return $query->getSingleScalarResult();
     }
 
@@ -49,11 +50,14 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Finds entities that do not match a set of criteria.
      *
      * @author http://stackoverflow.com/users/710693/jcm
+     *
      * @link http://stackoverflow.com/questions/14085946/doctrine-findby-does-not-equal
+     *
      * @param array      $criteria
      * @param array|null $orderBy
      * @param int|null   $limit
      * @param int|null   $offset
+     *
      * @return array The objects.
      */
     public function findByNot(
@@ -62,18 +66,18 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         $limit = null,
         $offset = null
     ) {
-        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb   = $this->getEntityManager()->createQueryBuilder();
         $expr = $this->getEntityManager()->getExpressionBuilder();
 
         $qb->select('entity')->from($this->getEntityName(), 'entity');
 
         foreach ($criteria as $field => $value) {
-            $qb->andWhere($expr->neq('entity.' . $field, $value));
+            $qb->andWhere($expr->neq('entity.'.$field, $value));
         }
 
         if ($orderBy) {
             foreach ($orderBy as $field => $order) {
-                $qb->addOrderBy('entity.' . $field, $order);
+                $qb->addOrderBy('entity.'.$field, $order);
             }
         }
 
@@ -114,7 +118,8 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Returns true if the entity has a field with the given name, else false.
      *
      * @param string $fieldName
-     * @return boolean
+     *
+     * @return bool
      */
     public function hasField($fieldName)
     {
@@ -125,6 +130,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Retrieve the primary key value[s] for the given entity.
      *
      * @param object $entity
+     *
      * @return array
      */
     public function getIdentifierValues($entity)
@@ -133,6 +139,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         $this->guardForInstanceOf($entity, $class);
 
         $meta = $this->getClassMetadata();
+
         return $meta->getIdentifierValues($entity);
     }
 
@@ -143,11 +150,13 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * element type.
      *
      * @param string $fieldName
+     *
      * @return array
      */
     public function getFormElementDefinition($fieldName)
     {
         $definition = $this->getFormHelper()->getElementDefinition($fieldName);
+
         return $definition;
     }
 
@@ -157,11 +166,13 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Overwrite in the child class to add custom filters/validators.
      *
      * @param string $fieldName
+     *
      * @return array
      */
     public function getInputSpecification($fieldName)
     {
         $spec = $this->getFormHelper()->getInputSpecification($fieldName);
+
         return $spec;
     }
 
@@ -175,12 +186,13 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     public function getInputFilterSpecification()
     {
         $spec = [];
-        foreach($this->_class->getFieldNames() as $fieldName) {
+        foreach ($this->_class->getFieldNames() as $fieldName) {
             $spec[$fieldName] = $this->getInputSpecification($fieldName);
         }
-        foreach($this->_class->getAssociationNames() as $association) {
+        foreach ($this->_class->getAssociationNames() as $association) {
             $spec[$association] = $this->getInputSpecification($association);
         }
+
         return $spec;
     }
 
@@ -192,6 +204,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     public function getInputFilter()
     {
         $factory = new \Zend\InputFilter\Factory();
+
         return $factory->createInputFilter($this->getInputFilterSpecification());
     }
 
@@ -206,6 +219,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
             $this->formHelper = new \Vrok\Doctrine\FormHelper($this->_class,
                     $this->getEntityManager());
         }
+
         return $this->formHelper;
     }
 
@@ -213,6 +227,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Helper function to return a unified string to use as translation identifer.
      *
      * @param string $fieldName (optional) the fieldname to append to the string
+     *
      * @return string
      */
     public function getTranslationString($fieldName = null)
@@ -227,9 +242,10 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Calls entityManager->persist.
      *
      * @param Entity $instance
-     * @param array $formData
-     * @param array $changeset  if given the resulting changeset of the update
-     *     is stored in the referenced array
+     * @param array  $formData
+     * @param array  $changeset if given the resulting changeset of the update
+     *                          is stored in the referenced array
+     *
      * @return Entity
      */
     public function updateInstance(Entity $instance, array $formData, array &$changeset = null)
@@ -266,29 +282,32 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      * Retrieve the entity data as array.
      *
      * @param \Vrok\Doctrine\Entity $instance
+     *
      * @return array
      */
     public function getInstanceData(Entity $instance)
     {
         $hydrator = new \DoctrineModule\Stdlib\Hydrator\DoctrineObject(
                 $this->getEntityManager());
+
         return $hydrator->extract($instance);
     }
 
     /**
      * Sets the given field of the given entity to a random token of the defined
      * length.
-     * Attention: flush the EM before using, uses native queries and table locks
+     * Attention: flush the EM before using, uses native queries and table locks.
      *
      * @param EntityInterface $entity
-     * @param string $field
-     * @param int $length
+     * @param string          $field
+     * @param int             $length
+     *
      * @throws Exception\RuntimeException
      */
     public function setRandomToken(EntityInterface $entity, $field, $length = 48)
     {
-        $em = $this->getEntityManager();
-        $table = $this->getClassMetadata()->getTableName();
+        $em         = $this->getEntityManager();
+        $table      = $this->getClassMetadata()->getTableName();
         $connection = $em->getConnection();
         /* @var $connection \Doctrine\DBAL\Connection */
 
@@ -301,24 +320,24 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         // manager so we cannot retry with a new token
         $connection->exec("LOCK TABLES $table WRITE;");
 
-        $result = $connection->fetchAll("SELECT $field FROM $table;");
+        $result    = $connection->fetchAll("SELECT $field FROM $table;");
         $tokenList = array_map('current', $result);
 
         $i = 0;
         do {
             $rnd = Random::getRandomToken($length);
-        } while(in_array($rnd, $tokenList) && ++$i < 10);
+        } while (in_array($rnd, $tokenList) && ++$i < 10);
 
         if ($i >= 10) {
             $connection->exec('UNLOCK TABLES;');
-            throw new Exception\RuntimeException("Generation of a unique token"
-                . " for field '$field' in table '$table' failed $i times,"
-                . " please increase the possible range / token length!");
+            throw new Exception\RuntimeException('Generation of a unique token'
+                ." for field '$field' in table '$table' failed $i times,"
+                .' please increase the possible range / token length!');
         }
 
         $identifiers = $entity->getIdentifiers($em);
-        $clauses = [];
-        foreach($identifiers as $column => $value) {
+        $clauses     = [];
+        foreach ($identifiers as $column => $value) {
             $clauses[] = "$column = '$value'";
         }
         $cond = implode(' AND ', $clauses);

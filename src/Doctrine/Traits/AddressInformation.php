@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -12,8 +13,9 @@ trait AddressInformation
     /**
      * Retrieve the address as a single string (e.g. for geocoding).
      *
-     * @param bool $full        if true addressInfo, district and country are returned too
-     * @param bool $anonymous   if true street, housenumber and addressInfo are omitted
+     * @param bool $full      if true addressInfo, district and country are returned too
+     * @param bool $anonymous if true street, housenumber and addressInfo are omitted
+     *
      * @return string
      */
     public function getAddress($full = false, $anonymous = false)
@@ -32,7 +34,6 @@ trait AddressInformation
 
             $address .= ',';
         }
-
 
         if ($this->postalCode) {
             $address .= ' '.$this->postalCode;
@@ -169,11 +170,13 @@ trait AddressInformation
      * Sets the street name.
      *
      * @param string $street
+     *
      * @return self
      */
     public function setStreet($street)
     {
         $this->street = $street;
+
         return $this;
     }
 
@@ -181,11 +184,13 @@ trait AddressInformation
      * Sets the house number.
      *
      * @param string $houseNumber
+     *
      * @return self
      */
     public function setHouseNumber($houseNumber)
     {
         $this->houseNumber = $houseNumber;
+
         return $this;
     }
 
@@ -193,11 +198,13 @@ trait AddressInformation
      * Sets the additional address details.
      *
      * @param string $addressInfo
+     *
      * @return self
      */
     public function setAddressInfo($addressInfo)
     {
         $this->addressInfo = $addressInfo;
+
         return $this;
     }
 
@@ -205,11 +212,13 @@ trait AddressInformation
      * Sets the postal code.
      *
      * @param string $postalCode
+     *
      * @return self
      */
     public function setPostalCode($postalCode)
     {
         $this->postalCode = $postalCode;
+
         return $this;
     }
 
@@ -217,11 +226,13 @@ trait AddressInformation
      * Sets the city name.
      *
      * @param string $city
+     *
      * @return self
      */
     public function setCity($city)
     {
         $this->city = $city;
+
         return $this;
     }
 
@@ -229,11 +240,13 @@ trait AddressInformation
      * Sets the district name.
      *
      * @param string $district
+     *
      * @return self
      */
     public function setDistrict($district)
     {
         $this->district = $district;
+
         return $this;
     }
 
@@ -241,11 +254,13 @@ trait AddressInformation
      * Sets the country name.
      *
      * @param string $country
+     *
      * @return self
      */
     public function setCountry($country)
     {
         $this->country = $country;
+
         return $this;
     }
 }

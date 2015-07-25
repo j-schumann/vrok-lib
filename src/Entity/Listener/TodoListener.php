@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -22,14 +23,14 @@ class TodoListener implements EventManagerAwareInterface
 {
     use EventManagerAwareTrait;
 
-    const EVENT_TODO_POSTUPDATE   = 'todo.postUpdate';
+    const EVENT_TODO_POSTUPDATE = 'todo.postUpdate';
 
     protected $changeset = [];
 
     /**
      * Caches the changeset as it is only available in the preUpdate event, not postUpdate.
      *
-     * @param AbstractTodo $todo
+     * @param AbstractTodo       $todo
      * @param PreUpdateEventArgs $event
      */
     public function preUpdate(AbstractTodo $todo, PreUpdateEventArgs $event)
@@ -41,7 +42,7 @@ class TodoListener implements EventManagerAwareInterface
      * Triggers an event for every update (even automatically induced updates,
      * e.g. of status!).
      *
-     * @param AbstractTodo $todo
+     * @param AbstractTodo       $todo
      * @param LifecycleEventArgs $event
      * @triggers todo.postUpdate
      */

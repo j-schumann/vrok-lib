@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -43,11 +44,12 @@ abstract class AbstractCalendarEntry extends Entity implements HasReferenceInter
     final public function getShortName()
     {
         $className = get_class($this);
-        if (strpos($className, "\\") === false) {
+        if (strpos($className, '\\') === false) {
             return strtolower($className);
         }
 
-        $parts = explode("\\", $className);
+        $parts = explode('\\', $className);
+
         return strtolower(end($parts));
     }
 
@@ -72,11 +74,13 @@ abstract class AbstractCalendarEntry extends Entity implements HasReferenceInter
      * Sets the description.
      *
      * @param string $description
+     *
      * @return self
      */
     public function setDescription($description)
     {
         $this->description = (string) $description;
+
         return $this;
     }
 // </editor-fold>
@@ -101,11 +105,13 @@ abstract class AbstractCalendarEntry extends Entity implements HasReferenceInter
      * Sets the end date.
      *
      * @param \DateTime $value
+     *
      * @return self
      */
     public function setEndDate(\DateTime $value)
     {
         $this->endDate = $value;
+
         return $this;
     }
 // </editor-fold>
@@ -130,11 +136,13 @@ abstract class AbstractCalendarEntry extends Entity implements HasReferenceInter
      * Sets the start date.
      *
      * @param \DateTime $value
+     *
      * @return self
      */
     public function setStartDate(\DateTime $value)
     {
         $this->startDate = $value;
+
         return $this;
     }
 // </editor-fold>
@@ -145,13 +153,13 @@ abstract class AbstractCalendarEntry extends Entity implements HasReferenceInter
      */
     protected $title;
 
-
     /**
      * Returns the title.
      *
      * @return string
      */
-    public function getTitle()     {
+    public function getTitle()
+    {
         return $this->title;
     }
 
@@ -159,10 +167,13 @@ abstract class AbstractCalendarEntry extends Entity implements HasReferenceInter
      * Sets the title.
      *
      * @param string $title
+     *
      * @return self
      */
-    public function setTitle($title)     {
+    public function setTitle($title)
+    {
         $this->title = $title;
+
         return $this;
     }
 

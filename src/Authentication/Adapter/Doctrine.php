@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -36,15 +37,15 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
      */
     public function authenticate()
     {
-        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $em         = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
         $repository = $em->getRepository('Vrok\Entity\User');
 
-        $user = $repository->findOneBy(array('username' => $this->identity));
+        $user = $repository->findOneBy(['username' => $this->identity]);
         /* @var $user UserEntity */
 
         if (!$user) {
             // fallback to email address
-            $user = $repository->findOneBy(array('email' => $this->identity));
+            $user = $repository->findOneBy(['email' => $this->identity]);
             if (!$user) {
                 return $this->getResult(self::MSG_IDENTITYNOTFOUND);
             }
@@ -69,7 +70,7 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
         if (password_needs_rehash($user->getPassword(), PASSWORD_DEFAULT)) {
             // setPassword resets isRandom and passwordDate so we backup and
             // restore them afterwards as the password itself hasn't changed
-            $isRandom = $user->getIsRandomPassword();
+            $isRandom     = $user->getIsRandomPassword();
             $passwordDate = $user->getPasswordDate();
 
             $user->setPassword($this->credential);
@@ -86,12 +87,13 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
      * Creates a new Result instance with the given options.
      *
      * @param string $message
-     * @param mixed $identity
+     * @param mixed  $identity
+     *
      * @return Result
      */
     protected function getResult($message, $identity = null)
     {
-        switch($message) {
+        switch ($message) {
             case self::MSG_IDENTITYNOTFOUND:
                 $type = Result::FAILURE_IDENTITY_NOT_FOUND;
                 break;
@@ -113,8 +115,8 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
                 break;
         }
 
-        return new Result($type, $identity, array(
-            $message
-        ));
+        return new Result($type, $identity, [
+            $message,
+        ]);
     }
 }

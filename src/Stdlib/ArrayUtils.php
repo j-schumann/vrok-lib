@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -20,13 +21,15 @@ abstract class ArrayUtils
      * @param array $arr
      * @param mixed $key
      * @param mixed $val
+     *
      * @return array
      */
     public static function array_unshift_assoc(&$arr, $key, $val)
     {
-        $arr = array_reverse($arr, true);
+        $arr       = array_reverse($arr, true);
         $arr[$key] = $val;
-        $arr = array_reverse($arr, true);
+        $arr       = array_reverse($arr, true);
+
         return $arr;
     }
 
@@ -34,6 +37,7 @@ abstract class ArrayUtils
      * Calculates the average of the values in the given array.
      *
      * @param array $array
+     *
      * @return float
      */
     public static function array_average(array $array)
@@ -47,7 +51,9 @@ abstract class ArrayUtils
      * Calculates the median of the values in the given array.
      *
      * @param array $array
+     *
      * @return float
+     *
      * @throws \DomainException if the array is empty
      */
     public static function array_median(array $array)
@@ -61,17 +67,18 @@ abstract class ArrayUtils
         sort($array, SORT_NUMERIC);
         $middle = floor($count / 2);
 
-        if($count % 2) { // odd number, middle is the median
+        if ($count % 2) { // odd number, middle is the median
             return $array[$middle];
         }
 
         // even number, calculate avg of 2 medians
-        $low = $array[$middle - 1];
+        $low  = $array[$middle - 1];
         $high = $array[$middle];
+
         return ($low + $high) / 2;
     }
-    
-    /**
+
+/**
      * Removes the given value from the given array. If the value exists multiple times,
      * all instances are removed.
      *
@@ -80,7 +87,7 @@ abstract class ArrayUtils
      */
     public static function unsetValue(array &$arr, $value)
     {
-        foreach(array_keys($arr, $value, true) as $key) {
+        foreach (array_keys($arr, $value, true) as $key) {
             unset($arr[$key]);
         }
     }

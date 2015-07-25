@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -8,17 +9,18 @@
 namespace Vrok\Stdlib\Guard;
 
 /**
- * Provide a guard method for instanceof
+ * Provide a guard method for instanceof.
  */
 trait InstanceOfGuardTrait
 {
     /**
-     * Verifies that the data is an instance of the given class
+     * Verifies that the data is an instance of the given class.
      *
-     * @param  mixed  $data           the data to verify
-     * @param  string $className      the class name to match
-     * @param  string $dataName       the data name
-     * @param  string $exceptionClass FQCN for the exception
+     * @param mixed  $data           the data to verify
+     * @param string $className      the class name to match
+     * @param string $dataName       the data name
+     * @param string $exceptionClass FQCN for the exception
+     *
      * @throws \Exception
      */
     protected function guardForInstanceOf(
@@ -29,7 +31,7 @@ trait InstanceOfGuardTrait
     ) {
         if (!($data instanceof $className)) {
             $message = sprintf(
-                "%s must be an instance of %s, [%s] given",
+                '%s must be an instance of %s, [%s] given',
                 $dataName,
                 $className,
                 is_object($data) ? get_class($data) : gettype($data)

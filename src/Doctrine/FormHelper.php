@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,15 +18,15 @@ use Zend\InputFilter\InputFilterProviderInterface;
  */
 class FormHelper implements InputFilterProviderInterface
 {
-    const ERROR_ISEMPTY             = 'validate.field.isEmpty';
-    const ERROR_NOTFLOAT            = 'validate.field.notFloat';
-    const ERROR_NOTINT              = 'validate.field.notInt';
-    const ERROR_TOOLONG             = 'validate.field.tooLong';
-    const ERROR_INVALIDDATE         = 'validate.field.invalidDate';
-    const ERROR_INVALIDEMAIL        = 'validate.field.invalidEmail';
+    const ERROR_ISEMPTY      = 'validate.field.isEmpty';
+    const ERROR_NOTFLOAT     = 'validate.field.notFloat';
+    const ERROR_NOTINT       = 'validate.field.notInt';
+    const ERROR_TOOLONG      = 'validate.field.tooLong';
+    const ERROR_INVALIDDATE  = 'validate.field.invalidDate';
+    const ERROR_INVALIDEMAIL = 'validate.field.invalidEmail';
 
     /**
-     * ORM metadata descriptor for a entity class
+     * ORM metadata descriptor for a entity class.
      *
      * @var ClassMetadataInfo
      */
@@ -42,11 +43,11 @@ class FormHelper implements InputFilterProviderInterface
      * Class constructor - stores the given metadata & manager.
      *
      * @param ClassMetadataInfo $metadata
-     * @param EntityManager $entityManager
+     * @param EntityManager     $entityManager
      */
     public function __construct(ClassMetadataInfo $metadata, EntityManager $entityManager)
     {
-        $this->metadata = $metadata;
+        $this->metadata      = $metadata;
         $this->entityManager = $entityManager;
     }
 
@@ -55,7 +56,9 @@ class FormHelper implements InputFilterProviderInterface
      * form element creation.
      *
      * @param string $fieldName
+     *
      * @return array
+     *
      * @throws \Doctrine\ORM\ORMException
      */
     public function getElementDefinition($fieldName)
@@ -84,7 +87,7 @@ class FormHelper implements InputFilterProviderInterface
         switch ($mapping['type']) {
             case 'date':
                 $definition['options']['render_delimiters'] = false;
-                $definition['options']['day_attributes'] = [
+                $definition['options']['day_attributes']    = [
                     'class' => 'dateselect-day',
                 ];
                 $definition['options']['month_attributes'] = [
@@ -107,36 +110,35 @@ class FormHelper implements InputFilterProviderInterface
      * form element creation.
      *
      * @param string $fieldName
+     *
      * @return array
      */
     public function getAssociationElement($fieldName)
     {
         $association = $this->metadata->associationMappings[$fieldName];
-        $target = $this->entityManager->getClassMetadata($association['targetEntity']);
+        $target      = $this->entityManager->getClassMetadata($association['targetEntity']);
 
         $property = null;
         // @todo warum 'name', wo kommt das her? warum ist das unique?
         if ($target->hasField('name')) {
             $property = 'name';
-        }
-        elseif($target->hasField('id')) {
+        } elseif ($target->hasField('id')) {
             // @todo is the ID always unique?
             $property = 'id';
-        }
-        else {
+        } else {
             // @todo does not work with composite keys
             $identifiers = $target->getIdentifierColumnNames();
-            $property = $identifiers[0];
+            $property    = $identifiers[0];
         }
 
         $definition = [
             'type'    => 'Vrok\Form\Element\ObjectSelect',
             'name'    => $fieldName,
             'options' => [
-                'object_manager'     => $this->entityManager,
-                'target_class'       => $association['targetEntity'],
-                'property'           => $property,
-                'label'              => $this->getLabel($fieldName),
+                'object_manager' => $this->entityManager,
+                'target_class'   => $association['targetEntity'],
+                'property'       => $property,
+                'label'          => $this->getLabel($fieldName),
 
                 // display the empty element even if the relation is required
                 // to force the user to select one and not only use the first
@@ -159,6 +161,7 @@ class FormHelper implements InputFilterProviderInterface
      * Checks if the association allows multiple elements.
      *
      * @param array $association
+     *
      * @return bool
      */
     protected function associationIsMultiple($association)
@@ -175,13 +178,14 @@ class FormHelper implements InputFilterProviderInterface
      * Checks if the relation defined by the given association is required.
      *
      * @param array $association
-     * @return boolean
+     *
+     * @return bool
      */
     protected function associationIsRequired($association)
     {
         if ($association['type'] == \Doctrine\ORM\Mapping\ClassMetadata::MANY_TO_ONE) {
             // @todo does MANY_TO_ONE always have joinColumns?
-            foreach($association['joinColumns'] as $joinColumn) {
+            foreach ($association['joinColumns'] as $joinColumn) {
                 if ($joinColumn['nullable'] === true) {
                     return false;
                 }
@@ -198,12 +202,12 @@ class FormHelper implements InputFilterProviderInterface
      * Returns the form element class to use for the given field.
      *
      * @param array $mapping
+     *
      * @return string
      */
     public function getElementType(array $mapping)
     {
-        switch($mapping['type'])
-        {
+        switch ($mapping['type']) {
             case 'boolean':
                 return 'Zend\Form\Element\Checkbox';
 
@@ -231,6 +235,7 @@ class FormHelper implements InputFilterProviderInterface
      * Returns the elements unified translatable label.
      *
      * @param string $fieldName
+     *
      * @return string
      */
     protected function getLabel($fieldName)
@@ -243,6 +248,7 @@ class FormHelper implements InputFilterProviderInterface
      * Returns a list of all attributes to set on the form input.
      *
      * @param array $mapping
+     *
      * @return array
      */
     protected function getAttributes(array $mapping)
@@ -256,8 +262,7 @@ class FormHelper implements InputFilterProviderInterface
             $attributes['value'] = $mapping['options']['default'];
         }
 
-        switch($mapping['type'])
-        {
+        switch ($mapping['type']) {
             case 'date':
                 $attributes['type'] = 'dateselect';
                 break;
@@ -276,6 +281,7 @@ class FormHelper implements InputFilterProviderInterface
      * Returns the max length to use for the input field & validation.
      *
      * @param array $mapping
+     *
      * @return int
      */
     protected function getLength(array $mapping)
@@ -294,9 +300,10 @@ class FormHelper implements InputFilterProviderInterface
     public function getInputFilterSpecification()
     {
         $spec = [];
-        foreach($this->metadata->getFieldNames() as $fieldName) {
+        foreach ($this->metadata->getFieldNames() as $fieldName) {
             $spec[$fieldName] = $this->getInputSpecification($fieldName);
         }
+
         return $spec;
     }
 
@@ -305,6 +312,7 @@ class FormHelper implements InputFilterProviderInterface
      * InputFilter\Factory (@link \Zend\InputFilter\InputProviderInterface).
      *
      * @param string $fieldName
+     *
      * @return array
      */
     public function getInputSpecification($fieldName)
@@ -329,6 +337,7 @@ class FormHelper implements InputFilterProviderInterface
      * InputFilter\Factory (@link \Zend\InputFilter\InputProviderInterface).
      *
      * @param string $associationName
+     *
      * @return array
      */
     public function getAssociationSpecification($associationName)
@@ -341,7 +350,7 @@ class FormHelper implements InputFilterProviderInterface
             'allowEmpty' => !$this->associationIsRequired($association),
             'filters'    => [
                 'null' => [
-                    'name' => 'Zend\Filter\ToNull',
+                    'name'    => 'Zend\Filter\ToNull',
                     'options' => [
                         'type' => \Zend\Filter\ToNull::TYPE_STRING,
                     ],
@@ -355,6 +364,7 @@ class FormHelper implements InputFilterProviderInterface
      * Returns the default filters to use for the element.
      *
      * @param array $mapping
+     *
      * @return array
      */
     public function getFilters(array $mapping)
@@ -374,7 +384,7 @@ class FormHelper implements InputFilterProviderInterface
             ];
         }
 
-        switch($mapping['type']) {
+        switch ($mapping['type']) {
             case 'date':
                 $filters['dateSelect'] = [
                     // special filter to return NULL if no subelement is set
@@ -396,6 +406,7 @@ class FormHelper implements InputFilterProviderInterface
      * Returns the default validators for the given field.
      *
      * @param array $mapping
+     *
      * @return array
      */
     public function getValidators(array $mapping)
@@ -406,16 +417,15 @@ class FormHelper implements InputFilterProviderInterface
             $validators['notEmpty'] = $this->getNotEmptyValidatorSpecification();
         }
 
-        switch($mapping['type'])
-        {
+        switch ($mapping['type']) {
             case 'date':
                 $validators['date'] = [
                     'name'                   => 'Zend\Validator\Date',
                     'break_chain_on_failure' => true,
                     'options'                => [
                         'messages' => [
-                            \Zend\Validator\Date::FALSEFORMAT => self::ERROR_INVALIDDATE,
-                            \Zend\Validator\Date::INVALID => self::ERROR_INVALIDDATE,
+                            \Zend\Validator\Date::FALSEFORMAT  => self::ERROR_INVALIDDATE,
+                            \Zend\Validator\Date::INVALID      => self::ERROR_INVALIDDATE,
                             \Zend\Validator\Date::INVALID_DATE => self::ERROR_INVALIDDATE,
                         ],
                     ],
@@ -428,8 +438,7 @@ class FormHelper implements InputFilterProviderInterface
                     'break_chain_on_failure' => true,
                     'options'                => [
                         'messages' => [
-                            \Zend\I18n\Validator\IsFloat::NOT_FLOAT
-                                    => self::ERROR_NOTFLOAT,
+                            \Zend\I18n\Validator\IsFloat::NOT_FLOAT => self::ERROR_NOTFLOAT,
                         ],
                     ],
                 ];
@@ -441,8 +450,7 @@ class FormHelper implements InputFilterProviderInterface
                     'break_chain_on_failure' => true,
                     'options'                => [
                         'messages' => [
-                            \Zend\I18n\Validator\IsInt::NOT_INT
-                                    => self::ERROR_NOTINT,
+                            \Zend\I18n\Validator\IsInt::NOT_INT => self::ERROR_NOTINT,
                         ],
                     ],
                 ];
@@ -457,8 +465,7 @@ class FormHelper implements InputFilterProviderInterface
                     'options'                => [
                         'max'      => $this->getLength($mapping),
                         'messages' => [
-                            \Zend\Validator\StringLength::TOO_LONG =>
-                                    self::ERROR_TOOLONG,
+                            \Zend\Validator\StringLength::TOO_LONG => self::ERROR_TOOLONG,
                         ],
                     ],
                 ];
@@ -472,7 +479,8 @@ class FormHelper implements InputFilterProviderInterface
      * Returns true if the element should be marked as required, else false.
      *
      * @param array $mapping
-     * @return boolean
+     *
+     * @return bool
      */
     protected function elementIsRequired(array $mapping)
     {
@@ -498,7 +506,7 @@ class FormHelper implements InputFilterProviderInterface
         return [
             'name'                   => 'Zend\Validator\NotEmpty',
             'break_chain_on_failure' => true,
-            'options' => [
+            'options'                => [
                 'messages' => [
                     \Zend\Validator\NotEmpty::IS_EMPTY => self::ERROR_ISEMPTY,
                 ],

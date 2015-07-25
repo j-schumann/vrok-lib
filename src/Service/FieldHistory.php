@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -33,7 +34,7 @@ class FieldHistory
     /**
      * Class constructor - stores the dependencies.
      *
-     * @param EntityManager $entityManager
+     * @param EntityManager                  $entityManager
      * @param AuthenticationServiceInterface $authService
      */
     public function __construct(
@@ -41,16 +42,16 @@ class FieldHistory
             AuthenticationServiceInterface $authService
     ) {
         $this->entityManager = $entityManager;
-        $this->authService = $authService;
+        $this->authService   = $authService;
     }
 
     /**
      * Creates or updates the history entry for the given entity/field.
      *
      * @param EntityInterface $entity
-     * @param string $field
-     * @param mixed $value
-     * @param bool $flush   if true the current unitOfWork is committed to the DB
+     * @param string          $field
+     * @param mixed           $value
+     * @param bool            $flush  if true the current unitOfWork is committed to the DB
      */
     public function logChange(EntityInterface $entity, $field, $value, $flush = false)
     {
@@ -82,9 +83,10 @@ class FieldHistory
      * Logs multiple changes to the given entity at once.
      *
      * @see logChange
+     *
      * @param EntityInterface $entity
-     * @param array $changeset
-     * @param bool $flush   if true the current unitOfWork is committed to the DB
+     * @param array           $changeset
+     * @param bool            $flush     if true the current unitOfWork is committed to the DB
      */
     public function logChangeset(EntityInterface $entity, array $changeset, $flush = false)
     {
@@ -104,7 +106,8 @@ class FieldHistory
      * else the array of all logged field changes for the entity.
      *
      * @param EntityInterface $entity
-     * @param string $field
+     * @param string          $field
+     *
      * @return HistoryEntity[]
      */
     public function getHistory(EntityInterface $entity, $field = null)
@@ -114,6 +117,7 @@ class FieldHistory
 
         if ($field) {
             $filter->byField($field);
+
             return $filter->getQuery()->getOneOrNullResult();
         }
 
@@ -137,6 +141,7 @@ class FieldHistory
         $filter = $this->getHistoryFilter();
         $filter->byObject($entity);
         $filter->delete();
+
         return $filter->getQuery()->execute();
     }
 
@@ -144,11 +149,13 @@ class FieldHistory
      * Retrieve a new filter instance to search for history entries.
      *
      * @param string $alias
+     *
      * @return FieldHistoryFilter
      */
     public function getHistoryFilter($alias = 'h')
     {
         $qb = $this->getHistoryRepository()->createQueryBuilder($alias);
+
         return new FieldHistoryFilter($qb);
     }
 

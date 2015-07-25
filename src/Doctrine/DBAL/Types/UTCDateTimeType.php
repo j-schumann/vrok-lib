@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -13,16 +14,17 @@ use Doctrine\DBAL\Types\ConversionException;
 
 /**
  * @author DoctrineExtensions
+ *
  * @see https://github.com/l3pp4rd/DoctrineExtensions/blob/master/doc/timestampable.md#creating-a-utc-datetime-type-that-stores-your-datetimes-in-utc
  */
 class UTCDateTimeType extends DateTimeType
 {
-    static private $utc = null;
+    private static $utc = null;
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if ($value === null) {
-            return null;
+            return;
         }
 
         if (is_null(self::$utc)) {
@@ -37,7 +39,7 @@ class UTCDateTimeType extends DateTimeType
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if ($value === null) {
-            return null;
+            return;
         }
 
         if (is_null(self::$utc)) {

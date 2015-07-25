@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -44,6 +45,7 @@ class Interval extends AbstractValidator
                 new DateInterval($value);
             } catch (Exception $e) {
                 $this->error(self::INVALID_INTERVAL);
+
                 return false;
             }
 
@@ -54,13 +56,15 @@ class Interval extends AbstractValidator
         // using our Interval form element
         if (isset($value['amount'])) {
             $amount = $value['amount'];
-            if (!is_numeric($amount) || (int)$amount != $amount || $amount <= 0) {
+            if (!is_numeric($amount) || (int) $amount != $amount || $amount <= 0) {
                 $this->error(self::INVALID_AMOUNT);
+
                 return false;
             }
         }
 
         $this->error(self::INVALID_INTERVAL);
+
         return false;
     }
 }

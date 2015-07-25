@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -40,9 +41,9 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
     const STATUS_OVERDUE   = 'overdue';   // Deadline ist abgelaufen
 
     // used to build the translation string for each Todo type
-    const ASSIGNEE_DESCRIPTION_PREFIX = 'todo.assigneeDescription.';
+    const ASSIGNEE_DESCRIPTION_PREFIX   = 'todo.assigneeDescription.';
     const INSPECTION_DESCRIPTION_PREFIX = 'todo.inspectionDescription.';
-    const TITLE_PREFIX = 'todo.title.';
+    const TITLE_PREFIX                  = 'todo.title.';
 
     /**
      * @var EntityInterface
@@ -66,11 +67,12 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      * Checks if the given User is assigned to this Todo.
      *
      * @param \Vrok\Entity\User $user
+     *
      * @return bool
      */
     public function isUserAssigned(User $user)
     {
-        foreach($this->getUserTodos() as $ut) {
+        foreach ($this->getUserTodos() as $ut) {
             if ($ut->getUser() == $user
                 && $ut->getStatus() === UserTodo::STATUS_ASSIGNED
             ) {
@@ -87,12 +89,12 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      * Also sets the URL helper to generate the complete URLs for action/inspection.
      * Called by the TodoService.
      *
-     * @param EntityInterface $object
+     * @param EntityInterface       $object
      * @param \Zend\View\Helper\Url $urlHelper
      */
     public function setHelpers(EntityInterface $object, \Zend\View\Helper\Url $urlHelper)
     {
-        $this->object = $object;
+        $this->object    = $object;
         $this->urlHelper = $urlHelper;
     }
 
@@ -115,7 +117,7 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      *
      * @return string
      */
-    abstract function getActionUrl();
+    abstract public function getActionUrl();
 
     /**
      * Retrieve the description of the todo for the given user.
@@ -128,23 +130,26 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      * Uses the helpers set with {@link setHelpers} to retrieve the necessary URLs and
      * parameters and return the translation message.
      *
-     * @param User $user        the user for which the description is generated, to
-     *     allow different URLs / texts for different user groups.
+     * @param User $user the user for which the description is generated, to
+     *                   allow different URLs / texts for different user groups.
+     *
      * @return array
      */
     public function getDescription(\Vrok\Entity\User $user)
     {
-        $params = array();
+        $params = [];
 
         // isAssigned also returns false if the user was assigned but the UserTodo
         // status is not "assigned", so completed todos will render as inspection for him.
         if ($this->isUserAssigned($user)) {
             $params['actionUrl'] = $this->getActionUrl();
-            return array(self::ASSIGNEE_DESCRIPTION_PREFIX.$this->getShortName(), $params);
+
+            return [self::ASSIGNEE_DESCRIPTION_PREFIX.$this->getShortName(), $params];
         }
 
         $params['inspectionUrl'] = $this->getInspectionUrl($user);
-        return array(self::INSPECTION_DESCRIPTION_PREFIX.$this->getShortName(), $params);
+
+        return [self::INSPECTION_DESCRIPTION_PREFIX.$this->getShortName(), $params];
     }
 
     /**
@@ -154,11 +159,11 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      */
     public static function getOpenStates()
     {
-        return array(
+        return [
             self::STATUS_OPEN,
             self::STATUS_ASSIGNED,
             self::STATUS_OVERDUE,
-        );
+        ];
     }
 
     /**
@@ -181,11 +186,12 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
     final public function getShortName()
     {
         $className = get_class($this);
-        if (strpos($className, "\\") === false) {
+        if (strpos($className, '\\') === false) {
             return strtolower($className);
         }
 
-        $parts = explode("\\", $className);
+        $parts = explode('\\', $className);
+
         return strtolower(end($parts));
     }
 
@@ -210,11 +216,13 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      * Sets the status.
      *
      * @param string $status
+     *
      * @return self
      */
     public function setStatus($status)
     {
         $this->status = $status;
+
         return $this;
     }
 // </editor-fold>
@@ -240,11 +248,13 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
      * Sets the creator user account.
      *
      * @param \Vrok\Entity\User $user
+     *
      * @return self
      */
     public function setCreator(\Vrok\Entity\User $user = null)
     {
         $this->creator = $user;
+
         return $this;
     }
 // </editor-fold>
@@ -268,12 +278,14 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
     /**
      * Sets the completion date.
      *
-     * @param  \DateTime $deadline
+     * @param \DateTime $deadline
+     *
      * @return self
      */
     public function setDeadline(\DateTime $deadline)
     {
         $this->deadline = $deadline;
+
         return $this;
     }
 
@@ -298,12 +310,14 @@ abstract class AbstractTodo extends Entity implements HasReferenceInterface
     /**
      * Sets the completion date.
      *
-     * @param  \DateTime $completedAt
+     * @param \DateTime $completedAt
+     *
      * @return self
      */
     public function setCompletedAt(\DateTime $completedAt)
     {
         $this->completedAt = $completedAt;
+
         return $this;
     }
 

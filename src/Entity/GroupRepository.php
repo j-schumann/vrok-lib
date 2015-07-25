@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -31,12 +32,12 @@ class GroupRepository extends EntityRepository
                 break;
 
             case 'parent':
-                $definition['options']['find_method'] = array(
+                $definition['options']['find_method'] = [
                     'name'   => 'getPotentialParents',
-                    'params' => array(
+                    'params' => [
                         'groupId' => 0,
-                    ),
-                );
+                    ],
+                ];
 
                 // @todo - validator to prevent setting a parent which in turn
                 // has the current element as parent/grandparent/etc
@@ -52,18 +53,20 @@ class GroupRepository extends EntityRepository
      * Does no deep-check for circular references!
      *
      * @param int $groupId
+     *
      * @return Collection
      */
     public function getPotentialParents($groupId)
     {
-        $em = $this->getEntityManager();
+        $em    = $this->getEntityManager();
         $query = $em->createQuery('SELECT g FROM Vrok\Entity\Group g'
-            . ' WHERE g.id <> :id AND (g.parent <> :parent OR g.parent IS NULL)'
-            . ' ORDER BY g.name ASC');
-        $query->setParameters(array(
-            'id'     => (int)$groupId,
-            'parent' => (int)$groupId
-        ));
+            .' WHERE g.id <> :id AND (g.parent <> :parent OR g.parent IS NULL)'
+            .' ORDER BY g.name ASC');
+        $query->setParameters([
+            'id'     => (int) $groupId,
+            'parent' => (int) $groupId,
+        ]);
+
         return $query->getResult();
     }
 
@@ -77,22 +80,20 @@ class GroupRepository extends EntityRepository
         switch ($fieldName) {
             case 'name':
                 $spec['validators']['stringLength']['options']['messages'] =
-                    array(\Zend\Validator\StringLength::TOO_LONG =>
-                        $this->getTranslationString('name').'.tooLong',);
+                    [\Zend\Validator\StringLength::TOO_LONG => $this->getTranslationString('name').'.tooLong'];
 
-                $spec['validators']['uniqueObject'] = array(
+                $spec['validators']['uniqueObject'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
-                    'options' => array(
+                    'options' => [
                         'use_context'       => true,
                         'object_repository' => $this,
                         'fields'            => 'name',
                         'object_manager'    => $this->getEntityManager(),
-                        'messages' => array(
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
-                                $this->getTranslationString('name').'.notUnique',
-                        )
-                    ),
-                );
+                        'messages'          => [
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('name').'.notUnique',
+                        ],
+                    ],
+                ];
                 break;
         }
 

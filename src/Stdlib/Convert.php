@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -23,8 +24,10 @@ abstract class Convert
      * a DateTime instance.
      *
      * @link http://stackoverflow.com/a/3243949/1341762
+     *
      * @param type $instance
      * @param type $className
+     *
      * @return type
      */
     public static function objectToObject($instance, $className)

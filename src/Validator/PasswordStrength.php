@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -25,8 +26,8 @@ class PasswordStrength extends AbstractValidator
      * @var array
      */
     protected $messageTemplates = [
-        self::INVALID  => "Invalid type given. String expected",
-        self::TOO_WEAK => "The given password is too weak",
+        self::INVALID  => 'Invalid type given. String expected',
+        self::TOO_WEAK => 'The given password is too weak',
     ];
 
     /**
@@ -37,15 +38,15 @@ class PasswordStrength extends AbstractValidator
     protected $threshold = 20;
 
     /**
-     * Sets validator options
+     * Sets validator options.
      *
-     * @param  int|array|\Traversable $options
+     * @param int|array|\Traversable $options
      */
     public function __construct($options = [])
     {
         if (!is_array($options)) {
             $temp['threshold'] = array_shift(func_get_args());
-            $options = $temp;
+            $options           = $temp;
         }
 
         parent::__construct($options);
@@ -65,11 +66,13 @@ class PasswordStrength extends AbstractValidator
      * Sets the minimum password strength.
      *
      * @param float $value
+     *
      * @return self
      */
     public function setThreshold($value)
     {
-        $this->threshold = (float)$value;
+        $this->threshold = (float) $value;
+
         return $this;
     }
 
@@ -80,13 +83,15 @@ class PasswordStrength extends AbstractValidator
     {
         if (!is_string($value)) {
             $this->error(self::INVALID);
+
             return false;
         }
 
-        $calc = new StrengthCalculator();
+        $calc     = new StrengthCalculator();
         $strength = $calc->getStrength($value);
         if ($strength < $this->threshold) {
             $this->error(self::TOO_WEAK);
+
             return false;
         }
 

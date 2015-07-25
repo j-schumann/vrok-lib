@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -22,12 +23,14 @@ class FieldHistoryFilter extends AbstractFilter
      * Retrieve only log entries for the given field name.
      *
      * @param string $field
+     *
      * @return self
      */
     public function byField($field)
     {
-        $this->qb->andWhere($this->alias.".field = :field")
+        $this->qb->andWhere($this->alias.'.field = :field')
            ->setParameter('field', $field);
+
         return $this;
     }
 }

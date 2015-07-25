@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -23,6 +24,7 @@ class CurrentUser extends AbstractPlugin
     {
         $um = $this->getController()->getServiceLocator()
                 ->get('UserManager');
+
         return $um->getCurrentUser();
     }
 }

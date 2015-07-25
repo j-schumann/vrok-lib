@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -71,11 +72,11 @@ class AuthorizeRedirectStrategy implements
     public function onDispatch(MvcEvent $event)
     {
         // redirect to login is not necessary for console...
-        if (! $event->getRequest() instanceof HttpRequest) {
+        if (!$event->getRequest() instanceof HttpRequest) {
             return;
         }
 
-        $provider = $this->getServiceLocator()->get('BjyAuthorize\Provider\Identity\ProviderInterface');
+        $provider      = $this->getServiceLocator()->get('BjyAuthorize\Provider\Identity\ProviderInterface');
         $identityRoles = $provider->getIdentityRoles();
 
         // no logged in user -> nothing to log out
@@ -83,7 +84,7 @@ class AuthorizeRedirectStrategy implements
             return;
         }
 
-        $now = time();
+        $now     = time();
         $session = new \Zend\Session\Container(__CLASS__);
         if (isset($session['activityTimeout']) && $session['activityTimeout'] < $now) {
             $manager = $this->getServiceLocator()->get('UserManager');
@@ -93,10 +94,10 @@ class AuthorizeRedirectStrategy implements
                     ->get('Zend\I18n\Translator\TranslatorInterface');
             $message = $translator->translate([
                 'message.user.activityTimeout',
-                floor($this->getTtl() / 60)
+                floor($this->getTtl() / 60),
             ]);
 
-            $cm = $this->getServiceLocator()->get('ControllerPluginManager');
+            $cm        = $this->getServiceLocator()->get('ControllerPluginManager');
             $messenger = $cm->get('flashMessenger');
             $messenger->addErrorMessage($message);
 
@@ -108,6 +109,7 @@ class AuthorizeRedirectStrategy implements
             // also: we should differentiate between XHR that only expect JSON etc
             // and those that support the script-redirect
             $helper = $cm->get('loginRedirector');
+
             return $helper->gotoLogin();
         }
 
@@ -117,31 +119,31 @@ class AuthorizeRedirectStrategy implements
 
         // logged in but no timeout -> new session, set new timeout
         // logged in but timeout in the future -> refresh timeout
-        $session['activityTimeout']  = $now + $this->getTtl();
+        $session['activityTimeout'] = $now + $this->getTtl();
     }
 
     /**
-     * Handles redirects in case of dispatch errors caused by unauthorized access
+     * Handles redirects in case of dispatch errors caused by unauthorized access.
      *
      * @param \Zend\Mvc\MvcEvent $event
      */
     public function onDispatchError(MvcEvent $event)
     {
-        $result   = $event->getResult();
-        $response = $event->getResponse();
+        $result     = $event->getResult();
+        $response   = $event->getResponse();
         $routeMatch = $event->getRouteMatch();
 
         // Do nothing if the result is a response object or not valid
         if ($result instanceof ResponseInterface || !$routeMatch
-            || ($response && ! $response instanceof HttpResponse)
+            || ($response && !$response instanceof HttpResponse)
         ) {
             return;
         }
 
         // Common view variables
         $viewVariables = [
-            'error'      => $event->getParam('error'),
-           'identity'   => $event->getParam('identity'),
+            'error'   => $event->getParam('error'),
+           'identity' => $event->getParam('identity'),
         ];
 
         switch ($event->getError()) {
@@ -177,7 +179,7 @@ class AuthorizeRedirectStrategy implements
             $response = new HttpResponse();
         }
 
-        $provider = $this->getServiceLocator()->get('BjyAuthorize\Provider\Identity\ProviderInterface');
+        $provider      = $this->getServiceLocator()->get('BjyAuthorize\Provider\Identity\ProviderInterface');
         $identityRoles = $provider->getIdentityRoles();
 
         if (in_array($provider->getAuthenticatedRole(), $identityRoles)) {
@@ -194,7 +196,7 @@ class AuthorizeRedirectStrategy implements
         }
 
         // no identity -> not logged in -> redirect to login page
-        $cm = $this->getServiceLocator()->get('ControllerPluginManager');
+        $cm        = $this->getServiceLocator()->get('ControllerPluginManager');
         $messenger = $cm->get('flashMessenger');
         $messenger->addErrorMessage('message.user.loginRequired');
 
@@ -205,8 +207,7 @@ class AuthorizeRedirectStrategy implements
         // for "normal" requests
         if ($result instanceof ViewModel) {
             $event->setViewModel($result);
-        }
-        else {
+        } else {
             $event->setResponse($result);
         }
     }
@@ -231,6 +232,7 @@ class AuthorizeRedirectStrategy implements
      * Returns the number seconds a user may be inactive before being logged out.
      *
      * $return int
+     *
      * @todo konfigurierbar machen. Die Strategy ist servicelocator-aware weil nicht alle
      * dependencies injected werden sollen (nur in den allerwenigsten Fällen brauchen wir
      * tatsächlich den LoginRedirector und den Messenger, die Strategy wird aber bei jedem
@@ -248,6 +250,6 @@ class AuthorizeRedirectStrategy implements
      */
     public function setTtl($ttl)
     {
-        $this->ttl = (int)$ttl;
+        $this->ttl = (int) $ttl;
     }
 }

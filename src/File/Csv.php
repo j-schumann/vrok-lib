@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -27,21 +28,21 @@ class Csv
     protected $file = null;
 
     /**
-     * Field separator
+     * Field separator.
      *
      * @var string
      */
     protected $delimiter = ';';
 
     /**
-     * Field enclosure character
+     * Field enclosure character.
      *
      * @var string
      */
     protected $enclosure = '"';
 
     /**
-     * Escape character for chars that are the same as the enclosure or delimiter
+     * Escape character for chars that are the same as the enclosure or delimiter.
      *
      * @var string
      */
@@ -50,7 +51,7 @@ class Csv
     /**
      * Indicates if the first line contains the column headers.
      *
-     * @var boolean
+     * @var bool
      */
     protected $hasHeader = true;
 
@@ -69,7 +70,7 @@ class Csv
      */
     public function setDelimiter($delimiter = ';')
     {
-        $this->delimiter = (string)$delimiter;
+        $this->delimiter = (string) $delimiter;
     }
 
     /**
@@ -80,7 +81,7 @@ class Csv
      */
     public function setEnclosure($enclosure = '"')
     {
-        $this->enclosure = (string)$enclosure;
+        $this->enclosure = (string) $enclosure;
     }
 
     /**
@@ -91,7 +92,7 @@ class Csv
      */
     public function setEscape($escape = '\\')
     {
-        $this->escape = (string)$escape;
+        $this->escape = (string) $escape;
     }
 
     /**
@@ -102,6 +103,6 @@ class Csv
      */
     public function setHasHeader($hasHeader = true)
     {
-        $this->hasHeader = (bool)$hasHeader;
+        $this->hasHeader = (bool) $hasHeader;
     }
 }

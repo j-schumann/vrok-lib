@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -22,12 +23,14 @@ class ValidationFilter extends AbstractFilter
      * Retrieve only validations of the given type.
      *
      * @param string $type
+     *
      * @return self
      */
     public function byType($type)
     {
         $this->qb->andWhere($this->alias.'.type = :type')
             ->setParameter('type', $type);
+
         return $this;
     }
 }

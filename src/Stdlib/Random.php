@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -20,15 +21,17 @@ class Random
      * Returns secure random bytes using the OS random source(s). If multiple
      * sources are available they are mixed using XOR.
      *
-     * @param integer $byteCount    the number of bytes to return
-     * @param string $outputType    one of the OUTPUT_* constants
-     * @return string               a string of bytes
+     * @param int    $byteCount  the number of bytes to return
+     * @param string $outputType one of the OUTPUT_* constants
+     *
+     * @return string a string of bytes
+     *
      * @throws Exception\InvalidArgumentException if a unknown $outputType is requested
      */
     public static function getRandomBytes($byteCount, $outputType = null)
     {
         $sources = [];
-        foreach(['getFromOpenSSL', 'getFromMcrypt', 'getFromCOM'] as $func) {
+        foreach (['getFromOpenSSL', 'getFromMcrypt', 'getFromCOM'] as $func) {
             $bytes = self::$func($byteCount);
             if ($bytes) {
                 $sources[] = $bytes;
@@ -45,7 +48,7 @@ class Random
         }
 
         if (!count($sources)) {
-            throw new Exception\RuntimeException (
+            throw new Exception\RuntimeException(
                 'No (secure) random byte source available!'
             );
         }
@@ -53,7 +56,7 @@ class Random
         // primitive mixing as suggested in
         // http://www.rfc-editor.org/rfc/rfc4086.txt
         $result = array_shift($sources);
-        foreach($sources as $source) {
+        foreach ($sources as $source) {
             $result ^= $source;
         }
 
@@ -66,6 +69,7 @@ class Random
 
             case self::OUTPUT_ALNUM:
                 $bigint = \Zend\Math\BigInteger\BigInteger::getDefaultAdapter();
+
                 return $bigint->baseConvert(bin2hex($result), 16, 62);
 
             default:
@@ -77,9 +81,11 @@ class Random
     /**
      * Returns a random token of the given length.
      *
-     * @param int $length   string length of the token
-     * @param string $type  one of the OUTPUT_* constants
+     * @param int    $length string length of the token
+     * @param string $type   one of the OUTPUT_* constants
+     *
      * @return string
+     *
      * @throws Exception\InvalidArgumentException if a unknown $type is requested
      */
     public static function getRandomToken($length, $type = self::OUTPUT_ALNUM)
@@ -87,7 +93,7 @@ class Random
         $byteCount = $length;
 
         // the types return more characters than bytes are needed, save entropy!
-        switch(strtolower($type)) {
+        switch (strtolower($type)) {
             case self::OUTPUT_HEX:
                 $byteCount = ceil($length / 2);
                 break;
@@ -108,7 +114,7 @@ class Random
             $token .= self::getRandomBytes($byteCount, $type);
         }
         // re-request bytes if our $length => $byteCount conversion was bad
-        while(strlen($token) < $length);
+        while (strlen($token) < $length);
 
         return substr($token, 0, $length);
     }
@@ -116,29 +122,32 @@ class Random
     /**
      * Get the requested number of random bytes using Mcrypt.
      *
-     * @param int $byteCount    number of bytes to return
-     * @return string   the random bytes, null or false on error
+     * @param int $byteCount number of bytes to return
+     *
+     * @return string the random bytes, null or false on error
      */
     public static function getFromMcrypt($byteCount)
     {
         // Don't use the mcrypt function on http://en.wikipedia.org/wiki/Phalanger
         // as /dev/[u]random is not available
         if (!function_exists('mcrypt_create_iv') || defined('PHALANGER')) {
-            return null;
+            return;
         }
+
         return mcrypt_create_iv($byteCount, MCRYPT_DEV_URANDOM);
     }
 
     /**
      * Get the requested number of random bytes.
      *
-     * @param int $byteCount    number of bytes to return
+     * @param int $byteCount number of bytes to return
+     *
      * @return string
      */
     public static function getFromOpenSSL($byteCount)
     {
         if (!function_exists('openssl_random_pseudo_bytes')) {
-            return null;
+            return;
         }
         // according to the docs "most times" a secure algorithm is used, so we
         // don't check for the second parameter $isSecure to be true
@@ -149,7 +158,8 @@ class Random
      * Returns the requested number of random bytes from /dev/random.
      * Attention: uses blocking filesystem access.
      *
-     * @param int $byteCount    number of bytes to return
+     * @param int $byteCount number of bytes to return
+     *
      * @return string
      */
     public static function getFromDev($byteCount)
@@ -169,13 +179,15 @@ class Random
      * Uses the CryptoAPI / COM to return random bytes.
      *
      * @link http://msdn.microsoft.com/en-us/library/aa388182(VS.85).aspx
-     * @param integer $byteCount    number of bytes to return
+     *
+     * @param int $byteCount number of bytes to return
+     *
      * @return string
      */
     public static function getFromCOM($byteCount)
     {
         if (!class_exists('\\COM', 0)) {
-            return null;
+            return;
         }
 
         $comObject = new \COM('CAPICOM.Utilities.1');
@@ -186,15 +198,17 @@ class Random
     /**
      * Return pseudorandom bytes by using Mersenne Twister.
      *
-     * @param integer $byteCount    the number of bytes to return
-     * @return string               a string of bytes
+     * @param int $byteCount the number of bytes to return
+     *
+     * @return string a string of bytes
      */
     public static function getPseudoRandomBytes($byteCount)
     {
         $bytes = '';
-        for ($i = 0; $i < $byteCount; $i++) {
+        for ($i = 0; $i < $byteCount; ++$i) {
             $bytes .= chr(mt_rand(0, 255));
         }
+
         return $bytes;
     }
 }

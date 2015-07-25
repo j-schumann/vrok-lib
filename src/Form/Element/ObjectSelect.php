@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -25,6 +26,7 @@ class ObjectSelect extends DoctrineSelect
         if (null === $this->proxy) {
             $this->proxy = new Proxy();
         }
+
         return $this->proxy;
     }
 }

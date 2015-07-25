@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -23,17 +24,18 @@ trait SharedFunctions
      * Adds a CSRF protection element to the form.
      *
      * @param string $name
-     * @param int $timeout
+     * @param int    $timeout
+     *
      * @return self
      */
     public function addCsrfElement($name, $timeout = 600)
     {
-        return $this->add(array(
+        return $this->add([
             'type'    => 'Vrok\Form\Element\Csrf',
             'name'    => $name,
-            'options' => array(
-                'csrf_options' => array(
-                    'timeout'    => $timeout,
+            'options' => [
+                'csrf_options' => [
+                    'timeout' => $timeout,
 
                      // Injects the default translator or else the error message is
                      // not translated because Zend\Form\Element\Csrf would not do
@@ -41,9 +43,9 @@ trait SharedFunctions
                      // the element class.
                     'translator' => $this->getServiceLocator()->getServiceLocator()
                         ->get('translator'),
-                ),
-            ),
-        ));
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -56,9 +58,10 @@ trait SharedFunctions
      *
      * @param array $messages
      */
-    public function setUntranslatedMessages($messages) {
+    public function setUntranslatedMessages($messages)
+    {
         $translator = $this->getServiceLocator()->getServiceLocator()->get('translator');
-        foreach($messages as &$messageSet) {
+        foreach ($messages as &$messageSet) {
             foreach ($messageSet as &$message) {
                 $message = $translator->translate($message);
             }
@@ -76,7 +79,7 @@ trait SharedFunctions
     public function setElementMessage($element, $message)
     {
         $translator = $this->getServiceLocator()->getServiceLocator()->get('translator');
-        $this->get($element)->setMessages(array($translator->translate($message)));
+        $this->get($element)->setMessages([$translator->translate($message)]);
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -64,109 +65,101 @@ class UserRepository extends EntityRepository
             case 'lastSession':
                 // the field is filled automatically, we keep the column
                 // definition NOT NULL but allow empty values in forms/filters
-                $spec['required'] = false;
+                $spec['required']   = false;
                 $spec['allowEmpty'] = true;
                 unset($spec['validators']['notEmpty']);
                 break;
 
             case 'displayName':
-                $spec['filter']['stripTags'] = array(
+                $spec['filter']['stripTags'] = [
                     'name' => 'Zend\Filter\StripTags',
-                );
+                ];
 
-                $spec['validators']['stringLength']['options']['min'] = 3;
+                $spec['validators']['stringLength']['options']['min']      = 3;
                 $spec['validators']['stringLength']['options']['messages'] =
-                    array(
-                        \Zend\Validator\StringLength::TOO_LONG =>
-                            $this->getTranslationString('displayName').'.tooLong',
-                        \Zend\Validator\StringLength::TOO_SHORT =>
-                            $this->getTranslationString('displayName').'.tooShort',
-                    );
+                    [
+                        \Zend\Validator\StringLength::TOO_LONG  => $this->getTranslationString('displayName').'.tooLong',
+                        \Zend\Validator\StringLength::TOO_SHORT => $this->getTranslationString('displayName').'.tooShort',
+                    ];
 
                 // a displayName may not be in use as email, username or
                 // displayName for any other user:
-                $spec['validators']['uniqueObject1'] = array(
+                $spec['validators']['uniqueObject1'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
-                    'options' => array(
+                    'options' => [
                         'use_context'       => true,
                         'object_repository' => $this,
                         'fields'            => 'username',
                         'object_manager'    => $this->getEntityManager(),
-                        'messages'          => array(
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
-                                $this->getTranslationString('displayName').'.notUnique',
-                        ),
-                    ),
-                );
-                $spec['validators']['uniqueObject2'] = array(
+                        'messages'          => [
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('displayName').'.notUnique',
+                        ],
+                    ],
+                ];
+                $spec['validators']['uniqueObject2'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
-                    'options' => array(
+                    'options' => [
                         'use_context'       => true,
                         'object_repository' => $this,
                         'fields'            => 'email',
                         'object_manager'    => $this->getEntityManager(),
-                        'messages'          => array(
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
-                                $this->getTranslationString('displayName').'.notUnique',
-                        ),
-                    ),
-                );
-                $spec['validators']['uniqueObject3'] = array(
+                        'messages'          => [
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('displayName').'.notUnique',
+                        ],
+                    ],
+                ];
+                $spec['validators']['uniqueObject3'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
-                    'options' => array(
+                    'options' => [
                         'use_context'       => true,
                         'object_repository' => $this,
                         'fields'            => 'displayName',
                         'object_manager'    => $this->getEntityManager(),
-                        'messages'          => array(
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
-                                $this->getTranslationString('displayName').'.notUnique',
-                        ),
-                    ),
-                );
+                        'messages'          => [
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('displayName').'.notUnique',
+                        ],
+                    ],
+                ];
                 break;
 
             case 'email':
-                $spec['filters']['stringToLower'] = array(
+                $spec['filters']['stringToLower'] = [
                     'name' => 'Zend\Filter\StringToLower',
-                );
+                ];
                 $spec['validators']['email'] =
                     $this->getFormHelper()->getEmailValidatorSpecification();
                 $spec['validators']['stringLength']['options']['messages'] =
-                    array(\Zend\Validator\StringLength::TOO_LONG =>
-                        $this->getTranslationString('email').'.tooLong',);
-                $spec['validators']['uniqueObject1'] = array(
+                    [\Zend\Validator\StringLength::TOO_LONG => $this->getTranslationString('email').'.tooLong'];
+                $spec['validators']['uniqueObject1'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
-                    'options' => array(
+                    'options' => [
                         'use_context'       => true,
                         'object_repository' => $this,
                         'fields'            => 'email',
                         'object_manager'    => $this->getEntityManager(),
-                        'messages'          => array(
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
-                                $this->getTranslationString('email').'.notUnique',
-                        ),
-                    ),
-                );
-                $spec['validators']['uniqueObject2'] = array(
+                        'messages'          => [
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('email').'.notUnique',
+                        ],
+                    ],
+                ];
+                $spec['validators']['uniqueObject2'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
-                    'options' => array(
+                    'options' => [
                         'use_context'       => true,
                         'object_repository' => $this,
                         'fields'            => 'username',
                         'object_manager'    => $this->getEntityManager(),
-                        'messages'          => array(
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
-                                $this->getTranslationString('email').'.notUnique',
-                        ),
-                    ),
-                );
+                        'messages'          => [
+                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('email').'.notUnique',
+                        ],
+                    ],
+                ];
                 break;
 
             case 'username':
-                $spec['filters']['stringToLower'] = array(
+                $spec['filters']['stringToLower'] = [
                     'name' => 'Zend\Filter\StringToLower',
-                );
+                ];
                 /*
                  * @todo diese validierungen gehören in das Registrierungsform
                  * des jeweiligen Projekts dass die Anforderungen festlegt.
@@ -221,20 +214,20 @@ class UserRepository extends EntityRepository
      * which requires the functions to be implemented in the repository.
      * We can not use findBy(groups => $name) because this will return:
      * "You cannot search for the association field 'Vrok\Entity\User#groups', because it
-     * is the inverse side of an association."
+     * is the inverse side of an association.".
      *
      * @param string|array $group
+     *
      * @return User[]
      */
     public function findByGroup($group)
     {
-        $qb = $this->createQueryBuilder('u');
+        $qb     = $this->createQueryBuilder('u');
         $filter = new Filter\UserFilter($qb);
 
         if (is_array($group)) {
             $filter->byGroupNames($group);
-        }
-        else {
+        } else {
             $filter->byGroupName($group);
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -31,15 +32,15 @@ class ViewScriptAsset extends BaseAsset
     /**
      * Constructor.
      *
-     * @param string $source        Path to the view script so it can be found
-     *     in the Viewmanagers path stack
+     * @param string      $source   Path to the view script so it can be found
+     *                              in the Viewmanagers path stack
      * @param PhpRenderer $renderer The view renderer
-     * @param array  $filters       An array of filters
+     * @param array       $filters  An array of filters
      */
-    public function __construct($source, PhpRenderer $renderer, $filters = array())
+    public function __construct($source, PhpRenderer $renderer, $filters = [])
     {
         $this->viewScript = $source;
-        $this->renderer = $renderer;
+        $this->renderer   = $renderer;
         parent::__construct($filters);
     }
 

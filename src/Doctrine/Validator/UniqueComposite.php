@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -19,7 +20,7 @@ class UniqueComposite extends UniqueObject
      * identifiers but when adding it to a concrete field it only receives this
      * single value as $value and ignores the $context which contains the other
      * fields, the validation fails with "Provided values count is 1, while
-     * expected number of fields to be matched is 2"
+     * expected number of fields to be matched is 2".
      *
      * Using a fieldset and adding the validator in an inputfilter with the name
      * of the fieldset works but prohibits using the inputfilter from the

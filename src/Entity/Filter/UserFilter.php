@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -22,6 +23,7 @@ class UserFilter extends AbstractFilter
      * or displayName.
      *
      * @param string $pattern
+     *
      * @return self
      */
     public function byName($pattern)
@@ -30,6 +32,7 @@ class UserFilter extends AbstractFilter
                 .' OR '.$this->alias.'.email  LIKE :pattern'
                 .' OR '.$this->alias.'.displayName  LIKE :pattern)')
             ->setParameter('pattern', '%'.$pattern.'%');
+
         return $this;
     }
 
@@ -37,6 +40,7 @@ class UserFilter extends AbstractFilter
      * Only users assigned to the given group are returned.
      *
      * @param int $group
+     *
      * @return self
      */
     public function byGroupId($group)
@@ -44,6 +48,7 @@ class UserFilter extends AbstractFilter
         $this->joinGroups();
         $this->qb->andWhere('g.id = :group')
             ->setParameter('group', $group);
+
         return $this;
     }
 
@@ -51,6 +56,7 @@ class UserFilter extends AbstractFilter
      * Only users within the given group are returned.
      *
      * @param string $group
+     *
      * @return self
      */
     public function byGroupName($group)
@@ -58,6 +64,7 @@ class UserFilter extends AbstractFilter
         $this->joinGroups();
         $this->qb->andWhere('g.name = :group')
             ->setParameter('group', $group);
+
         return $this;
     }
 
@@ -65,6 +72,7 @@ class UserFilter extends AbstractFilter
      * Only users that are within one of the given groups are returned.
      *
      * @param type $groups
+     *
      * @return self
      */
     public function byGroupNames($groups)
@@ -72,6 +80,7 @@ class UserFilter extends AbstractFilter
         $this->joinGroups();
         $this->qb->andWhere('g.name in (:groups)')
             ->setParameter('groups', $groups);
+
         return $this;
     }
 
@@ -83,6 +92,7 @@ class UserFilter extends AbstractFilter
     public function areNotDeleted()
     {
         $this->qb->andWhere($this->alias.'.deletedAt IS NULL');
+
         return $this;
     }
 
@@ -97,6 +107,7 @@ class UserFilter extends AbstractFilter
             $this->qb->join($this->alias.'.groups', 'g')->select($this->alias.', g');
             $this->groupJoin = true;
         }
+
         return $this;
     }
 }

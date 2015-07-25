@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -18,25 +19,26 @@ use Zend\Form\View\Helper\AbstractHelper;
 class FormInterval extends AbstractHelper
 {
     /**
-     * FormSelect helper
+     * FormSelect helper.
      *
      * @var FormSelect
      */
     protected $selectHelper;
 
     /**
-     * FormText helper
+     * FormText helper.
      *
      * @var FormText
      */
     protected $textHelper;
 
     /**
-     * Invoke helper as function
+     * Invoke helper as function.
      *
      * Proxies to {@link render()}.
      *
      * @param ElementInterface $element
+     *
      * @return string
      */
     public function __invoke(ElementInterface $element = null)
@@ -49,10 +51,12 @@ class FormInterval extends AbstractHelper
     }
 
     /**
-     * Render the two elements
+     * Render the two elements.
      *
-     * @param  ElementInterface $element
+     * @param ElementInterface $element
+     *
      * @return string
+     *
      * @throws \Zend\Form\Exception\InvalidArgumentException
      * @throws \Zend\Form\Exception\DomainException
      */
@@ -74,12 +78,12 @@ class FormInterval extends AbstractHelper
         }
 
         $selectHelper = $this->getSelectElementHelper();
-        $textHelper = $this->getTextElementHelper();
+        $textHelper   = $this->getTextElementHelper();
 
         $typeOptions = $element->getTypeValueOptions();
 
-        $amountElement   = $element->getAmountElement();
-        $typeElement = $element->getTypeElement()->setValueOptions($typeOptions);
+        $amountElement = $element->getAmountElement();
+        $typeElement   = $element->getTypeElement()->setValueOptions($typeOptions);
 
         return '<div class="form-interval">'.
                 $textHelper->render($amountElement)
@@ -89,7 +93,7 @@ class FormInterval extends AbstractHelper
     }
 
     /**
-     * Retrieve the FormSelect helper
+     * Retrieve the FormSelect helper.
      *
      * @return FormSelect
      */
@@ -107,7 +111,7 @@ class FormInterval extends AbstractHelper
     }
 
     /**
-     * Retrieve the FormText helper
+     * Retrieve the FormText helper.
      *
      * @return FormText
      */

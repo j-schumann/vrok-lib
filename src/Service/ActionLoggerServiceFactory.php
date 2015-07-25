@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -19,6 +20,7 @@ class ActionLoggerServiceFactory implements FactoryInterface
      * Inject the dependencies into the new service instance.
      *
      * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     *
      * @return \Vrok\Service\ActionLogger
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
@@ -28,6 +30,7 @@ class ActionLoggerServiceFactory implements FactoryInterface
         $ci = $serviceLocator->get('ClientInfo');
 
         $logger = new ActionLogger($em, $as, $ci);
+
         return $logger;
     }
 }

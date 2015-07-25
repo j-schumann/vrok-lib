@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -32,9 +33,9 @@ class PurgeValidations extends AbstractJob
     public static function onCronDaily(EventInterface $e)
     {
         $controller = $e->getTarget();
-        $qm = $controller->getServiceLocator()->get('SlmQueue\Queue\QueuePluginManager');
-        $queue = $qm->get('jobs');
-        $job = $queue->getJobPluginManager()->get(__CLASS__);
+        $qm         = $controller->getServiceLocator()->get('SlmQueue\Queue\QueuePluginManager');
+        $queue      = $qm->get('jobs');
+        $job        = $queue->getJobPluginManager()->get(__CLASS__);
         $queue->push($job);
     }
 }

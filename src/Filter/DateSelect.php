@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -18,12 +19,12 @@ class DateSelect extends AbstractFilter
     /**
      * @var array
      */
-    protected $options = array(
+    protected $options = [
         'pattern' => 'Y-m-d',
-    );
+    ];
 
     /**
-     * Sets filter options
+     * Sets filter options.
      *
      * @param array|Traversable $options
      */
@@ -35,19 +36,21 @@ class DateSelect extends AbstractFilter
     }
 
     /**
-     * Sets the pattern option
+     * Sets the pattern option.
      *
-     * @param  string $pattern
+     * @param string $pattern
+     *
      * @return self Provides a fluent interface
      */
     public function setPattern($pattern)
     {
         $this->options['pattern'] = $pattern;
+
         return $this;
     }
 
     /**
-     * Returns the pattern option
+     * Returns the pattern option.
      *
      * @return string|null
      */
@@ -57,26 +60,26 @@ class DateSelect extends AbstractFilter
     }
 
     /**
-     * Defined by Zend\Filter\FilterInterface
+     * Defined by Zend\Filter\FilterInterface.
      *
      * Converts the array produced by the Zend\Form\Element\DateSelect
      * to a string according to the configured pattern. Returns null if the
      * value is no array or not all date parts are set.
      *
      * @param mixed $value
+     *
      * @return string|null
      */
     public function filter($value)
     {
         if (!is_array($value) || empty($value['year']) || empty($value['month'])
-            || empty($value['day']))
-        {
-            return null;
+            || empty($value['day'])) {
+            return;
         }
 
         return str_replace(
-            array('Y', 'm', 'd'),
-            array($value['year'], $value['month'], $value['day']),
+            ['Y', 'm', 'd'],
+            [$value['year'], $value['month'], $value['day']],
             $this->getPattern()
         );
     }

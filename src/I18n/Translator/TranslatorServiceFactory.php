@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,8 +18,8 @@ class TranslatorServiceFactory implements FactoryInterface
 {
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $config = $serviceLocator->get('Config');
-        $trConfig = isset($config['translator']) ? $config['translator'] : array();
+        $config   = $serviceLocator->get('Config');
+        $trConfig = isset($config['translator']) ? $config['translator'] : [];
 
         // the default translator factory is not able to use an existing service
         if (isset($trConfig['cache']) && is_string($trConfig['cache'])) {
@@ -26,6 +27,7 @@ class TranslatorServiceFactory implements FactoryInterface
         }
 
         $translator = Translator::factory($trConfig);
+
         return $translator;
     }
 }

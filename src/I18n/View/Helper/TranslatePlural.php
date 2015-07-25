@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -23,12 +24,13 @@ use Zend\I18n\View\Helper\AbstractTranslatorHelper;
 class TranslatePlural extends AbstractTranslatorHelper
 {
     /**
-     * Translate a plural message
+     * Translate a plural message.
      *
-     * @param  array  $messages
-     * @param  int $number
-     * @param  string  $textDomain
-     * @param  string  $locale
+     * @param array  $messages
+     * @param int    $number
+     * @param string $textDomain
+     * @param string $locale
+     *
      * @return string
      */
     public function __invoke(array $messages, $number, $textDomain = null, $locale = null)
@@ -43,19 +45,19 @@ class TranslatePlural extends AbstractTranslatorHelper
 
         // default: no params, only the singular/plural messages
         $strings = $messages;
-        $params = array();
+        $params  = [];
 
         // first element is an array: these are the messages and the second
         // element are the params (to use for both messages)
         if (is_array($messages[0])) {
             $strings = $messages[0];
-            $params = $messages[1];
+            $params  = $messages[1];
         }
-        
-        $domainObject = $translator->getTranslator()->getTextDomain($textDomain, $locale);
-        $index = $domainObject->getPluralRule()->evaluate($number);
 
-        return $translator->translate(array($strings[$index], $params),
+        $domainObject = $translator->getTranslator()->getTextDomain($textDomain, $locale);
+        $index        = $domainObject->getPluralRule()->evaluate($number);
+
+        return $translator->translate([$strings[$index], $params],
                 $textDomain, $locale);
     }
 }

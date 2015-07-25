@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -15,13 +16,14 @@ use Doctrine\ORM\EntityManager;
 class Entity implements EntityInterface
 {
     /**
-     * Implement EntityInterface
+     * Implement EntityInterface.
      *
      * {@inheritdoc}
      */
     public function getIdentifiers(EntityManager $em)
     {
         $cm = $em->getClassMetadata(get_class($this));
+
         return $cm->getIdentifierValues($this);
     }
 }

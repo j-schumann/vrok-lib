@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -29,7 +30,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function __construct()
     {
-        $this->members = new ArrayCollection();
+        $this->members  = new ArrayCollection();
         $this->children = new ArrayCollection();
     }
 
@@ -65,7 +66,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function addChildren($children)
     {
-        foreach($children as $child) {
+        foreach ($children as $child) {
             $this->children->add($child);
         }
     }
@@ -77,7 +78,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function removeChildren($children)
     {
-        foreach($children as $child) {
+        foreach ($children as $child) {
             $this->children->removeElement($child);
         }
     }
@@ -103,11 +104,13 @@ class Group extends Entity implements HierarchicalRoleInterface
      * Sets the groups description.
      *
      * @param string $description
+     *
      * @return self
      */
     public function setDescription($description)
     {
         $this->description = (string) $description;
+
         return $this;
     }
 // </editor-fold>
@@ -132,7 +135,8 @@ class Group extends Entity implements HierarchicalRoleInterface
      * Adds the given user to the group members.
      *
      * @param User $user
-     * @return boolean  false if the user was already a member, else true
+     *
+     * @return bool false if the user was already a member, else true
      */
     public function addMember(User $user)
     {
@@ -141,6 +145,7 @@ class Group extends Entity implements HierarchicalRoleInterface
         }
 
         $this->members[] = $user;
+
         return true;
     }
 
@@ -148,14 +153,16 @@ class Group extends Entity implements HierarchicalRoleInterface
      * Removes the given User from the group members.
      *
      * @param User $user
-     * @return boolean     true if the User was in the collection and was
-     *     removed, else false
+     *
+     * @return bool true if the User was in the collection and was
+     *              removed, else false
      */
     public function removeMember(User $user)
     {
         if (!$this->members->contains($user)) {
             return false;
         }
+
         return $this->members->removeElement($user);
     }
 
@@ -166,7 +173,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function addMembers(Collection $members)
     {
-        foreach($members as $member) {
+        foreach ($members as $member) {
             $this->addMember($member);
         }
     }
@@ -178,7 +185,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function removeMembers(Collection $members)
     {
-        foreach($members as $member) {
+        foreach ($members as $member) {
             $this->removeMember($member);
         }
     }
@@ -206,11 +213,13 @@ class Group extends Entity implements HierarchicalRoleInterface
      * Must be unique.
      *
      * @param string $name
+     *
      * @return self
      */
     public function setName($name)
     {
         $this->name = (string) $name;
+
         return $this;
     }
 // </editor-fold>
@@ -235,11 +244,13 @@ class Group extends Entity implements HierarchicalRoleInterface
      * Sets the parent Group.
      *
      * @param Group $parent
+     *
      * @return self
      */
     public function setParent(Group $parent = null)
     {
         $this->parent = $parent;
+
         return $this;
     }
 // </editor-fold>

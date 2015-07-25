@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -18,7 +19,9 @@ abstract class StringUtils
      * Escapes a string to be used in a regular expression.
      *
      * @link http://www.php.net/manual/en/function.preg-replace.php#92456
+     *
      * @param string $str
+     *
      * @return string
      */
     public static function escapeString($str)
@@ -27,11 +30,11 @@ abstract class StringUtils
         // \ ^ . $ | ( ) [ ]
         // * + ? { } ,
 
-        $patterns = array('/\//', '/\^/', '/\./', '/\$/', '/\|/',
+        $patterns = ['/\//', '/\^/', '/\./', '/\$/', '/\|/',
             '/\(/', '/\)/', '/\[/', '/\]/', '/\*/', '/\+/',
-            '/\?/', '/\{/', '/\}/', '/\,/');
-        $replace = array('\/', '\^', '\.', '\$', '\|', '\(', '\)',
-            '\[', '\]', '\*', '\+', '\?', '\{', '\}', '\,');
+            '/\?/', '/\{/', '/\}/', '/\,/', ];
+        $replace = ['\/', '\^', '\.', '\$', '\|', '\(', '\)',
+            '\[', '\]', '\*', '\+', '\?', '\{', '\}', '\,', ];
 
         return preg_replace($patterns, $replace, $str);
     }
@@ -41,13 +44,15 @@ abstract class StringUtils
      * Used when parsing files.
      *
      * @param type $string
+     *
      * @return string
      */
     public static function removeBOM($string)
     {
-        if(substr($string, 0, 3) == pack("CCC", 0xef, 0xbb, 0xbf)) {
+        if (substr($string, 0, 3) == pack('CCC', 0xef, 0xbb, 0xbf)) {
             $string = substr($string, 3);
         }
+
         return $string;
     }
 }

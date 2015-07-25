@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -19,7 +20,7 @@ use Zend\Paginator\Paginator as ZendPaginator;
 abstract class AbstractFilter
 {
     /**
-     * QueryBuilder instance
+     * QueryBuilder instance.
      *
      * @var QueryBuilder
      */
@@ -48,21 +49,23 @@ abstract class AbstractFilter
     /**
      * Any method not implemented is forwared to the queryBuilder to allow transparent
      * access and a fluent interface:
-     * $filter->byAttribute($value)->andWhere('simpleAttribute = :simple)
+     * $filter->byAttribute($value)->andWhere('simpleAttribute = :simple).
      *
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
+     *
      * @return mixed
      */
     public function __call($name, $arguments)
     {
-        return call_user_func_array(array($this->qb, $name), $arguments);
+        return call_user_func_array([$this->qb, $name], $arguments);
     }
 
     /**
      * Retrieve the main alias used in the queryBuilder for the entity.
      *
      * @link http://stackoverflow.com/a/16422221/1341762
+     *
      * @return string
      */
     public function getAlias()
@@ -102,6 +105,7 @@ abstract class AbstractFilter
         $this->qb->select('count('.$this->alias.')');
         $count = $this->qb->getQuery()->getSingleScalarResult();
         $this->qb->add('select', $old[0]);
+
         return $count;
     }
 
@@ -120,11 +124,13 @@ abstract class AbstractFilter
      *
      * @param string $field
      * @param string $order
+     *
      * @return self
      */
     public function orderByField($field, $order = 'asc')
     {
         $this->qb->orderBy($this->alias.'.'.$field, $order);
+
         return $this;
     }
 
@@ -136,6 +142,7 @@ abstract class AbstractFilter
     public function getPaginator()
     {
         $query = $this->getQuery();
+
         return new ZendPaginator(new PaginatorAdapter(new ORMPaginator($query)));
     }
 }

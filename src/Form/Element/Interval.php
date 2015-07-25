@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -43,26 +44,26 @@ class Interval extends Element implements
     protected $typeOptions = ['S', 'M', 'H', 'D'];
 
     /**
-     * input element that contains the integer part (interval length)
+     * input element that contains the integer part (interval length).
      *
      * @var Text
      */
     protected $amountElement;
 
     /**
-     * Select element that contains the interval type
+     * Select element that contains the interval type.
      *
      * @var Select
      */
     protected $typeElement;
 
     /**
-     * Constructor. Adds the elements
+     * Constructor. Adds the elements.
      *
-     * @param  null|int|string  $name    Optional name for the element
-     * @param  array            $options Optional options for the element
+     * @param null|int|string $name    Optional name for the element
+     * @param array           $options Optional options for the element
      */
-    public function __construct($name = null, $options = array())
+    public function __construct($name = null, $options = [])
     {
         parent::__construct($name, $options);
 
@@ -86,9 +87,10 @@ class Interval extends Element implements
     /**
      * Accepted options for DurationSelect:
      * - amount_attributes: HTML attributes to be rendered with the amout element
-     * - type_attributes: HTML attributes to be rendered with the type element
+     * - type_attributes: HTML attributes to be rendered with the type element.
      *
      * @param array|\Traversable $options
+     *
      * @return self
      */
     public function setOptions($options)
@@ -127,19 +129,21 @@ class Interval extends Element implements
     }
 
     /**
-     * Set the amount attributes
+     * Set the amount attributes.
      *
-     * @param  array $attributes
+     * @param array $attributes
+     *
      * @return DateSelect
      */
     public function setAmountAttributes(array $attributes)
     {
         $this->amountElement->setAttributes($attributes);
+
         return $this;
     }
 
     /**
-     * Get the amount attributes
+     * Get the amount attributes.
      *
      * @return array
      */
@@ -149,19 +153,21 @@ class Interval extends Element implements
     }
 
     /**
-     * Set the type attributes
+     * Set the type attributes.
      *
-     * @param  array $attributes
+     * @param array $attributes
+     *
      * @return DateSelect
      */
     public function setTypeAttributes(array $attributes)
     {
         $this->typeElement->setAttributes($attributes);
+
         return $this;
     }
 
     /**
-     * Get the type attributes
+     * Get the type attributes.
      *
      * @return array
      */
@@ -172,26 +178,28 @@ class Interval extends Element implements
 
     /**
      * @param mixed $value
+     *
      * @throws \Zend\Form\Exception\InvalidArgumentException
+     *
      * @return void|\Zend\Form\Element
      */
     public function setValue($value)
     {
         if ($value instanceof DateInterval) {
             $interval = VrokInterval::convert($value);
-            $value = [];
+            $value    = [];
 
             if (is_int($interval->getDays())) {
-                $value['amount'] = $interval->getDays();
+                $value['amount']       = $interval->getDays();
                 $value['intervaltype'] = 'D';
             } elseif (is_int($interval->getHours())) {
-                $value['amount'] = $interval->getHours();
+                $value['amount']       = $interval->getHours();
                 $value['intervaltype'] = 'H';
             } elseif (is_int($interval->getMinutes())) {
-                $value['amount'] = $interval->getMinutes();
+                $value['amount']       = $interval->getMinutes();
                 $value['intervaltype'] = 'M';
             } else {
-                $value['amount'] = $interval->asSeconds();
+                $value['amount']       = $interval->asSeconds();
                 $value['intervaltype'] = 'S';
             }
         }
@@ -202,10 +210,10 @@ class Interval extends Element implements
             if (!isset($value['intervaltype'])) {
                 $value['intervaltype'] = isset($value[1]) ? $value[1] : '';
             }
-        } elseif(is_null($value)) {
+        } elseif (is_null($value)) {
             $value = [
                 'amount'       => '',
-                'intervaltype' => ''
+                'intervaltype' => '',
             ];
         } elseif (is_numeric($value)) {
             $value = [
@@ -235,22 +243,24 @@ class Interval extends Element implements
     }
 
     /**
-     * Prepare the form element (mostly used for rendering purposes)
+     * Prepare the form element (mostly used for rendering purposes).
      *
-     * @param  FormInterface $form
+     * @param FormInterface $form
+     *
      * @return mixed
      */
     public function prepareElement(FormInterface $form)
     {
         $name = $this->getName();
-        $this->amountElement->setName($name . '[amount]');
-        $this->typeElement->setName($name . '[intervaltype]');
+        $this->amountElement->setName($name.'[amount]');
+        $this->typeElement->setName($name.'[intervaltype]');
     }
 
     /**
      * Sets the allowed options to select from.
      *
      * @param $options array ['S', 'M', 'H', 'D'] or a combination of these
+     *
      * @return array
      */
     public function setTypeOptions(array $options)
@@ -275,7 +285,7 @@ class Interval extends Element implements
 
     /**
      * Clone the element (this is needed by Collection element,
-     * as it needs different copies of the elements)
+     * as it needs different copies of the elements).
      */
     public function __clone()
     {

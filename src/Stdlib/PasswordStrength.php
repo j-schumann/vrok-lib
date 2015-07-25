@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -9,7 +10,7 @@ namespace Vrok\Stdlib;
 
 /**
  * Allows to calculate the strength of a password with a variant of a NIST
- * proposal developed by Thomas Hruska,
+ * proposal developed by Thomas Hruska,.
  *
  * @link http://en.wikipedia.org/wiki/Password_strength#NIST_Special_Publication_800-63
  * @link http://cubicspot.blogspot.de/2011/11/how-to-calculate-password-strength.html
@@ -60,6 +61,7 @@ class PasswordStrength
      * Converts the given strength value into a human readable rating.
      *
      * @param float $strength
+     *
      * @return string
      */
     public function getRating($strength)
@@ -90,6 +92,7 @@ class PasswordStrength
      * words separated with a space.
      *
      * @param string $password
+     *
      * @return float
      */
     public function getStrength($password)
@@ -98,8 +101,8 @@ class PasswordStrength
 
         // Variant on NIST rules to reduce long sequences of repeated characters
         $result = 0;
-        $mult = [];
-        for ($i = 0; $i < $y; $i++) {
+        $mult   = [];
+        for ($i = 0; $i < $y; ++$i) {
             $code = ord($password[$i]);
 
             if (!isset($mult[$code])) {
@@ -121,11 +124,11 @@ class PasswordStrength
 
         // NIST password strength rules allow up to 6 extra bits for mixed case
         // and non-alphabetic characters
-        $lower = preg_match('/[a-z]/', $password);
-        $upper = preg_match('/[A-Z]/', $password);
+        $lower   = preg_match('/[a-z]/', $password);
+        $upper   = preg_match('/[A-Z]/', $password);
         $numeric = preg_match('/\d/', $password);
-        $space = preg_match('/ /', $password);
-        $other = !preg_match('/^[A-Za-z0-9 ]*$/', $password);
+        $space   = preg_match('/ /', $password);
+        $other   = !preg_match('/^[A-Za-z0-9 ]*$/', $password);
 
         $extrabits = 0;
         if ($upper) {
@@ -139,7 +142,7 @@ class PasswordStrength
         }
         if ($other) {
             $extrabits += 2;
-        } elseif($space) {
+        } elseif ($space) {
             $extrabits += 1;
         }
 
@@ -153,8 +156,8 @@ class PasswordStrength
         }
 
         // bonus if pw consists of 4 or more separate words
-        if (count(explode(" ", preg_replace('/\s+/', " ", $password))) > 3) {
-            $extrabits++;
+        if (count(explode(' ', preg_replace('/\s+/', ' ', $password))) > 3) {
+            ++$extrabits;
         }
 
         return $result + $extrabits;
@@ -164,6 +167,7 @@ class PasswordStrength
      * Returns the rating for the given password.
      *
      * @param string $password
+     *
      * @return string
      */
     public function ratePassword($password)

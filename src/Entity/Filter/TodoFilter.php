@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -25,20 +26,23 @@ class TodoFilter extends AbstractFilter
      * This only queries todos that have a deadline set!
      *
      * @param \DateTime $deadline
-     * @param string $operator
+     * @param string    $operator
+     *
      * @return self
      */
     public function byDeadline(\DateTime $deadline, $operator = '<')
     {
         $this->qb->andWhere($this->alias.".deadline $operator :deadline")
            ->setParameter('deadline', $deadline);
+
         return $this;
     }
 
     /**
      * Only todos with the given status are returned.
      *
-     * @param mixed $status     single status as string or list of states as array
+     * @param mixed $status single status as string or list of states as array
+     *
      * @return self
      */
     public function byStatus($status)
@@ -46,53 +50,55 @@ class TodoFilter extends AbstractFilter
         if (is_array($status)) {
             $this->qb->andWhere(
                     $this->qb->expr()->in($this->alias.'.status', ':todoStatus'));
-        }
-        else {
+        } else {
             $this->qb->andWhere($this->alias.'.status = :todoStatus');
         }
 
         $this->qb->setParameter('todoStatus', $status);
+
         return $this;
     }
 
     /**
      * Only todos of the given type are returned.
      *
-     * @param string $type  class name or short name from the discriminator map
+     * @param string $type class name or short name from the discriminator map
+     *
      * @return self
      */
     public function byType($type)
     {
-        $this->qb->andWhere($this->alias." INSTANCE OF :todoType")
+        $this->qb->andWhere($this->alias.' INSTANCE OF :todoType')
                  ->setParameter('todoType', $type);
+
         return $this;
     }
 
     /**
-     * Only open todos are returned
+     * Only open todos are returned.
      *
      * @return self
      */
     public function areOpen()
     {
-        return $this->byStatus(array(
+        return $this->byStatus([
             Todo::STATUS_ASSIGNED,
             Todo::STATUS_OPEN,
             Todo::STATUS_OVERDUE,
-        ));
+        ]);
     }
 
     /**
-     * Only closed todos are returned
+     * Only closed todos are returned.
      *
      * @return self
      */
     public function areClosed()
     {
-        return $this->byStatus(array(
+        return $this->byStatus([
             Todo::STATUS_CANCELLED,
             Todo::STATUS_COMPLETED,
-        ));
+        ]);
     }
 
     /**
@@ -101,7 +107,8 @@ class TodoFilter extends AbstractFilter
      * Use the {@link byStatus} to restrict to todo states.
      *
      * @param \Vrok\Entity\User $user
-     * @param mixed $status     single status as string or list of states as array
+     * @param mixed             $status single status as string or list of states as array
+     *
      * @return self
      */
     public function byUser(\Vrok\Entity\User $user, $status = null)
@@ -113,8 +120,7 @@ class TodoFilter extends AbstractFilter
         if ($status) {
             if (is_array($status)) {
                 $this->qb->andWhere($this->qb->expr()->in('ut.status', ':userStatus'));
-            }
-            else {
+            } else {
                 $this->qb->andWhere('ut.status = :userStatus');
             }
 

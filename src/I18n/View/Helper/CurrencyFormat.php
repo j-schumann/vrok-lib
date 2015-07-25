@@ -1,4 +1,5 @@
 <?php
+
 /*
  *  @copyright   (c) 2014-2015, Vrok
  *  @license     http://customlicense CustomLicense
@@ -21,13 +22,14 @@ use Zend\I18n\View\Helper\CurrencyFormat as ZendFormat;
 class CurrencyFormat extends ZendFormat
 {
     /**
-     * Format a number
+     * Format a number.
      *
-     * @param  float  $number
-     * @param  string $currencyCode
-     * @param  bool   $showDecimals
-     * @param  string $locale
-     * @param  string $pattern
+     * @param float  $number
+     * @param string $currencyCode
+     * @param bool   $showDecimals
+     * @param string $locale
+     * @param string $pattern
+     *
      * @return string
      */
     public function __invoke(
@@ -58,13 +60,14 @@ class CurrencyFormat extends ZendFormat
     }
 
     /**
-     * Format a number
+     * Format a number.
      *
-     * @param  float        $number
-     * @param  string       $currencyCode
-     * @param  bool|null    $showDecimals
-     * @param  string       $locale
-     * @param  string       $pattern
+     * @param float     $number
+     * @param string    $currencyCode
+     * @param bool|null $showDecimals
+     * @param string    $locale
+     * @param string    $pattern
+     *
      * @return string
      */
     protected function formatCurrency(
@@ -91,7 +94,7 @@ class CurrencyFormat extends ZendFormat
         // we got a custom pattern which would be modified by setAttribute()
         if ($showDecimals) {
             $this->formatters[$formatterId]->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
-        } elseif($showDecimals === false) {
+        } elseif ($showDecimals === false) {
             $this->formatters[$formatterId]->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
         }
 

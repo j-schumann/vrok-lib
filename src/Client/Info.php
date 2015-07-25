@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -12,7 +13,7 @@ class Info
     /**
      * Returns if the current request is using SSL.
      *
-     * @return boolean
+     * @return bool
      */
     public function isSslRequest()
     {
@@ -23,8 +24,7 @@ class Info
 
         // Nginx
         if (isset($_SERVER['HTTP_SCHEME'])
-                && ($_SERVER['HTTP_SCHEME'] === 'https'))
-        {
+                && ($_SERVER['HTTP_SCHEME'] === 'https')) {
             return true;
         }
 
@@ -35,8 +35,7 @@ class Info
 
         // Behind a loadbalancer, e.g. nginx?
         if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-                && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
-        {
+                && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
             return true;
         }
 
@@ -46,7 +45,7 @@ class Info
     /**
      * Returns if the current request is made from the CLI.
      *
-     * @return boolean
+     * @return bool
      */
     public function isConsoleRequest()
     {

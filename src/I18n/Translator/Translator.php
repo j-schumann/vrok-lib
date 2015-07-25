@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -25,22 +26,23 @@ class Translator extends ZendTranslator
     /**
      * Translate a message.
      *
-     * @param  mixed  $msg
-     * @param  string $textDomain
-     * @param  string $locale
+     * @param mixed  $msg
+     * @param string $textDomain
+     * @param string $locale
+     *
      * @return string
      */
     public function translate($msg, $textDomain = 'default', $locale = null)
     {
         $message = $msg;
-        $params = array();
+        $params  = [];
 
         if (is_array($msg)) {
             $message = array_shift($msg);
 
             // the parameters can even be a single value, in this case %0% is
             // replaced
-            $params = (array)array_shift($msg);
+            $params = (array) array_shift($msg);
         }
 
         $locale      = ($locale ?: $this->getLocale());
@@ -53,9 +55,10 @@ class Translator extends ZendTranslator
             // want to implement this functionality in all view helpers etc
             // that use the injected translator, the translate()-ViewHelper
             // and the controller plugin translate().
-            foreach($params as $k => $v) {
+            foreach ($params as $k => $v) {
                 $translation = str_replace('%'.$k.'%', $v, $translation);
             }
+
             return $translation;
         }
 
@@ -73,27 +76,29 @@ class Translator extends ZendTranslator
      *
      * @triggers loadMessages.load-messages
      * @triggers loadMessages.no-messages-loaded
-     * @param    string $textDomain
-     * @param    string $locale
-     * @throws   Exception\RuntimeException
-     * @return   void
+     *
+     * @param string $textDomain
+     * @param string $locale
+     *
+     * @throws Exception\RuntimeException
      */
     protected function loadMessages($textDomain, $locale)
     {
         if (!isset($this->messages[$textDomain])) {
-            $this->messages[$textDomain] = array();
+            $this->messages[$textDomain] = [];
         }
 
         if (null !== ($cache = $this->getCache())) {
-            $cacheId = 'Zend_I18n_Translator_Messages_' . md5($textDomain . $locale);
+            $cacheId = 'Zend_I18n_Translator_Messages_'.md5($textDomain.$locale);
 
             if (null !== ($result = $cache->getItem($cacheId))) {
                 $this->messages[$textDomain][$locale] = $result;
+
                 return;
             }
         }
 
-        $messagesLoaded  = false;
+        $messagesLoaded = false;
         $messagesLoaded |= $this->loadMessagesFromRemote($textDomain, $locale);
         $messagesLoaded |= $this->loadMessagesFromPatterns($textDomain, $locale);
         $messagesLoaded |= $this->loadMessagesFromFiles($textDomain, $locale);
@@ -107,10 +112,10 @@ class Translator extends ZendTranslator
         // for this use case.
         if ($this->isEventManagerEnabled()) {
             $results = $this->getEventManager()->trigger(
-                self::EVENT_LOAD_MESSAGES, $this, array(
+                self::EVENT_LOAD_MESSAGES, $this, [
                     'locale'     => $locale,
                     'textDomain' => $textDomain,
-            ));
+            ]);
 
             // no listener should stop the event: if the event is stopped all
             // previous messages in the results are ignored
@@ -131,10 +136,10 @@ class Translator extends ZendTranslator
                 $results = $this->getEventManager()->trigger(
                     self::EVENT_NO_MESSAGES_LOADED,
                     $this,
-                    array(
+                    [
                         'locale'      => $locale,
                         'text_domain' => $textDomain,
-                    ),
+                    ],
                     function ($r) {
                         return ($r instanceof TextDomain);
                     }
@@ -146,7 +151,7 @@ class Translator extends ZendTranslator
             }
 
             $this->messages[$textDomain][$locale] = $discoveredTextDomain;
-            $messagesLoaded = true;
+            $messagesLoaded                       = true;
         }
 
         if ($messagesLoaded && $cache !== null) {
@@ -159,12 +164,13 @@ class Translator extends ZendTranslator
      *
      * @param string $textDomain
      * @param string $locale
+     *
      * @return TextDomain
      */
     public function getTextDomain($textDomain, $locale = null)
     {
         if (!isset($this->messages[$textDomain])) {
-            $this->messages[$textDomain] = array();
+            $this->messages[$textDomain] = [];
         }
         $locale = $locale ?: $this->getLocale();
 
@@ -179,20 +185,23 @@ class Translator extends ZendTranslator
      * Allows to inject multiple TextDomain objects at once.
      *
      * @todo validate $textDomains
+     *
      * @param array|ArrayAccess $textDomains
-     * @param string $domainName
-     * @param string $locale
-     * @return bool     true if at least one TextDomain was injected.
+     * @param string            $domainName
+     * @param string            $locale
+     *
+     * @return bool true if at least one TextDomain was injected.
      */
     public function addTextDomains($textDomains, $domainName, $locale)
     {
         $messagesLoaded = false;
-        foreach($textDomains as $object) {
+        foreach ($textDomains as $object) {
             if ($object instanceof TextDomain) {
                 $this->addTextDomain($object, $domainName, $locale);
                 $messagesLoaded = true;
             }
         }
+
         return $messagesLoaded;
     }
 
@@ -204,22 +213,22 @@ class Translator extends ZendTranslator
      * in another order/priority.
      *
      * @todo Issue + PullRequest for ZF Repo
+     *
      * @param TextDomain $textDomain
-     * @param string $domainName
-     * @param string $locale
+     * @param string     $domainName
+     * @param string     $locale
      */
     public function addTextDomain(TextDomain $textDomain, $domainName, $locale)
     {
         if (!isset($this->messages[$domainName])) {
-            $this->messages[$domainName] = array();
+            $this->messages[$domainName] = [];
         }
 
         if (isset($this->messages[$domainName][$locale])
             && $this->messages[$domainName][$locale] instanceof TextDomain
         ) {
             $this->messages[$domainName][$locale]->merge($textDomain);
-        }
-        else {
+        } else {
             $this->messages[$domainName][$locale] = $textDomain;
         }
     }

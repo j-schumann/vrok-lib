@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,7 +18,7 @@ class FullUrl extends AbstractHelper
 {
     /**
      * The server/domain name including TLD, e.g.:
-     * www.domain.tld
+     * www.domain.tld.
      *
      * @var string
      */
@@ -35,10 +36,11 @@ class FullUrl extends AbstractHelper
 
     /**
      * Returns the applications full URL as configured in the config.
-     * (Working with the console, e.g. for cron jobs)
+     * (Working with the console, e.g. for cron jobs).
      *
-     * @param string $schema    (optional) schema to use. If not set a protocol
-     *     relative url will be returned
+     * @param string $schema (optional) schema to use. If not set a protocol
+     *                       relative url will be returned
+     *
      * @return string
      */
     public function __invoke($schema = null)

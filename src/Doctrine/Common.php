@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -14,6 +15,7 @@ abstract class Common
      *
      * @param string $class     FQCN of the entity
      * @param string $fieldName (optional) the fieldname to append to the string
+     *
      * @return string
      */
     public static function getEntityTranslationString($class, $fieldName = null)
@@ -22,6 +24,7 @@ abstract class Common
         if ($fieldName) {
             $string .= '.'.$fieldName;
         }
+
         return $string;
     }
 }

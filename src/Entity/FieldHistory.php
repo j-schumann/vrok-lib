@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
 use Vrok\Doctrine\HasReferenceInterface;
 use Vrok\Doctrine\Traits\ModificationDate;
+
 // @todo http://www.doctrine-project.org/jira/browse/DDC-3334
 //use Vrok\Doctrine\Traits\ObjectReference;
 
@@ -26,7 +27,9 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Retrieve the stored value as object of the given class.
      *
      * @todo Extremely hacky.
+     *
      * @param string $className
+     *
      * @return object
      */
     public function getObjectValue($className)
@@ -38,8 +41,9 @@ class FieldHistory extends Entity implements HasReferenceInterface
         // se we first need to recreate the json from the database, create the stdObject
         // and finally cast it to the desired class which serializes the object and
         // unserializes with the new class name...
-        $json = json_encode($this->getValue());
+        $json   = json_encode($this->getValue());
         $object = json_decode($json, false);
+
         return \Vrok\Stdlib\Convert::objectToObject($object, $className);
     }
 
@@ -47,22 +51,24 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Retrieve the referenced object for the given entity.
      *
      * @param \Doctrine\ORM\EntityManager $em
-     * @return \Vrok\Doctrine\EntityInterface   or null if no object referenced.
+     *
+     * @return \Vrok\Doctrine\EntityInterface or null if no object referenced.
      */
     public function getReference(\Doctrine\ORM\EntityManager $em)
     {
         if (!$this->getReferenceClass() || !$this->getReferenceIdentifier()) {
-            return null;
+            return;
         }
 
         $repo = $em->getRepository($this->getReferenceClass());
+
         return $repo->find(json_decode($this->getReferenceIdentifier(), true));
     }
 
     /**
      * Stores the reference to the given entity.
      *
-     * @param \Doctrine\ORM\EntityManager $em
+     * @param \Doctrine\ORM\EntityManager    $em
      * @param \Vrok\Doctrine\EntityInterface $object
      */
     public function setReference(
@@ -95,11 +101,13 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Sets the class of the referenced object.
      *
      * @param string $class
+     *
      * @return self
      */
     public function setReferenceClass($class)
     {
         $this->referenceClass = $class;
+
         return $this;
     }
 // </editor-fold>
@@ -115,7 +123,7 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Returns the identifier values of the referenced object.
      * Will be returned as json to avoid errors when the column is used as key:
      * In the UnitOfWork Doctrine creates an idHash, if we would return an array here
-     * the implode() would throw "Notice: Array to string conversion"
+     * the implode() would throw "Notice: Array to string conversion".
      *
      * @return string
      */
@@ -130,11 +138,12 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * $classMetaData->getIdentifiers($entity).
      *
      * @param string $identifier
-     * return self
+     *                           return self
      */
     public function setReferenceIdentifier($identifier)
     {
         $this->referenceIdentifier = $identifier;
+
         return $this;
     }
 // </editor-fold>
@@ -149,7 +158,7 @@ class FieldHistory extends Entity implements HasReferenceInterface
     /**
      * Returns the field name.
      *
-     * @return integer
+     * @return int
      */
     public function getField()
     {
@@ -160,11 +169,13 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Sets the field name.
      *
      * @param string $field
+     *
      * @return self
      */
     public function setField($field)
     {
         $this->field = $field;
+
         return $this;
     }
 // </editor-fold>
@@ -189,8 +200,9 @@ class FieldHistory extends Entity implements HasReferenceInterface
         // the datatype for the history field is json array so NULL is returned as array
         // -> fix here, there is most probably no semantic difference
         if (is_array($this->value) && !count($this->value)) {
-            return null;
+            return;
         }
+
         return $this->value;
     }
 
@@ -198,11 +210,13 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Sets the previous field value.
      *
      * @param mixed $value
+     *
      * @return self
      */
     public function setValue($value)
     {
         $this->value = $value;
+
         return $this;
     }
 // </editor-fold>
@@ -228,11 +242,13 @@ class FieldHistory extends Entity implements HasReferenceInterface
      * Sets the assigned user account.
      *
      * @param \Vrok\Entity\User $user
+     *
      * @return self
      */
     public function setUser(\Vrok\Entity\User $user)
     {
         $this->user = $user;
+
         return $this;
     }
 // </editor-fold>

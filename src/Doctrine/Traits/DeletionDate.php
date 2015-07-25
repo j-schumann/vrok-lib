@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -29,12 +30,14 @@ trait DeletionDate
      * Sets the deletion date.
      * This marks the object as deleted.
      *
-     * @param  \DateTime $deletedAt
+     * @param \DateTime $deletedAt
+     *
      * @return self
      */
     public function setDeletedAt(\DateTime $deletedAt = null)
     {
         $this->deletedAt = $deletedAt;
+
         return $this;
     }
 }

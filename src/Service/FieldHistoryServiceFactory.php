@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -19,6 +20,7 @@ class FieldHistoryServiceFactory implements FactoryInterface
      * Inject the dependencies into the new service instance.
      *
      * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     *
      * @return \Vrok\Service\FieldHistory
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
@@ -27,6 +29,7 @@ class FieldHistoryServiceFactory implements FactoryInterface
         $as = $serviceLocator->get('AuthenticationService');
 
         $service = new FieldHistory($em, $as);
+
         return $service;
     }
 }

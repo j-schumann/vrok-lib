@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -18,29 +19,30 @@ use Zend\View\Helper\Partial;
 class FormElementDecorator extends AbstractHelper
 {
     /**
-     * Additional options
+     * Additional options.
      *
      * @var array
      */
-    protected $options = array();
+    protected $options = [];
 
     /**
-     * Label helper instance
+     * Label helper instance.
      *
      * @var Partial
      */
     protected $partialHelper;
 
     /**
-     * Invoke helper as functor
+     * Invoke helper as functor.
      *
      * Proxies to {@link render()}.
      *
-     * @param  ElementInterface $element
-     * @param array $options
+     * @param ElementInterface $element
+     * @param array            $options
+     *
      * @return string|self
      */
-    public function __invoke(ElementInterface $element, array $options = array())
+    public function __invoke(ElementInterface $element, array $options = [])
     {
         $this->options = $options;
 
@@ -52,9 +54,10 @@ class FormElementDecorator extends AbstractHelper
     }
 
     /**
-     * Utility form helper that renders a label (if it exists), an element and errors
+     * Utility form helper that renders a label (if it exists), an element and errors.
      *
-     * @param  ElementInterface $element
+     * @param ElementInterface $element
+     *
      * @return string
      */
     public function render(ElementInterface $element)
@@ -62,11 +65,12 @@ class FormElementDecorator extends AbstractHelper
         // unify elements, we also need the ID for the labels "for" attribute
         // and the container IDs
         if (!$element->getAttribute('id')) {
-            $id = str_replace(array('[', ']'), array('-', ''), $element->getName());
+            $id = str_replace(['[', ']'], ['-', ''], $element->getName());
             $element->setAttribute('id', $id);
         }
 
         $ph = $this->getPartialHelper();
+
         return $ph('vrok/partials/form/element', [
             'element' => $element,
         ]);

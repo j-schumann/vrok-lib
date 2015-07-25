@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -26,6 +27,7 @@ class EntityListenerResolver extends DefaultEntityListenerResolver
      * back to try instantiation of the name as class.
      *
      * @param string $name
+     *
      * @return object
      */
     public function resolve($name)

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -26,47 +27,47 @@ class DurationSelect extends Select implements
 {
     /**
      * If set to true, it will generate an empty option for every select (this is mainly needed by most JavaScript
-     * libraries to allow to have a placeholder)
+     * libraries to allow to have a placeholder).
      *
      * @var bool
      */
     protected $createEmptyOption = false;
 
     /**
-     * Select form element that contains values for hour
+     * Select form element that contains values for hour.
      *
      * @var Select
      */
     protected $hourElement;
 
     /**
-     * Select form element that contains values for minute
+     * Select form element that contains values for minute.
      *
      * @var Select
      */
     protected $minuteElement;
 
-    protected $minHours = 0;
-    protected $maxHours = 24;
+    protected $minHours  = 0;
+    protected $maxHours  = 24;
     protected $stepHours = 1;
     protected $showHours = true;
 
-    protected $minMinutes = 0;
-    protected $maxMinutes = 59;
+    protected $minMinutes  = 0;
+    protected $maxMinutes  = 59;
     protected $stepMinutes = 1;
     protected $showMinutes = true;
 
     /**
-     * Constructor. Add the hours and minutes select elements
+     * Constructor. Add the hours and minutes select elements.
      *
-     * @param  null|int|string  $name    Optional name for the element
-     * @param  array            $options Optional options for the element
+     * @param null|int|string $name    Optional name for the element
+     * @param array           $options Optional options for the element
      */
-    public function __construct($name = null, $options = array())
+    public function __construct($name = null, $options = [])
     {
         parent::__construct($name, $options);
 
-        $this->hourElement   = new Select('hours');
+        $this->hourElement = new Select('hours');
         $this->hourElement->setAttribute('class', 'durationselect-hours');
         $this->minuteElement = new Select('minutes');
         $this->minuteElement->setAttribute('class', 'durationselect-minutes');
@@ -85,9 +86,10 @@ class DurationSelect extends Select implements
     /**
      * Accepted options for DurationSelect:
      * - hour_attributes: HTML attributes to be rendered with the hour element
-     * - minute_attributes: HTML attributes to be rendered with the minute element
+     * - minute_attributes: HTML attributes to be rendered with the minute element.
      *
      * @param array|\Traversable $options
+     *
      * @return self
      */
     public function setOptions($options)
@@ -136,12 +138,14 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * @param  bool $createEmptyOption
+     * @param bool $createEmptyOption
+     *
      * @return MonthSelect
      */
     public function setShouldCreateEmptyOption($createEmptyOption)
     {
         $this->createEmptyOption = (bool) $createEmptyOption;
+
         return $this;
     }
 
@@ -178,19 +182,21 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * Set the hour attributes
+     * Set the hour attributes.
      *
-     * @param  array $hourAttributes
+     * @param array $hourAttributes
+     *
      * @return DateSelect
      */
     public function setHourAttributes(array $hourAttributes)
     {
         $this->hourElement->setAttributes($hourAttributes);
+
         return $this;
     }
 
     /**
-     * Get the hour attributes
+     * Get the hour attributes.
      *
      * @return array
      */
@@ -200,19 +206,21 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * Set the minute attributes
+     * Set the minute attributes.
      *
-     * @param  array $minuteAttributes
+     * @param array $minuteAttributes
+     *
      * @return DateSelect
      */
     public function setMinuteAttributes(array $minuteAttributes)
     {
         $this->minuteElement->setAttributes($minuteAttributes);
+
         return $this;
     }
 
     /**
-     * Get the minute attributes
+     * Get the minute attributes.
      *
      * @return array
      */
@@ -323,7 +331,9 @@ class DurationSelect extends Select implements
 
     /**
      * @param mixed $value
+     *
      * @throws \Zend\Form\Exception\InvalidArgumentException
+     *
      * @return void|\Zend\Form\Element
      */
     public function setValue($value)
@@ -335,7 +345,7 @@ class DurationSelect extends Select implements
             if (!isset($value['minutes'])) {
                 $value['minutes'] = isset($value[1]) ? $value[1] : 0;
             }
-        } elseif(is_null($value)) {
+        } elseif (is_null($value)) {
             $value = ['hours' => 0, 'minutes' => 0];
         } elseif (is_numeric($value)) {
             // the values is given as a number of hours
@@ -366,16 +376,17 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * Prepare the form element (mostly used for rendering purposes)
+     * Prepare the form element (mostly used for rendering purposes).
      *
-     * @param  FormInterface $form
+     * @param FormInterface $form
+     *
      * @return mixed
      */
     public function prepareElement(FormInterface $form)
     {
         $name = $this->getName();
-        $this->hourElement->setName($name . '[hours]');
-        $this->minuteElement->setName($name . '[minutes]');
+        $this->hourElement->setName($name.'[hours]');
+        $this->minuteElement->setName($name.'[minutes]');
     }
 
     /**
@@ -386,9 +397,10 @@ class DurationSelect extends Select implements
     public function getHourValueOptions()
     {
         $options = [];
-        for($i = $this->minHours; $i <= $this->maxHours; $i += $this->stepHours) {
+        for ($i = $this->minHours; $i <= $this->maxHours; $i += $this->stepHours) {
             $options[$i] = $i;
         }
+
         return $options;
     }
 
@@ -400,9 +412,10 @@ class DurationSelect extends Select implements
     public function getMinuteValueOptions()
     {
         $options = [];
-        for($i = $this->minMinutes; $i <= $this->maxMinutes; $i += $this->stepMinutes) {
+        for ($i = $this->minMinutes; $i <= $this->maxMinutes; $i += $this->stepMinutes) {
             $options[$i] = $i;
         }
+
         return $options;
     }
 
@@ -414,43 +427,43 @@ class DurationSelect extends Select implements
      */
     public function getInputSpecification()
     {
-        return array(
-            'name' => $this->getName(),
-            'required' => false,
-            'validators' => array(
-                'callback' => array(
+        return [
+            'name'       => $this->getName(),
+            'required'   => false,
+            'validators' => [
+                'callback' => [
                     'name'                   => 'Zend\Validator\Callback',
                     'break_chain_on_failure' => true,
-                    'options'                => array(
-                        'messages' => array(
-                            \Zend\Validator\Callback::INVALID_VALUE
-                                => 'validate.field.invalidDuration',
-                        ),
-                        'callback' => array($this, 'validate'),
-                    ),
-                ),
-            ),
-        );
+                    'options'                => [
+                        'messages' => [
+                            \Zend\Validator\Callback::INVALID_VALUE => 'validate.field.invalidDuration',
+                        ],
+                        'callback' => [$this, 'validate'],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
      * Validate the value using the options set.
      *
      * @param array $value
-     * @return boolean
+     *
+     * @return bool
      */
     public function validate($value)
     {
         if ($this->showHours
             && (!isset($value['hours'])
-            || !in_array((int)$value['hours'], $this->getHourValueOptions()))
+            || !in_array((int) $value['hours'], $this->getHourValueOptions()))
         ) {
             return false;
         }
 
         if ($this->showMinutes
             && (!isset($value['minutes'])
-            || !in_array((int)$value['minutes'], $this->getMinuteValueOptions()))
+            || !in_array((int) $value['minutes'], $this->getMinuteValueOptions()))
         ) {
             return false;
         }
@@ -459,7 +472,7 @@ class DurationSelect extends Select implements
     }
 
     /**
-     * Clone the element (this is needed by Collection element, as it needs different copies of the elements)
+     * Clone the element (this is needed by Collection element, as it needs different copies of the elements).
      */
     public function __clone()
     {

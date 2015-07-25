@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -24,7 +25,7 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     /**
      * @var array
      */
-    protected $map = array();
+    protected $map = [];
 
     /**
      * @var MimeResolver The mime resolver.
@@ -37,21 +38,21 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     protected $viewManager;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * Instantiate and optionally populate map.
      *
-     * @param ViewManager $viewManager
+     * @param ViewManager       $viewManager
      * @param array|Traversable $map
      */
-    public function __construct(ViewManager $viewManager, $map = array())
+    public function __construct(ViewManager $viewManager, $map = [])
     {
         $this->viewManager = $viewManager;
         $this->setMap($map);
     }
 
     /**
-     * Set the mime resolver
+     * Set the mime resolver.
      *
      * @param MimeResolver $resolver
      */
@@ -61,7 +62,7 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     }
 
     /**
-     * Get the mime resolver
+     * Get the mime resolver.
      *
      * @return MimeResolver
      */
@@ -71,11 +72,12 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     }
 
     /**
-     * Set (overwrite) map
+     * Set (overwrite) map.
      *
      * Maps should be arrays or Traversable objects with name => path pairs
      *
-     * @param  array|Traversable                  $map
+     * @param array|Traversable $map
+     *
      * @throws Exception\InvalidArgumentException
      */
     public function setMap($map)
@@ -96,7 +98,7 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     }
 
     /**
-     * Retrieve the map
+     * Retrieve the map.
      *
      * @return array
      */
@@ -111,13 +113,13 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     public function resolve($name)
     {
         if (!isset($this->map[$name])) {
-            return null;
+            return;
         }
 
         $file  = $this->map[$name];
         $asset = new ViewScriptAsset($file, $this->viewManager->getRenderer());
 
-        $realFile = $this->viewManager->getRenderer()->resolver($file);
+        $realFile        = $this->viewManager->getRenderer()->resolver($file);
         $asset->mimetype = $this->getMimeResolver()->getMimeType($realFile);
 
         return $asset;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -56,11 +57,13 @@ class Validation extends Entity implements HasReferenceInterface
      * Sets the validation type.
      *
      * @param string $value
+     *
      * @return self
      */
     public function setType($value)
     {
         $this->type = $value;
+
         return $this;
     }
 // </editor-fold>
@@ -85,11 +88,13 @@ class Validation extends Entity implements HasReferenceInterface
      * Sets the content to be validated (e.g. new email address).
      *
      * @param string $value
+     *
      * @return self
      */
     public function setContent($value)
     {
         $this->content = $value;
+
         return $this;
     }
 // </editor-fold>
@@ -114,11 +119,13 @@ class Validation extends Entity implements HasReferenceInterface
      * Sets the validation token.
      *
      * @param string $value
+     *
      * @return self
      */
     public function setToken($value)
     {
         $this->token = $value;
+
         return $this;
     }
 
@@ -126,17 +133,19 @@ class Validation extends Entity implements HasReferenceInterface
      * Sets a new random token with the given length.
      *
      * @param int $length
+     *
      * @return self
      */
     public function setRandomToken($length = 20)
     {
-        $token = \Vrok\Stdlib\Random::getRandomToken((int)$length);
+        $token = \Vrok\Stdlib\Random::getRandomToken((int) $length);
+
         return $this->setToken($token);
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="retryCount">
     /**
-     * @var integer
+     * @var int
      * @ORM\Column(type="integer", options={"default" = 0})
      */
     protected $retryCount = 0;
@@ -144,7 +153,7 @@ class Validation extends Entity implements HasReferenceInterface
     /**
      * Returns how often this validation was re-requested.
      *
-     * @return integer
+     * @return int
      */
     public function getRetryCount()
     {
@@ -154,12 +163,14 @@ class Validation extends Entity implements HasReferenceInterface
     /**
      * Sets how often this validation was re-requested.
      *
-     * @param integer $value
+     * @param int $value
+     *
      * @return self
      */
     public function setRetryCount($value)
     {
         $this->retryCount = $value;
+
         return $this;
     }
 // </editor-fold>

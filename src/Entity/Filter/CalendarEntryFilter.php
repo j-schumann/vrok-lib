@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -23,6 +24,7 @@ class CalendarEntryFilter extends AbstractFilter
      *
      * @param \DateTime $startDate
      * @param \DateTime $endDate
+     *
      * @return self
      */
     public function byRange(\DateTime $startDate, \DateTime $endDate)
@@ -35,19 +37,22 @@ class CalendarEntryFilter extends AbstractFilter
             )
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate);
-       return $this;
+
+        return $this;
     }
 
     /**
      * Only entries of the given type are returned.
      *
-     * @param string $type  class name or short name from the discriminator map
+     * @param string $type class name or short name from the discriminator map
+     *
      * @return self
      */
     public function byType($type)
     {
-        $this->qb->andWhere($this->alias." INSTANCE OF :entryType")
+        $this->qb->andWhere($this->alias.' INSTANCE OF :entryType')
                  ->setParameter('entryType', $type);
+
         return $this;
     }
 }

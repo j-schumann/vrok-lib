@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -8,16 +9,17 @@
 namespace Vrok\Stdlib\Guard;
 
 /**
- * Provide a guard method for is_object
+ * Provide a guard method for is_object.
  */
 trait ObjectGuardTrait
 {
     /**
-     * Verifies that the data is an object
+     * Verifies that the data is an object.
      *
-     * @param  mixed  $data           the data to verify
-     * @param  string $dataName       the data name
-     * @param  string $exceptionClass FQCN for the exception
+     * @param mixed  $data           the data to verify
+     * @param string $dataName       the data name
+     * @param string $exceptionClass FQCN for the exception
+     *
      * @throws \Exception
      */
     protected function guardForObject(
@@ -27,7 +29,7 @@ trait ObjectGuardTrait
     ) {
         if (!is_object($data)) {
             $message = sprintf(
-                "%s must be an object, [%s] given",
+                '%s must be an object, [%s] given',
                 $dataName,
                 gettype($data)
             );

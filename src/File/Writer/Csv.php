@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -24,7 +25,7 @@ class Csv extends CsvFile
 
     /**
      * Allows to specify a mapping of indexes to csv columns.
-     * map = array(1 => 'Column A', 'timestamp' => 'Column B')
+     * map = array(1 => 'Column A', 'timestamp' => 'Column B').
      *
      * Columns not found in the map keep their indizes
      *
@@ -36,14 +37,14 @@ class Csv extends CsvFile
      * Indicates if only columns defined in the map will be returned.
      * Columns that are not within the map will be skipped if this is true.
      *
-     * @var boolean
+     * @var bool
      */
     protected $mappedOnly = false;
 
     /**
      * Indicates if a header line is written or not.
      *
-     * @var boolean
+     * @var bool
      */
     protected $writeHeader = false;
 
@@ -61,6 +62,7 @@ class Csv extends CsvFile
         $this->toFileDescriptor($handle);
 
         rewind($handle);
+
         return stream_get_contents($handle);
     }
 
@@ -69,7 +71,9 @@ class Csv extends CsvFile
      * php://memory or a file on disk etc.
      *
      * @param resource $resource
-     * @return boolean
+     *
+     * @return bool
+     *
      * @throws Exception\InvalidArgumentException
      */
     protected function toFileDescriptor($resource)
@@ -94,7 +98,7 @@ class Csv extends CsvFile
             }
 
             $line = [];
-            foreach($header as $index => $column) {
+            foreach ($header as $index => $column) {
                 $line[] = isset($row[$index])
                     ? $row[$index]
                     : null;
@@ -133,7 +137,7 @@ class Csv extends CsvFile
         }
 
         $header = [];
-        foreach($this->data[0] as $column => $value) {
+        foreach ($this->data[0] as $column => $value) {
             if (isset($this->map[$column])) {
                 $header[$column] = $this->map[$column];
             } else {

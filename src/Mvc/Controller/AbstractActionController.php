@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -25,14 +26,16 @@ abstract class AbstractActionController extends ZendController
      * variables if provided.
      *
      * @param array $variables
+     *
      * @return ViewModel
      */
-    public function createViewModel(array $variables = array())
+    public function createViewModel(array $variables = [])
     {
         // we want to inject the flashMessenger instance into the view
         // as the view helper would create a new instance (and old messages
         // would not be shown if we added new messages in the current action)
         $variables['flashMessenger'] = $this->flashMessenger();
+
         return new ViewModel($variables);
     }
 
@@ -41,18 +44,20 @@ abstract class AbstractActionController extends ZendController
      * provided in the given parameter name.
      *
      * @param string $entityClass
-     * @param string $param     parameter name to use
-     * @param string $field     field name to query with the parameter value
-     * @return mixed    Doctrine Entity or an array containing the error message
+     * @param string $param       parameter name to use
+     * @param string $field       field name to query with the parameter value
+     *
+     * @return mixed Doctrine Entity or an array containing the error message
      */
     public function getEntityFromParam($entityClass, $param = 'id', $field = 'id')
     {
         $value = $this->params($param);
         if (!$value) {
-            return array(self::MESSAGE_PARAM_MISSING, $param);
+            return [self::MESSAGE_PARAM_MISSING, $param];
         }
+
         return $this->getEntity($entityClass, $value, $field)
-            ?: array(self::MESSAGE_PARAM_INVALID, $param);
+            ?: [self::MESSAGE_PARAM_INVALID, $param];
     }
 
     /**
@@ -60,36 +65,40 @@ abstract class AbstractActionController extends ZendController
      * provided in the given parameter name.
      *
      * @param string $entityClass
-     * @param string $param     parameter name to use
-     * @param string $field     field name to query with the parameter value
-     * @return mixed    Doctrine Entity or an array containing the error message
+     * @param string $param       parameter name to use
+     * @param string $field       field name to query with the parameter value
+     *
+     * @return mixed Doctrine Entity or an array containing the error message
      */
     public function getEntityFromQuery($entityClass, $param = 'id', $field = 'id')
     {
         $value = $this->params()->fromQuery($param);
         if (!$value) {
-            return array(self::MESSAGE_PARAM_MISSING, $param);
+            return [self::MESSAGE_PARAM_MISSING, $param];
         }
+
         return $this->getEntity($entityClass, $value, $field)
-            ?: array(self::MESSAGE_PARAM_INVALID, $param);
+            ?: [self::MESSAGE_PARAM_INVALID, $param];
     }
 
     /**
      * Shortcut function to retrieve a Doctrine entity by a simple query.
      * Returns only one entity, even if more are found!
      *
-     * @param string $entityClass   the entity class
-     * @param mixed $value          the value for which should be queried
-     * @param string $field         (optional) the column in which we want to search for
-     *     the value, defaults to "id"
-     * @return mixed                the entity or null if none found
+     * @param string $entityClass the entity class
+     * @param mixed  $value       the value for which should be queried
+     * @param string $field       (optional) the column in which we want to search for
+     *                            the value, defaults to "id"
+     *
+     * @return mixed the entity or null if none found
      */
     public function getEntity($entityClass, $value, $field = 'id')
     {
-        $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        $em         = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
         $repository = $em->getRepository($entityClass);
 
-        $entity = $repository->findOneBy(array($field => $value));
+        $entity = $repository->findOneBy([$field => $value]);
+
         return $entity;
     }
 
@@ -97,14 +106,16 @@ abstract class AbstractActionController extends ZendController
      * Renders the given partial using the model data provided.
      *
      * @param string $partial
-     * @param mixed $model      (optional) ViewModel or array with data
-     * @param string $module    (optional) name of the module where the partial resides
+     * @param mixed  $model   (optional) ViewModel or array with data
+     * @param string $module  (optional) name of the module where the partial resides
+     *
      * @return string
      */
-    public function renderPartial($partial, $model = array(), $module = null)
+    public function renderPartial($partial, $model = [], $module = null)
     {
         $partialHelper = $this->getServiceLocator()->get('viewhelpermanager')
                 ->get('partial');
+
         return $module
                 ? $partialHelper($partial, $module, $model)
                 : $partialHelper($partial, $model);
@@ -114,19 +125,20 @@ abstract class AbstractActionController extends ZendController
      * Returns the JSON response with the given partial and javascript.
      *
      * @param string $partial
-     * @param mixed $model          (optional) ViewModel or array with data
-     * @param string $javascript    (optional) javascript to be executed after
-     *     the response loaded
-     * @param string $module        (optional) name of the module where the
-     *     partial resides
+     * @param mixed  $model      (optional) ViewModel or array with data
+     * @param string $javascript (optional) javascript to be executed after
+     *                           the response loaded
+     * @param string $module     (optional) name of the module where the
+     *                           partial resides
+     *
      * @return JsonModel
      */
-    public function getAjaxResponse($partial, $model = array(),
+    public function getAjaxResponse($partial, $model = [],
             $javascript = null, $module = null)
     {
         $html = $this->renderPartial($partial, $model, $module);
 
-        $data = array('html' => $html);
+        $data = ['html' => $html];
         if ($javascript) {
             $data['script'] = $javascript;
         }
@@ -140,16 +152,17 @@ abstract class AbstractActionController extends ZendController
      *
      * @param string $message
      * @param string $url
+     *
      * @return JsonModel
      */
     public function getErrorResponse($message = null, $url = '/')
     {
         $translator = $this->getServiceLocator()->get('translator');
-        $message = $translator->translate($message ?: 'message.invalidAjaxRequest');
+        $message    = $translator->translate($message ?: 'message.invalidAjaxRequest');
 
-        $data = array(
+        $data = [
             'script' => "alert('$message'); window.location.href='$url';",
-        );
+        ];
 
         return $this->getJsonModel($data);
     }
@@ -158,13 +171,14 @@ abstract class AbstractActionController extends ZendController
      * Returns the response to redirect the user to the given URL (or home).
      *
      * @param string $url
+     *
      * @return JsonModel
      */
     public function getRedirectResponse($url = '/')
     {
-       $data = array(
+        $data = [
             'script' => "window.location.href='$url';",
-        );
+        ];
 
         return $this->getJsonModel($data);
     }
@@ -174,6 +188,7 @@ abstract class AbstractActionController extends ZendController
      * Supports JSONP when the callback is given in a paramenter named "callback".
      *
      * @param mixed $data
+     *
      * @return JsonModel
      */
     public function getJsonModel($data)
@@ -182,6 +197,7 @@ abstract class AbstractActionController extends ZendController
         if ($this->request->getQuery('callback')) {
             $json->setJsonpCallback($this->request->getQuery('callback'));
         }
+
         return $json;
     }
 }

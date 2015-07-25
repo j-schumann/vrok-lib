@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -36,9 +37,9 @@ class ActionLogger
     /**
      * Class constructor - stores the dependencies.
      *
-     * @param EntityManager $entityManager
+     * @param EntityManager                  $entityManager
      * @param AuthenticationServiceInterface $authService
-     * @param Info $clientInfo
+     * @param Info                           $clientInfo
      */
     public function __construct(
             EntityManager $entityManager,
@@ -46,8 +47,8 @@ class ActionLogger
             Info $clientInfo
     ) {
         $this->entityManager = $entityManager;
-        $this->authService = $authService;
-        $this->clientInfo = $clientInfo;
+        $this->authService   = $authService;
+        $this->clientInfo    = $clientInfo;
     }
 
     /**
@@ -55,8 +56,8 @@ class ActionLogger
      *
      * @param string $action
      * @param string $content
-     * @param int $reactionTime
-     * @param bool $flush   if true the current unitOfWork is committed to the DB
+     * @param int    $reactionTime
+     * @param bool   $flush        if true the current unitOfWork is committed to the DB
      */
     public function logAction($action, $content = null, $reactionTime = 0, $flush = false)
     {

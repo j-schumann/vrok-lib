@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -108,6 +109,7 @@ class UserManager implements
      * Called when a validation was successfully confirmed.
      *
      * @triggers userValidated
+     *
      * @param EventInterface $e
      */
     public function onValidationSuccessful(EventInterface $e)
@@ -148,6 +150,7 @@ class UserManager implements
      * Called when a validation expired.
      *
      * @triggers userValidationExpired
+     *
      * @param EventInterface $e
      */
     public function onValidationExpired(EventInterface $e)
@@ -179,7 +182,8 @@ class UserManager implements
      * Creates a new UserEntity instance and sets the provided fields.
      *
      * @param array $data
-     * @return UserEntity|array     the new user instance or an array of errors
+     *
+     * @return UserEntity|array the new user instance or an array of errors
      */
     public function createUser($data)
     {
@@ -298,6 +302,7 @@ class UserManager implements
      * Creates a new Group from the given form data.
      *
      * @param array $formData
+     *
      * @return GroupEntity
      */
     public function createGroup(array $formData)
@@ -305,7 +310,7 @@ class UserManager implements
         $em = $this->getEntityManager();
 
         $groupRepository = $em->getRepository('Vrok\Entity\Group');
-        $group = $groupRepository->updateInstance(new GroupEntity(), $formData);
+        $group           = $groupRepository->updateInstance(new GroupEntity(), $formData);
         $em->flush();
         $this->getEventManager()->trigger(self::EVENT_CREATE_GROUP_POST, $group);
 
@@ -320,22 +325,25 @@ class UserManager implements
     public function getCurrentUser()
     {
         $authService = $this->getServiceLocator()->get('AuthenticationService');
+
         return $authService->getIdentity();
     }
 
     /**
      * Checks if the current user is allowed to access the given resource (and has
      * the given privilege).
-     * Mimics BjyAuthorize\Controller\Plugin\IsAllowed
+     * Mimics BjyAuthorize\Controller\Plugin\IsAllowed.
      *
-     * @param mixed $resource
+     * @param mixed  $resource
      * @param string $privilege
+     *
      * @return bool
      */
     public function isAllowed($resource, $privilege = null)
     {
         $authorizeService =
                 $this->getServiceLocator()->get('BjyAuthorize\Service\Authorize');
+
         return $authorizeService->isAllowed($resource, $privilege);
     }
 
@@ -343,12 +351,13 @@ class UserManager implements
      * Tries to find a user whos username or email equals the given identity.
      *
      * @param string $identity
-     * @return UserEntity   or null if none found
+     *
+     * @return UserEntity or null if none found
      */
     public function getUserByIdentity($identity)
     {
         $repository = $this->getUserRepository();
-        $user = $repository->findOneBy(['username' => $identity]);
+        $user       = $repository->findOneBy(['username' => $identity]);
         if ($user) {
             return $user;
         }
@@ -362,6 +371,7 @@ class UserManager implements
      *
      * @param string $username
      * @param string $password
+     *
      * @return User|array
      */
     public function login($username, $password)
@@ -371,7 +381,7 @@ class UserManager implements
             return $validator->getMessages();
         }
 
-        $now = new \DateTime();
+        $now  = new \DateTime();
         $user = $this->getCurrentUser();
         $user->setLastLogin($now);
         $user->setLastSession($now);
@@ -383,7 +393,7 @@ class UserManager implements
     /**
      * Logs the current user out.
      *
-     * @return boolean
+     * @return bool
      */
     public function logout()
     {
@@ -413,13 +423,13 @@ class UserManager implements
         $password = $user->setRandomPassword();
 
         $emailService = $this->getServiceLocator()->get('Vrok\Service\Email');
-        $mail = $emailService->createMail();
+        $mail         = $emailService->createMail();
         $mail->setSubject('mail.user.randomPassword.subject');
 
         $viewHelperManager = $this->getServiceLocator()->get('viewhelpermanager');
-        $urlHelper = $viewHelperManager->get('url');
-        $fullUrlHelper = $viewHelperManager->get('FullUrl');
-        $url = $urlHelper('account/login');
+        $urlHelper         = $viewHelperManager->get('url');
+        $fullUrlHelper     = $viewHelperManager->get('FullUrl');
+        $url               = $urlHelper('account/login');
 
         $mail->setHtmlBody(['mail.user.randomPassword.body', [
             'displayName' => $user->getDisplayName(),
@@ -476,6 +486,7 @@ class UserManager implements
             AuthValidator::UNCATEGORIZED      => 'validate.authentication.uncategorizedFailure',
             AuthValidator::GENERAL            => 'validate.authentication.failed',
         ]);
+
         return $validator;
     }
 
@@ -492,7 +503,7 @@ class UserManager implements
     public function getPostLoginRoute()
     {
         $config = $this->getServiceLocator()->get('config');
-        $route = empty($config['user_manager']['post_login_route'])
+        $route  = empty($config['user_manager']['post_login_route'])
             ? 'account'
             : $config['user_manager']['post_login_route'];
 
@@ -525,11 +536,13 @@ class UserManager implements
      * Sets the route where search requests for user can be sent via AJAX.
      *
      * @param string $route
+     *
      * @return self
      */
     public function setUserSearchRoute($route)
     {
         $this->userSearchRoute = $route;
+
         return $this;
     }
 
@@ -541,6 +554,7 @@ class UserManager implements
     public function getUserSearchUrl()
     {
         $url = $this->getServiceLocator()->get('ControllerPluginManager')->get('url');
+
         return $url->fromRoute($this->getUserSearchRoute());
     }
 
@@ -559,11 +573,13 @@ class UserManager implements
      * The route must support the "id" parameter for the user ID.
      *
      * @param string $route
+     *
      * @return self
      */
     public function setUserAdminRoute($route)
     {
         $this->userAdminRoute = $route;
+
         return $this;
     }
 
@@ -571,11 +587,13 @@ class UserManager implements
      * Retrieve the URL where an user may be inspected/edited.
      *
      * @param int $userId
+     *
      * @return string
      */
     public function getUserAdminUrl($userId)
     {
         $url = $this->getServiceLocator()->get('ControllerPluginManager')->get('url');
+
         return $url->fromRoute($this->getUserAdminRoute(), ['id' => $userId]);
     }
 
@@ -605,7 +623,9 @@ class UserManager implements
      * between BAD and GREAT and a translation message for this rating.
      *
      * @param string $password
-     * @return array    [strength => float, rating => string, ratingText => string]
+     *
+     * @return array [strength => float, rating => string, ratingText => string]
+     *
      * @see Vrok\Stdlib\PasswordStrength
      */
     public function ratePassword($password)
@@ -613,8 +633,8 @@ class UserManager implements
         $calc = new PasswordStrength();
         $calc->setThresholds($this->getPasswordStrengthThresholds());
 
-        $strength = $calc->getStrength($password);
-        $rating = $calc->getRating($strength);
+        $strength   = $calc->getStrength($password);
+        $rating     = $calc->getRating($strength);
         $ratingText = 'message.passwordRating.'.$rating;
 
         return [
@@ -627,13 +647,15 @@ class UserManager implements
     /**
      * Retrieve a new user filter instance.
      *
-     * @param string $alias     the alias for the user record
+     * @param string $alias the alias for the user record
+     *
      * @return \Vrok\Entity\Filter\UserFilter
      */
     public function getUserFilter($alias = 'u')
     {
-        $qb = $this->getUserRepository()->createQueryBuilder($alias);
+        $qb     = $this->getUserRepository()->createQueryBuilder($alias);
         $filter = new \Vrok\Entity\Filter\UserFilter($qb);
+
         return $filter;
     }
 
@@ -671,6 +693,7 @@ class UserManager implements
      * Sets multiple config options at once.
      *
      * @todo validate $config
+     *
      * @param array $config
      */
     public function setConfig($config)

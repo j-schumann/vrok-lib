@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -9,4 +10,5 @@ namespace Vrok\Stdlib\Exception;
 
 class InvalidArgumentException extends \InvalidArgumentException
     implements ExceptionInterface
-{}
+{
+}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -22,12 +23,14 @@ class ObjectMetaFilter extends AbstractFilter
      * Retrieve only meta entries for the given meta name.
      *
      * @param string $name
+     *
      * @return self
      */
     public function byName($name)
     {
-        $this->qb->andWhere($this->alias.".name = :name")
+        $this->qb->andWhere($this->alias.'.name = :name')
            ->setParameter('name', $name);
+
         return $this;
     }
 }

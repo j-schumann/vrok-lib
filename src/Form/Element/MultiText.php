@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,16 +18,16 @@ class MultiText extends \Zend\Form\Element\Text
     implements \Vrok\Form\ElementInterface, ElementPrepareAwareInterface
 {
     /**
-     * The number of inputs to render
+     * The number of inputs to render.
      *
      * @var int
      */
     protected $inputCount = 3;
 
     /**
-     * maxlength to set on the inputs
+     * maxlength to set on the inputs.
      *
-     * @var integer
+     * @var int
      */
     protected $maxlength = 100;
 
@@ -35,19 +36,19 @@ class MultiText extends \Zend\Form\Element\Text
      *
      * @var array
      */
-    protected $elements = array();
+    protected $elements = [];
 
     /**
      * Create the required sub-elements.
      *
-     * @param  null|int|string  $name    Optional name for the element
-     * @param  array            $options Optional options for the element
+     * @param null|int|string $name    Optional name for the element
+     * @param array           $options Optional options for the element
      */
-    public function __construct($name = null, $options = array())
+    public function __construct($name = null, $options = [])
     {
         parent::__construct($name, $options);
 
-        for ($i = 0; $i < $this->inputCount; $i++) {
+        for ($i = 0; $i < $this->inputCount; ++$i) {
             $this->createText();
         }
     }
@@ -58,7 +59,7 @@ class MultiText extends \Zend\Form\Element\Text
     protected function createText()
     {
         $number = count($this->elements) + 1;
-        $text = new Text("input$number");
+        $text   = new Text("input$number");
         $text->setAttribute('maxlength', $this->maxlength);
         $this->elements[] = $text;
     }
@@ -73,8 +74,9 @@ class MultiText extends \Zend\Form\Element\Text
         if ($number > $this->inputCount) {
             throw new OutOfBoundsException(
                 'Only '.$this->inputCount
-                .' elements configured, cannot return #'.(int)$number);
+                .' elements configured, cannot return #'.(int) $number);
         }
+
         return $this->elements[$number - 1];
     }
 
@@ -82,15 +84,16 @@ class MultiText extends \Zend\Form\Element\Text
      * Sets the options (e.g. "count").
      *
      * @param array|Traversable $options
+     *
      * @return self
+     *
      * @throws \Zend\Form\Exception\InvalidArgumentException
      */
     public function setOptions($options)
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        }
-        elseif (!is_array($options)) {
+        } elseif (!is_array($options)) {
             throw new \Zend\Form\Exception\InvalidArgumentException(
                 'The options parameter must be an array or a Traversable'
             );
@@ -134,14 +137,13 @@ class MultiText extends \Zend\Form\Element\Text
     public function setInputCount($count)
     {
         $this->inputCount = $count;
-        $elementCount = count($this->elements);
+        $elementCount     = count($this->elements);
         if ($this->inputCount < $elementCount) {
-            for ($i = $this->inputCount; $i < $elementCount; $i++) {
+            for ($i = $this->inputCount; $i < $elementCount; ++$i) {
                 unset($this->elements[$i]);
             }
-        }
-        elseif($this->inputCount > $elementCount) {
-            for ($i = 0; $i < $this->inputCount - $elementCount; $i++) {
+        } elseif ($this->inputCount > $elementCount) {
+            for ($i = 0; $i < $this->inputCount - $elementCount; ++$i) {
                 $this->createText();
             }
         }
@@ -165,7 +167,7 @@ class MultiText extends \Zend\Form\Element\Text
     public function setMaxlength($maxlength = 100)
     {
         $this->maxlength = $maxlength;
-        foreach($this->elements as $element) {
+        foreach ($this->elements as $element) {
             $element->setAttribute('maxlength', $this->maxlength);
         }
     }
@@ -173,23 +175,24 @@ class MultiText extends \Zend\Form\Element\Text
     /**
      * Populates the sub-elements with the given value.
      *
-     * @param  mixed $value
+     * @param mixed $value
+     *
      * @return self
      */
     public function setValue($value)
     {
         // reset
-        foreach($this->elements as $element) {
+        foreach ($this->elements as $element) {
             $element->setValue(null);
         }
 
         // ignore other data types
         if (is_array($value)) {
             $count = 1;
-            foreach($value as $entry) {
+            foreach ($value as $entry) {
                 $this->getInput($count)->setValue($entry);
 
-                $count++;
+                ++$count;
 
                 // ignore additional entries
                 if ($count >= $this->inputCount) {
@@ -201,29 +204,30 @@ class MultiText extends \Zend\Form\Element\Text
         return $this;
     }
 
-   /**
-     * Prepare the form element (mostly used for rendering purposes)
+    /**
+     * Prepare the form element (mostly used for rendering purposes).
      *
-     * @param  FormInterface $form
+     * @param FormInterface $form
+     *
      * @return mixed
      */
     public function prepareElement(FormInterface $form)
     {
         $name = $this->getName();
-        for($i = 1; $i <= $this->inputCount; $i++) {
-            $this->getInput($i)->setName($name . "[input$i]");
+        for ($i = 1; $i <= $this->inputCount; ++$i) {
+            $this->getInput($i)->setName($name."[input$i]");
         }
     }
 
     /**
      * Clone the element (this is needed by Collection element, as it needs
-     * different copies of the elements)
+     * different copies of the elements).
      */
     public function __clone()
     {
-        $elements = array();
-        foreach($this->elements as $element) {
-            $elements   = clone $element;
+        $elements = [];
+        foreach ($this->elements as $element) {
+            $elements = clone $element;
         }
         $this->elements = $elements;
     }

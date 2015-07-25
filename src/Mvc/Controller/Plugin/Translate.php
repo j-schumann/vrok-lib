@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -17,15 +18,17 @@ class Translate extends AbstractPlugin
     /**
      * Translates the given message.
      *
-     * @param  string $message
-     * @param  string $textDomain
-     * @param  string $locale
+     * @param string $message
+     * @param string $textDomain
+     * @param string $locale
+     *
      * @return string
      */
     public function __invoke($message, $textDomain = null, $locale = null)
     {
         $translator = $this->getController()->getServiceLocator()
                 ->get('Zend\I18n\Translator\TranslatorInterface');
+
         return $translator->translate($message, $textDomain, $locale);
     }
 }

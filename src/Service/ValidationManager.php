@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -37,7 +38,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * Name of the route where an user may confirm a validation.
      * "/params" is appended to this route name when a validation object is provided
      * (fixes the display of an additional "/" on the end of the URL when no route
-     * parameters were set)
+     * parameters were set).
      *
      * @var string
      */
@@ -54,15 +55,16 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
     /**
      * List of timeouts in seconds until the validations of a type expire.
      *
-     * @var int[]   [type => timeout, ...]
+     * @var int[] [type => timeout, ...]
      */
     protected $timeouts = [];
 
     /**
      * Creates a new validation of the given type for the given owner.
      *
-     * @param string $type
+     * @param string          $type
      * @param EntityInterface $owner
+     *
      * @return ValidationEntity
      */
     public function createValidation($type, EntityInterface $owner)
@@ -89,15 +91,18 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      *
      * @triggers validationFailed
      * @triggers validationSuccessful
-     * @param int $id
+     *
+     * @param int    $id
      * @param string $token
-     * @return mixed    false|Response
+     *
+     * @return mixed false|Response
      */
     public function confirmValidation($id, $token)
     {
         $validation = $this->getValidationRepository()->find($id);
         if (!$validation) {
             $this->triggerFail();
+
             return false;
         }
 
@@ -109,14 +114,16 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
             // @todo should the validation be removed immediately or is this better done
             // by the cron job to reduce page load time?
             $this->removeIfExpired($validation);
+
             return false;
         }
 
         if ($validation->getToken() != $token) {
             $this->triggerFail($validation);
+
             return false;
         }
-        $em = $this->getEntityManager();
+        $em      = $this->getEntityManager();
         $results = $this->getEventManager()->trigger(
             self::EVENT_VALIDATION_SUCCESSFUL,
             $validation
@@ -135,6 +142,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * validationFailed event to allow logging etc.
      *
      * @triggers validationFailed
+     *
      * @param ValidationEntity $validation
      */
     protected function triggerFail(ValidationEntity $validation = null)
@@ -148,7 +156,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
         $this->getEventManager()->trigger(
             self::EVENT_VALIDATION_FAILED,
             $this,
-            ['validation' => $validation,]
+            ['validation' => $validation]
         );
     }
 
@@ -157,6 +165,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * If no validation is given the base URL to the validation form is returned.
      *
      * @param ValidationEntity $validation
+     *
      * @return string
      */
     public function getConfirmationUrl(ValidationEntity $validation = null)
@@ -178,6 +187,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      *
      * @param object $owner
      * @param string $type
+     *
      * @return array
      */
     public function getValidations(EntityInterface $owner = null, $type = null)
@@ -197,16 +207,17 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * Deletes all expired validations from the database.
      *
      * @triggers validationExpired
-     * @return int  the number of expired & deleted validations
+     *
+     * @return int the number of expired & deleted validations
      */
     public function purgeValidations()
     {
         $validations = $this->getValidationRepository()->findAll();
-        $count = 0;
+        $count       = 0;
 
-        foreach($validations as $validation) {
+        foreach ($validations as $validation) {
             if ($this->removeIfExpired($validation)) {
-                $count++;
+                ++$count;
             }
         }
 
@@ -218,8 +229,10 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * if it is expired.
      *
      * @triggers validationExpired
+     *
      * @param ValidationEntity $validation
-     * @return boolean  true if the validation is expired and was removed, else false
+     *
+     * @return bool true if the validation is expired and was removed, else false
      */
     protected function removeIfExpired(ValidationEntity $validation)
     {
@@ -246,7 +259,8 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * Returns true if the given validation is expired, else false.
      *
      * @param ValidationEntity $validation
-     * @return boolean
+     *
+     * @return bool
      */
     public function isExpiredValidation(ValidationEntity $validation)
     {
@@ -266,11 +280,13 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * Retrieve a new filter instance to search for validations.
      *
      * @param string $alias
+     *
      * @return ValidationFilter
      */
     public function getValidationFilter($alias = 'v')
     {
         $qb = $this->getValidationRepository()->createQueryBuilder($alias);
+
         return new ValidationFilter($qb);
     }
 
@@ -287,6 +303,7 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * null if no timeout was set (validation will never expire).
      *
      * @param string $type
+     *
      * @return int|null
      */
     public function getTimeout($type)
@@ -300,8 +317,9 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * Sets the time in seconds validations of the given type are valid.
      *
      * @todo validate args
+     *
      * @param string $type
-     * @param int $timeout
+     * @param int    $timeout
      */
     public function setTimeout($type, $timeout)
     {
@@ -312,11 +330,12 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
      * Sets multiple timeouts at once.
      *
      * @todo use Zend Guard to check for array etc
+     *
      * @param array $timeouts
      */
     public function setTimeouts(array $timeouts)
     {
-        foreach($timeouts as $type => $timeout) {
+        foreach ($timeouts as $type => $timeout) {
             $this->setTimeout($type, $timeout);
         }
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -32,7 +33,7 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
     /**
      * Returns true if and only if storage is empty.
      *
-     * @return boolean
+     * @return bool
      */
     public function isEmpty()
     {
@@ -42,6 +43,7 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
         $identity = $this->read();
         if ($identity === null) {
             $this->clear();
+
             return true;
         }
 
@@ -60,7 +62,7 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
         $identity = $this->getStorage()->read();
 
         if (is_int($identity) || is_scalar($identity)) {
-            $em = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+            $em       = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
             $identity = $em->getRepository('Vrok\Entity\User')->find($identity);
         }
 
@@ -74,9 +76,9 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
     }
 
     /**
-     * Writes $contents to storage
+     * Writes $contents to storage.
      *
-     * @param  mixed $contents
+     * @param mixed $contents
      */
     public function write($contents)
     {
@@ -85,7 +87,7 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
     }
 
     /**
-     * Clears contents from storage
+     * Clears contents from storage.
      */
     public function clear()
     {
@@ -101,8 +103,9 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
     public function getStorage()
     {
         if (null === $this->storage) {
-            $this->setStorage(new Storage\Session);
+            $this->setStorage(new Storage\Session());
         }
+
         return $this->storage;
     }
 
@@ -110,11 +113,13 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
      * Allows to set a custom storage.
      *
      * @param StorageInterface $storage
+     *
      * @return self
      */
     public function setStorage(StorageInterface $storage)
     {
         $this->storage = $storage;
+
         return $this;
     }
 }

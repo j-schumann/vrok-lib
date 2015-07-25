@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -65,11 +66,13 @@ class Owner implements EventManagerAwareInterface
      * sent to, the action must return the result in uniform format for all types.
      *
      * @param string $ownerClass
+     *
      * @return string
      */
     public function getOwnerSearchUrl($ownerClass)
     {
         $strategy = $this->getOwnerStrategy($ownerClass);
+
         return $strategy->getOwnerSearchUrl();
     }
 
@@ -77,11 +80,13 @@ class Owner implements EventManagerAwareInterface
      * Returns the URL to the admin page to view or edit the owner.
      *
      * @param EntityInterface $owner
+     *
      * @return string
      */
     public function getOwnerAdminUrl(EntityInterface $owner)
     {
         $strategy = $this->getOwnerStrategy(get_class($owner));
+
         return $strategy->getOwnerAdminUrl($owner);
     }
 
@@ -90,11 +95,13 @@ class Owner implements EventManagerAwareInterface
      * e.g. username + email; account number etc.
      *
      * @param EntityInterface $owner
+     *
      * @return string
      */
     public function getOwnerPresentation(EntityInterface $owner)
     {
         $strategy = $this->getOwnerStrategy(get_class($owner));
+
         return $strategy->getOwnerPresentation($owner);
     }
 
@@ -103,9 +110,12 @@ class Owner implements EventManagerAwareInterface
      * result in a local hash.
      *
      * @triggers getOwnerStrategy
+     *
      * @param string $ownerClass
-     * @param bool $throwException
-     * @return StrategyInterface   or null if none found
+     * @param bool   $throwException
+     *
+     * @return StrategyInterface or null if none found
+     *
      * @throws Exception\RuntimeException if no strategy was found and throwException is true
      */
     public function getOwnerStrategy($ownerClass, $throwException = false)
@@ -120,10 +130,10 @@ class Owner implements EventManagerAwareInterface
                 throw new Exception\RuntimeException("Class $ownerClass does not exist!");
             }
 
-            return null;
+            return;
         }
 
-        $classes = class_parents($ownerClass);
+        $classes   = class_parents($ownerClass);
         $classes[] = $ownerClass;
 
         // try to find a strategy that feels responsible for the given class or
@@ -132,7 +142,7 @@ class Owner implements EventManagerAwareInterface
             self::EVENT_GET_OWNER_STRATEGY,
             $this,
             ['classes' => $classes],
-            function($result) {
+            function ($result) {
                 return $result instanceof StrategyInterface;
             }
         );
@@ -149,24 +159,25 @@ class Owner implements EventManagerAwareInterface
             throw new Exception\RuntimeException('No strategy for '.$ownerClass.' found!');
         }
 
-        return null;
+        return;
     }
 
     /**
      * Checks if the given owner is allowed for the given entity.
      *
      * @param HasReferenceInterface $entity
-     * @param EntityInterface $owner
+     * @param EntityInterface       $owner
+     *
      * @return bool
      */
     public function isAllowedOwner(HasReferenceInterface $entity, EntityInterface $owner)
     {
-        foreach($this->allowedOwners as $entityClass => $owners) {
-            if (!$entity instanceOf $entityClass && !is_subclass_of($entity, $entityClass)) {
+        foreach ($this->allowedOwners as $entityClass => $owners) {
+            if (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass)) {
                 continue;
             }
 
-            foreach($owners as $ownerClass) {
+            foreach ($owners as $ownerClass) {
                 if ($owner instanceof $ownerClass || is_subclass_of($owner, $ownerClass)) {
                     return true;
                 }
@@ -178,9 +189,10 @@ class Owner implements EventManagerAwareInterface
 
     /**
      * Retrieve all owner classes that are allowed for the given entity.
-     * (Does not include the child classes of course.)
+     * (Does not include the child classes of course.).
      *
      * @param string $entityClass
+     *
      * @return array
      */
     public function getAllowedOwners($entityClass)
@@ -209,7 +221,8 @@ class Owner implements EventManagerAwareInterface
      * Sets multiple entity=>owner relations at once.
      *
      * @todo use zend guard for traversable
-     * @param array $allowedOwners  [entity => [owner, ...], ...]
+     *
+     * @param array $allowedOwners [entity => [owner, ...], ...]
      */
     public function setAllowedOwners(array $allowedOwners)
     {

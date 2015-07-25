@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -53,11 +54,13 @@ trait GeolocationInformation
      * Sets the latitude.
      *
      * @param string $latitude
+     *
      * @return self
      */
     public function setLatitude($latitude)
     {
         $this->latitude = $latitude;
+
         return $this;
     }
 // </editor-fold>
@@ -82,11 +85,13 @@ trait GeolocationInformation
      * Sets the longitude.
      *
      * @param string $longitude
+     *
      * @return self
      */
     public function setLongitude($longitude)
     {
         $this->longitude = $longitude;
+
         return $this;
     }
 // </editor-fold>

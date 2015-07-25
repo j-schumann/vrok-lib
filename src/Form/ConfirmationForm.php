@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -19,13 +20,13 @@ class ConfirmationForm extends Form
     {
         $this->addCsrfElement('csrfConfirm');
 
-        $this->add(array(
+        $this->add([
             'name'       => 'confirm',
-            'attributes' => array(
+            'attributes' => [
                 'type'  => 'submit',
                 'value' => 'form.confirm',
-            )
-        ));
+            ],
+        ]);
     }
 
     /**
@@ -36,6 +37,6 @@ class ConfirmationForm extends Form
      */
     public function setConfirmationMessage($message)
     {
-        $this->get('confirm')->setOptions(array('description' => $message));
+        $this->get('confirm')->setOptions(['description' => $message]);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -47,11 +48,13 @@ class ActionLog extends Entity
      * Sets the action name.
      *
      * @param string $value
+     *
      * @return self
      */
     public function setAction($value)
     {
         $this->action = $value;
+
         return $this;
     }
 // </editor-fold>
@@ -76,17 +79,19 @@ class ActionLog extends Entity
      * Sets the content to be validated (e.g. new email address).
      *
      * @param string $value
+     *
      * @return self
      */
     public function setContent($value)
     {
         $this->content = $value;
+
         return $this;
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="ipAddress">
     /**
-     * IPV6 = 32 characters + 5 colons
+     * IPV6 = 32 characters + 5 colons.
      *
      * @var string
      * @ORM\Column(type="string", length=39, nullable=true)
@@ -107,11 +112,13 @@ class ActionLog extends Entity
      * Sets the IP address from which the questionare was submitted.
      *
      * @param string $ipAddress
+     *
      * @return self
      */
     public function setIpAddress($ipAddress)
     {
         $this->ipAddress = $ipAddress;
+
         return $this;
     }
 // </editor-fold>
@@ -137,17 +144,19 @@ class ActionLog extends Entity
      * Sets the assigned user account.
      *
      * @param \Vrok\Entity\User $user
+     *
      * @return self
      */
     public function setUser(\Vrok\Entity\User $user)
     {
         $this->user = $user;
+
         return $this;
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="reactionTime">
     /**
-     * @var integer
+     * @var int
      * @ORM\Column(type="integer", options={"default" = 0})
      */
     protected $reactionTime = 0;
@@ -155,7 +164,7 @@ class ActionLog extends Entity
     /**
      * Returns the reaction time used for this action.
      *
-     * @return integer
+     * @return int
      */
     public function getReactionTime()
     {
@@ -165,12 +174,14 @@ class ActionLog extends Entity
     /**
      * Sets reaction time for this action.
      *
-     * @param integer $value
+     * @param int $value
+     *
      * @return self
      */
     public function setReactionTime($value)
     {
         $this->reactionTime = $value;
+
         return $this;
     }
 // </editor-fold>

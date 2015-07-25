@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -26,6 +27,7 @@ interface StrategyInterface
      * Returns the URL to the admin page to view or edit the owner.
      *
      * @param object $owner
+     *
      * @return string
      */
     public function getOwnerAdminUrl(EntityInterface $owner);
@@ -35,6 +37,7 @@ interface StrategyInterface
      * e.g. username + email; account number etc.
      *
      * @param object $owner
+     *
      * @return object
      */
     public function getOwnerPresentation(EntityInterface $owner);
@@ -43,6 +46,7 @@ interface StrategyInterface
      * Checks if the given object is a valid owner supported by this strategy.
      *
      * @param object $owner
+     *
      * @return bool
      */
     public function isValidOwner(EntityInterface $owner);

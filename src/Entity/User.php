@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -67,13 +68,14 @@ class User extends Entity implements RoleProviderInterface
      * Sets the users password to a random token of the given length.
      * Also sets the isRandomPassword flag to true.
      *
-     * @return string   the random password
+     * @return string the random password
      */
     public function setRandomPassword($length = 10)
     {
-        $password = Random::getRandomToken((int)$length);
+        $password = Random::getRandomToken((int) $length);
         $this->setPassword($password);
         $this->setIsRandomPassword(true);
+
         return $password;
     }
 
@@ -81,7 +83,8 @@ class User extends Entity implements RoleProviderInterface
      * Checks if the given password matches the stored one.
      *
      * @param string $password
-     * @return boolean
+     *
+     * @return bool
      */
     public function checkPassword($password)
     {
@@ -97,8 +100,9 @@ class User extends Entity implements RoleProviderInterface
      */
     public function getRoles()
     {
-        $roles = $this->groups->toArray();
+        $roles   = $this->groups->toArray();
         $roles[] = new \Zend\Permissions\Acl\Role\GenericRole('user');
+
         return $roles;
     }
 
@@ -106,11 +110,12 @@ class User extends Entity implements RoleProviderInterface
      * Returns true if the user is in the group given by name, else false.
      *
      * @param string $groupName
-     * @return boolean
+     *
+     * @return bool
      */
     public function inGroup($groupName)
     {
-        foreach($this->getGroups() as $group) {
+        foreach ($this->getGroups() as $group) {
             if ($group->getName() === $groupName) {
                 return true;
             }
@@ -141,11 +146,13 @@ class User extends Entity implements RoleProviderInterface
      * Must be unique.
      *
      * @param string $username
+     *
      * @return self
      */
     public function setUsername($username)
     {
         $this->username = (string) $username;
+
         return $this;
     }
 // </editor-fold>
@@ -170,11 +177,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets the users displayName.
      *
      * @param string $displayName
+     *
      * @return self
      */
     public function setDisplayName($displayName)
     {
         $this->displayName = (string) $displayName;
+
         return $this;
     }
 // </editor-fold>
@@ -186,17 +195,20 @@ class User extends Entity implements RoleProviderInterface
     protected $email;
 
     /**
-     * Returns the users email
+     * Returns the users email.
      *
      * @param bool $punyEncoded (optional) convert mail to IDN compatible format
+     *
      * @return string
      */
     public function getEmail($punyEncoded = false)
     {
         if ($punyEncoded) {
             $idna = new \Vrok\Stdlib\IdnaConvert();
+
             return $idna->encode($this->email);
         }
+
         return $this->email;
     }
 
@@ -204,11 +216,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets the users email.
      *
      * @param string $email
+     *
      * @return self
      */
     public function setEmail($email)
     {
         $this->email = (string) $email;
+
         return $this;
     }
 // </editor-fold>
@@ -218,7 +232,6 @@ class User extends Entity implements RoleProviderInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $password;
-
 
     /**
      * Returns the users (encrypted) password.
@@ -235,6 +248,7 @@ class User extends Entity implements RoleProviderInterface
      * Sets the isRandomPassword flag to false.
      *
      * @param string $password
+     *
      * @return self
      */
     public function setPassword($password)
@@ -242,6 +256,7 @@ class User extends Entity implements RoleProviderInterface
         $this->password = password_hash($password, PASSWORD_DEFAULT);
         $this->setIsRandomPassword(false);
         $this->setPasswordDate(new \DateTime());
+
         return $this;
     }
 
@@ -276,11 +291,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets whether or not the users password is a automatically generated one.
      *
      * @param bool $isRandomPassword
+     *
      * @return self
      */
     public function setIsRandomPassword($isRandomPassword = true)
     {
         $this->isRandomPassword = (bool) $isRandomPassword;
+
         return $this;
     }
 // </editor-fold>
@@ -305,11 +322,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets the last session date.
      *
      * @param \DateTime $lastSession
+     *
      * @return self
      */
     public function setLastSession(\DateTime $lastSession)
     {
         $this->lastSession = $lastSession;
+
         return $this;
     }
 // </editor-fold>
@@ -334,11 +353,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets the last login date.
      *
      * @param \DateTime $lastLogin
+     *
      * @return self
      */
     public function setLastLogin(\DateTime $lastLogin)
     {
         $this->lastLogin = $lastLogin;
+
         return $this;
     }
 // </editor-fold>
@@ -363,11 +384,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets the date of the last password change.
      *
      * @param \DateTime $passwordDate
+     *
      * @return self
      */
     public function setPasswordDate(\DateTime $passwordDate)
     {
         $this->passwordDate = $passwordDate;
+
         return $this;
     }
 // </editor-fold>
@@ -392,11 +415,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets whether the user is active or not.
      *
      * @param bool $isActive
+     *
      * @return self
      */
     public function setIsActive($isActive)
     {
         $this->isActive = (bool) $isActive;
+
         return $this;
     }
 // </editor-fold>
@@ -421,11 +446,13 @@ class User extends Entity implements RoleProviderInterface
      * Sets whether the user is validated or not.
      *
      * @param bool $isValidated
+     *
      * @return self
      */
     public function setIsValidated($isValidated)
     {
         $this->isValidated = (bool) $isValidated;
+
         return $this;
     }
 // </editor-fold>

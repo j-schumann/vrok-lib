@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   (c) 2014, Vrok
  * @license     http://customlicense CustomLicense
@@ -48,8 +49,9 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
      * The original helper would escape HTML, we don't want this to enable providing
      * links in the flash messages.
      *
-     * @param  array $messages
-     * @param  string  $class
+     * @param array  $messages
+     * @param string $class
+     *
      * @return string
      */
     protected function format($messages, $class)
@@ -61,7 +63,7 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
         // Flatten message array
         $messagesToPrint = [];
 
-        $translator = $this->getTranslator();
+        $translator           = $this->getTranslator();
         $translatorTextDomain = $this->getTranslatorTextDomain();
 
         array_walk_recursive($messages, function ($item) use (&$messagesToPrint, $translator, $translatorTextDomain) {
@@ -79,7 +81,7 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
         }
 
         // Generate markup
-        $markup  = sprintf($this->getMessageOpenFormat(), $class);
+        $markup = sprintf($this->getMessageOpenFormat(), $class);
         $markup .= implode(sprintf($this->getMessageSeparatorString(), $class), $messagesToPrint);
         $markup .= $this->getMessageCloseString();
 
