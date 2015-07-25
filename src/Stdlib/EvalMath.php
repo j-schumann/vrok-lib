@@ -5,6 +5,7 @@ namespace Vrok\Stdlib;
 // @todo Github/packagist repo finden dass die aktuelle Version enthält
 // damit sie nicht hier manuell eingefügt werden muss
 
+// https://github.com/moodle/moodle/blob/master/lib/evalmath/evalmath.class.php
 // patches:
 // - function EvalMath
 // + public function __construct

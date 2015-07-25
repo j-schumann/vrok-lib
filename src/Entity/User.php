@@ -204,7 +204,7 @@ class User extends Entity implements RoleProviderInterface
     public function getEmail($punyEncoded = false)
     {
         if ($punyEncoded) {
-            $idna = new \Vrok\Stdlib\IdnaConvert();
+            $idna = new \idna_convert();
 
             return $idna->encode($this->email);
         }

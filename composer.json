@@ -10,7 +10,8 @@
         "doctrine/doctrine-orm-module": "~0.9.0",
         "gedmo/doctrine-extensions": "~2.4.1",
         "rwoverdijk/assetmanager": "~1.4.1",
-        "zendframework/zendframework": "~2.5.1"
+        "zendframework/zendframework": "~2.5.1",
+        "phlylabs/idna-convert": "~0.9.0"
     },
     "autoload": {
         "psr-4": {

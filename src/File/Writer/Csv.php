@@ -25,7 +25,7 @@ class Csv extends CsvFile
 
     /**
      * Allows to specify a mapping of indexes to csv columns.
-     * map = array(1 => 'Column A', 'timestamp' => 'Column B').
+     * map = [1 => 'Column A', 'timestamp' => 'Column B'].
      *
      * Columns not found in the map keep their indizes
      *

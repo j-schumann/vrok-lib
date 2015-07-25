@@ -27,10 +27,10 @@ class Csv extends CsvFile
 
     /**
      * Allows to specify a mapping of columns to new indexes.
-     * A) map = array(1 => 'Column A', 2 => 'Column B')
+     * A) map = [1 => 'Column A', 2 => 'Column B']
      *    if no csv headers are given.
      *
-     * B) map = array('csvhead1' => 'Important Column', 'csvhead2' => 'Additional Column')
+     * B) map = ['csvhead1' => 'Important Column', 'csvhead2' => 'Additional Column']
      *    if the csv headers should be renamed
      *
      * Columns not found in the map keep their indizes / old headers
