@@ -135,6 +135,20 @@ abstract class AbstractFilter
     }
 
     /**
+     * Limits the number of records returned.
+     *
+     * @param int $limit
+     *
+     * @return self
+     */
+    public function limit($limit)
+    {
+        $this->qb->setMaxResults($limit);
+
+        return $this;
+    }
+
+    /**
      * Constructs a paginator for the current query.
      *
      * @return \Zend\Paginator\Paginator
