@@ -135,10 +135,11 @@
         var data = form.serialize();
 
         // the result container, the form itself or the DOM node given via id
-        var $container = container
-            ? $('#'+container)
-            : $(form.context.parentNode);
-
+        if (typeof(element) === 'string') {
+            container = $('#'+container);
+        }
+        var $container = container ? $(container) : $(form.context.parentNode);
+console.log(container);
         if (defaults.showOverlay) {
             $container.loading();
         }

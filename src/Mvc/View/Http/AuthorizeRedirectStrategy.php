@@ -53,9 +53,9 @@ class AuthorizeRedirectStrategy implements
     public function attach(EventManagerInterface $events)
     {
         $this->listeners[] = $events->attach(
-            MvcEvent::EVENT_DISPATCH,
-            [$this, 'onDispatch'],
-            5000
+            MvcEvent::EVENT_ROUTE,
+            [$this, 'onRoute'],
+            5000 // to run *before* BjyAuthorize
         );
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_DISPATCH_ERROR,
@@ -69,10 +69,10 @@ class AuthorizeRedirectStrategy implements
      *
      * @param \Zend\Mvc\MvcEvent $event
      */
-    public function onDispatch(MvcEvent $event)
+    public function onRoute(MvcEvent $event)
     {
         // redirect to login is not necessary for console...
-        if (!$event->getRequest() instanceof HttpRequest) {
+        if (! $event->getRequest() instanceof HttpRequest) {
             return;
         }
 
@@ -108,9 +108,13 @@ class AuthorizeRedirectStrategy implements
             // logged out now. But our activity-timeout message is not displayed.
             // also: we should differentiate between XHR that only expect JSON etc
             // and those that support the script-redirect
-            $helper = $cm->get('loginRedirector');
+//            $helper = $cm->get('loginRedirector');
 
-            return $helper->gotoLogin();
+//            return $helper->gotoLogin();
+            // let the dispatch finished. If the requested resource is
+            // accessible to logged out users it is fine, else the
+            // onDispatchError will handle it.
+            return;
         }
 
         // @todo XHR requests that are triggered periodically also keep the user
@@ -240,6 +244,7 @@ class AuthorizeRedirectStrategy implements
      */
     public function getTtl()
     {
+        //return 30;
         return $this->ttl;
     }
 

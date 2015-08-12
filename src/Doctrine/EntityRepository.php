@@ -8,6 +8,7 @@
 
 namespace Vrok\Doctrine;
 
+use DoctrineModule\Stdlib\Hydrator\DoctrineObject;
 use Doctrine\ORM\EntityRepository as DoctrineRepository;
 use Vrok\Stdlib\Guard\ObjectGuardTrait;
 use Vrok\Stdlib\Guard\InstanceOfGuardTrait;
@@ -216,8 +217,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     public function getFormHelper()
     {
         if (!$this->formHelper) {
-            $this->formHelper = new \Vrok\Doctrine\FormHelper($this->_class,
-                    $this->getEntityManager());
+            $this->formHelper = new FormHelper($this->_class, $this->getEntityManager());
         }
 
         return $this->formHelper;
@@ -253,8 +253,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
         if ($changeset !== null) {
             $old = $this->getInstanceData($instance);
         }
-        $hydrator = new \DoctrineModule\Stdlib\Hydrator\DoctrineObject(
-                $this->getEntityManager());
+        $hydrator = new DoctrineObject($this->getEntityManager());
         $object = $hydrator->hydrate($formData, $instance);
 
         $this->getEntityManager()->persist($object);
@@ -281,14 +280,13 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     /**
      * Retrieve the entity data as array.
      *
-     * @param \Vrok\Doctrine\Entity $instance
+     * @param Entity $instance
      *
      * @return array
      */
     public function getInstanceData(Entity $instance)
     {
-        $hydrator = new \DoctrineModule\Stdlib\Hydrator\DoctrineObject(
-                $this->getEntityManager());
+        $hydrator = new DoctrineObject($this->getEntityManager());
 
         return $hydrator->extract($instance);
     }

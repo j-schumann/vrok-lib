@@ -76,13 +76,17 @@ else {
     $eh = $this->plugin('FormElement');
 }
 
-$elementClasses = [$this->element->getAttribute('class')];
+$elementClasses = [];
 if ($type !== 'checkbox' && $type !== 'file' && $type !== 'radio') {
     $elementClasses[] = 'form-control';
 }
 if ($type === 'submit') {
    $elementClasses[] = 'btn btn-primary';
+} elseif ($type === 'button' || $type === 'reset') {
+   $elementClasses[] = 'btn btn-default';
 }
+// append the custom classes so they can overwrite the default classes
+$elementClasses[] = $this->element->getAttribute('class');
 
 $this->element->setAttribute('class', implode(' ', $elementClasses));
 $elementMarkup = $eh($this->element);
@@ -92,7 +96,13 @@ if (count($element->getMessages())) {
     $errorMarkup = $this->formElementErrors()->render($element, ['class' => 'errors help-block']);
 }
 
-if ($type === 'checkbox') {
+if ($type === 'button') {
+    echo $containerOpen
+            .$elementMarkup
+            .$errorMarkup
+            .$descriptionMarkup
+        .$containerClose;
+} elseif ($type === 'checkbox') {
     echo $containerOpen
             .$labelOpen
                 .$elementMarkup
