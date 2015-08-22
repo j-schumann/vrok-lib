@@ -92,8 +92,8 @@ class ErrorHandler
             return false;
         }
 
-        // by default the application will be stopped if not changed later on,
-        // e.g. for deprecated warnings
+        // by default the application will be stopped
+        // (if not changed later on, e.g. for deprecated warnings)
         $return = false;
 
         switch ($errno) {
@@ -154,8 +154,8 @@ class ErrorHandler
         // default handling we have to display the error ourselves
         $display = ini_get('display_errors');
         if ($display === 'on' || $display == 1) {
-            echo "Uncaught exception '".get_class($e)."' with message '"
-                .$e->getMessage()."' in ".$e->getFile().':'.$e->getLine()
+            echo 'Uncaught exception "'.get_class($e).'" with message "'
+                .$e->getMessage().'" in '.$e->getFile().':'.$e->getLine()."\n"
                 .' Stack trace: '.$e->getTraceAsString();
         }
     }
@@ -233,6 +233,7 @@ class ErrorHandler
         if (!headers_sent()) {
             header('Location: '.$this->redirectUrl);
         } else {
+            // @todo auf XHR prüfen und ggf JSON zurückgeben
             echo '<script type="text/javascript">window.location =  "'
                 .$this->redirectUrl.'";</script>';
         }

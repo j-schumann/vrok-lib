@@ -31,9 +31,12 @@ class UTCDateTimeType extends DateTimeType
             self::$utc = new \DateTimeZone('UTC');
         }
 
-        $value->setTimeZone(self::$utc);
+        // clone here to preserve the timezone of the original object passed
+        // to the query or entity
+        $datetime = clone $value;
+        $datetime->setTimeZone(self::$utc);
 
-        return $value->format($platform->getDateTimeFormatString());
+        return $datetime->format($platform->getDateTimeFormatString());
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform)

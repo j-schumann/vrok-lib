@@ -343,11 +343,12 @@ class FormHelper implements InputFilterProviderInterface
     public function getAssociationSpecification($associationName)
     {
         $association = $this->metadata->associationMappings[$associationName];
+        $required = $this->associationIsRequired($association);
 
-        return [
+        $spec = [
             'name'       => $associationName,
-            'required'   => $this->associationIsRequired($association),
-            'allowEmpty' => !$this->associationIsRequired($association),
+            'required'   => $required,
+            'allowEmpty' => !$required,
             'filters'    => [
                 'null' => [
                     'name'    => 'Zend\Filter\ToNull',
@@ -358,6 +359,12 @@ class FormHelper implements InputFilterProviderInterface
             ],
             // @todo object exists validator?
         ];
+
+        if ($required) {
+            $spec['validators']['notEmpty'] = $this->getNotEmptyValidatorSpecification();
+        }
+
+        return $spec;
     }
 
     /**

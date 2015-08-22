@@ -24,9 +24,17 @@ use Zend\Stdlib\ResponseInterface as ResponseInterface;
 use Zend\View\Model\ViewModel;
 
 /**
- * Listens on the dispatchEvent to check if the authorization failed, if yes redirect
- * the logged out user to the login form or show the 403 page if the user is logged in.
+ * Listens on the dispatchErrorEvent to check if the authorization failed, if yes
+ * redirect the logged out user to the login form or show the 403 page if the
+ * user is logged in.
  * Allows to redirect the user back to his source page after login.
+ *
+ * Listens to the routeEvent to log the user out if the activitityTimeout is
+ * reached (independently from the session timeout).
+ *
+ * This strategy is serviceLocatorAware as the dependencies (urlHelper,
+ * flashMessenger, config) are only used in rare cases, we don't want to
+ * fetch/instantiate those on every single page hit.
  */
 class AuthorizeRedirectStrategy implements
     ListenerAggregateInterface,
@@ -35,17 +43,20 @@ class AuthorizeRedirectStrategy implements
     use ListenerAggregateTrait;
     use ServiceLocatorAwareTrait;
 
+    const DEFAULT_TTL = 1800; // 30*60
+
     /**
      * @var string
      */
     protected $template = 'error/403';
 
     /**
-     * Number of seconds a user may be inactive before being logged out an the next hit.
+     * Number of seconds a user may be inactive before being logged out on the
+     * next hit.
      *
      * @var int
      */
-    protected $ttl = 1800; // 30*60
+    protected $ttl = null;
 
     /**
      * {@inheritDoc}
@@ -55,13 +66,40 @@ class AuthorizeRedirectStrategy implements
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_ROUTE,
             [$this, 'onRoute'],
-            5000 // to run *before* BjyAuthorize
+            5000 // to run *before* BjyAuthorize, so the user is already logged
+                 // out when the permissions are checked
+        );
+        $this->listeners[] = $events->attach(
+            MvcEvent::EVENT_DISPATCH,
+            [$this, 'onDispatch'],
+            -5000 // to run *after* the RouteNotFoundStrategy
         );
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_DISPATCH_ERROR,
             [$this, 'onDispatchError'],
-            -5000
+            -5000 // to run (almost) last (assetManager has lower prio)
         );
+    }
+
+    /**
+     * Deactivate the layout for XHR requests that triggered a 404.
+     *
+     * @param \Zend\Mvc\MvcEvent $event
+     */
+    public function onDispatch(MvcEvent $event)
+    {
+        $response = $event->getResponse();
+        if ($response->getStatusCode() != 404) {
+            // Only handle 404 responses
+            return;
+        }
+
+        if ($event->getRequest()->isXmlHttpRequest()) {
+            $vm = $event->getViewModel();
+            $firstChild = $vm->getChildren()[0];
+            $firstChild->setTerminal(true);
+            $event->setViewModel($firstChild);
+        }
     }
 
     /**
@@ -99,19 +137,9 @@ class AuthorizeRedirectStrategy implements
 
             $cm        = $this->getServiceLocator()->get('ControllerPluginManager');
             $messenger = $cm->get('flashMessenger');
-            $messenger->addErrorMessage($message);
+            $messenger->addInfoMessage($message);
 
-            // @todo the helper returns a viewmodel containing a script-redirect
-            // when the request is a XHR. This viewmodel is ignored by the event
-            // trigger, the user is then redirected with error 500 to the login page
-            // when he has no privilege to access the called page because is his
-            // logged out now. But our activity-timeout message is not displayed.
-            // also: we should differentiate between XHR that only expect JSON etc
-            // and those that support the script-redirect
-//            $helper = $cm->get('loginRedirector');
-
-//            return $helper->gotoLogin();
-            // let the dispatch finished. If the requested resource is
+            // let the dispatch finish. If the requested resource is
             // accessible to logged out users it is fine, else the
             // onDispatchError will handle it.
             return;
@@ -146,8 +174,8 @@ class AuthorizeRedirectStrategy implements
 
         // Common view variables
         $viewVariables = [
-            'error'   => $event->getParam('error'),
-           'identity' => $event->getParam('identity'),
+            'error'    => $event->getParam('error'),
+            'identity' => $event->getParam('identity'),
         ];
 
         switch ($event->getError()) {
@@ -196,7 +224,7 @@ class AuthorizeRedirectStrategy implements
             $response->setStatusCode(403);
             $event->setResponse($response);
 
-            return;
+            return $response;
         }
 
         // no identity -> not logged in -> redirect to login page
@@ -205,14 +233,23 @@ class AuthorizeRedirectStrategy implements
         $messenger->addErrorMessage('message.user.loginRequired');
 
         $helper = $cm->get('loginRedirector');
-        $result = $helper->gotoLogin();
+        $redirect = $helper->gotoLogin();
 
-        // Helper returns JsonModel for XHR and a response with the location header
-        // for "normal" requests
-        if ($result instanceof ViewModel) {
-            $event->setViewModel($result);
+        // prevent further listeners, we already decided to return a 403,
+        // no need to check for assets etc.
+        $event->stopPropagation();
+
+        // @todo how can we differentiate between XHR that only expect JSON etc
+        // and those that support the script-redirect for vrok-lib.js?
+
+        // Helper returns JsonModel for XHR and a response with the location
+        // header for "normal" requests
+        if ($redirect instanceof ViewModel) {
+            $event->setViewModel($redirect);
+            $response->setStatusCode(403); // else we would see an error 500
         } else {
-            $event->setResponse($result);
+            $event->setResponse($redirect);
+            return $redirect; // return directly to prevent view rendering
         }
     }
 
@@ -235,16 +272,20 @@ class AuthorizeRedirectStrategy implements
     /**
      * Returns the number seconds a user may be inactive before being logged out.
      *
-     * $return int
+     * The TTL is only used when a user is logged in so we fetch it only when
+     * required and not set instead of injecting on every page hit via factory.
      *
-     * @todo konfigurierbar machen. Die Strategy ist servicelocator-aware weil nicht alle
-     * dependencies injected werden sollen (nur in den allerwenigsten Fällen brauchen wir
-     * tatsächlich den LoginRedirector und den Messenger, die Strategy wird aber bei jedem
-     * Pagehit geladen). Daher hier auch die TTL aus dem SM holen.
+     * $return int
      */
     public function getTtl()
     {
-        //return 30;
+        if (!$this->ttl) {
+            $config = $this->getServiceLocator()->get('Config');
+            $this->ttl = isset($config['user_manager']['activity_timeout'])
+                ? (int)$config['user_manager']['activity_timeout']
+                : self::DEFAULT_TTL;
+        }
+
         return $this->ttl;
     }
 

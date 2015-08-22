@@ -8,13 +8,16 @@
 
 namespace Vrok\Mvc\Controller\Plugin;
 
+use Zend\Http\Request;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 use Zend\Session\Container as SessionContainer;
+use Zend\View\Helper\Url as UrlHelper;
 use Zend\View\Model\JsonModel;
 
 /**
- * Allows to redirect the user to the login page and then redirect back to the source page.
+ * Allows to redirect the user to the login page and then redirect back to the
+ * source page.
  */
 class LoginRedirector extends AbstractPlugin
 {
@@ -26,7 +29,7 @@ class LoginRedirector extends AbstractPlugin
     protected $loginRoute = 'account/login';
 
     /**
-     * @var \Zend\Http\PhpEnvironment\Request
+     * @var Request
      */
     protected $request = null;
 
@@ -36,7 +39,7 @@ class LoginRedirector extends AbstractPlugin
     protected $session = null;
 
     /**
-     * @var \Zend\View\Helper\Url
+     * @var UrlHelper
      */
     protected $urlHelper = null;
 
@@ -66,18 +69,28 @@ class LoginRedirector extends AbstractPlugin
         $helper = $this->urlHelper;
         $url    = $helper($this->loginRoute);
 
-        // we cannot redirect back after failed XHRs, we would need to check the referer
-        // which must not be set or helpful
+        /*
+         * Detection of XHR is based an the X_REQUESTED_WITH header, any AJAX
+         * requests without that header (e.g. D3.js or cross-domain requests)
+         * cannot be detected this way and will be handled as normal requests.
+         *
+         * We cannot redirect back after login for failed XHRs as they are no
+         * normal page, so we simply return the message&redirect without setting
+         * the returnAfterLogin URL.
+         */
         if ($this->request->isXmlHttpRequest()) {
             // this "script" result is only supported by Vrok.Tools.processResponse
             // in vrok-lib.js
             return new JsonModel([
-                'script' => "window.location.href='$url';",
+                'message' => 'Not allowed, please log in!',
+                'script'  => "window.location.href='$url';",
             ]);
         }
 
-        // store the complete URI including GET params to allow redirection back to this
-        // page after the login. POST is ignored and must be repeated.
+        /*
+         * store the complete URI including GET params to allow redirection back
+         * to this page after the login. POST is ignored and must be repeated.
+         */
         $session                     = $this->getSession();
         $session['returnAfterLogin'] = [
             'uri' => $this->request->getUriString(),
@@ -118,11 +131,13 @@ class LoginRedirector extends AbstractPlugin
     }
 
     /**
-     * @param \Zend\View\Helper\Url $urlHelper
+     * Injected by the factory.
+     *
+     * @param UrlHelper $urlHelper
      *
      * @return self
      */
-    public function setUrlHelper(\Zend\View\Helper\Url $urlHelper)
+    public function setUrlHelper(UrlHelper $urlHelper)
     {
         $this->urlHelper = $urlHelper;
 
@@ -130,11 +145,13 @@ class LoginRedirector extends AbstractPlugin
     }
 
     /**
-     * @param \Zend\Stdlib\RequestInterface $request
+     * Injected by the factory.
+     *
+     * @param Request $request
      *
      * @return self
      */
-    public function setRequest(\Zend\Http\Request $request)
+    public function setRequest(Request $request)
     {
         $this->request = $request;
 

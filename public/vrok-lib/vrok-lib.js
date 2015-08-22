@@ -3,8 +3,8 @@
     Vrok.Tools = Vrok.Tools || {};
 
     /**
-     * Issues a JSON(P) request to the given url and places the result HTML in the
-     * container given.
+     * Issues a JSON(P) request to the given URL and places the result HTML in
+     * the container given.
      *
      * @param {string} url              the URL to which the request is sent
      * @param {Node|string} container   the result DOM node
@@ -13,8 +13,8 @@
      *     {boolean} jsonp           set true if request should be made as
      *          JSONP, e.g. for cross domain requests, requires the server to
      *          support this
-     *     {boolean} scrollTo        whether or not after loading the page is scrolled
-     *          to the top of the container
+     *     {boolean} scrollTo        whether or not after loading the page is
+     *          scrolled to the top of the container
      *     {boolean} showOverlay     whether or not to show the loading overlay
      */
     Vrok.Tools.json = function(url, container, options) {
@@ -56,7 +56,11 @@
 
                 // still try to process, maybe we received a 403 with a
                 // redirect in the response.script
-                Vrok.Tools.processResponse(data.responseJSON, $container, defaults);
+                Vrok.Tools.processResponse(
+                    data.responseJSON ? data.responseJSON : data.responseText,
+                    $container,
+                    defaults
+                );
             }
         };
 
@@ -77,15 +81,15 @@
      * @param {string} senderName     the clicked elements id
      * @param {string} senderValue    the clicked elements value
      * @param {string} container      (optional) result container
-     * @param {object} options          hash of options:
+     * @param {object} options        hash of options:
      *     {function} callback       function to call after the load finished
      *     {boolean} jsonp           set true if request should be made as
      *          JSONP, e.g. for cross domain requests, requires the server to
      *          support this
-     *     {boolean} scrollTo        whether or not after loading the page is scrolled
-     *          to the top of the container
+     *     {boolean} scrollTo        whether or not after loading the page is
+     *          scrolled to the top of the container
      *     {boolean} showOverlay     whether or not to show the loading overlay
-     * @return {boolean}              false to prevent the browser from submitting
+     * @return {boolean}            false to prevent the browser from submitting
      */
     Vrok.Tools.submit = function(element, senderName, senderValue, container, options) {
         var form = null;
@@ -115,7 +119,7 @@
             return false;
         }
 
-        // add a sender element as image elements / buttons are not sent to the
+        // add a sender element as image elements/buttons are not sent to the
         // server by default but maybe we want to detect which image/button was
         // clicked to trigger separate actions
         if (senderName) {
@@ -135,11 +139,13 @@
         var data = form.serialize();
 
         // the result container, the form itself or the DOM node given via id
-        if (typeof(element) === 'string') {
+        if (typeof(container) === 'string') {
             container = $('#'+container);
+        } else if (form.data('target')) {
+            container = $(form.data('target'));
         }
         var $container = container ? $(container) : $(form.context.parentNode);
-console.log(container);
+
         if (defaults.showOverlay) {
             $container.loading();
         }
@@ -163,9 +169,18 @@ console.log(container);
 
                 // still try to process, maybe we received a 403 with a
                 // redirect in the response.script
-                Vrok.Tools.processResponse(data.responseJSON, $container, defaults);
+                Vrok.Tools.processResponse(
+                    data.responseJSON ? data.responseJSON : data.responseText,
+                    $container,
+                    defaults
+                );
             }
         };
+
+        if (defaults.jsonp) {
+            request.dataType = 'jsonp';
+            request.jsonp    = 'callback';
+        }
 
         $.ajax(request);
         return false;
@@ -186,6 +201,10 @@ console.log(container);
      *          to the top of the container
      */
     Vrok.Tools.processResponse = function(response, container, options) {
+        if (typeof(response) === 'string') {
+            response = {html: response};
+        }
+
         if (response.html && typeof(response.html) === 'string') {
             // allow the response to overwrite the (probably autodetected)
             // result container, e.g. when returning a complete view instead
@@ -247,8 +266,8 @@ console.log(container);
 
             // if we want to create an overlay and any one exists
             if( state && $element.find(".js-loading-overlay").length === 0 ) {
-                 // creates the overlay
-                var $overlay = $("<div/>").addClass("js-loading-overlay");
+                 // creates the overlay (font-awesome spinner not visible if FA not loaded)
+                var $overlay = $('<div><i class="fa fa-spinner fa-pulse fa-4x"></i></div>').addClass("js-loading-overlay");
 
                 // add a class
                 if(addClass !== undefined) {
@@ -257,10 +276,15 @@ console.log(container);
 
                 // append it to the current element and position it correctly
                 $element.append( $overlay ).addClass("js-loading");
-                $overlay.css('top', $element.position().top + 'px');
-                $overlay.css('left', $element.position().left + 'px');
-                $overlay.css('width', $element.width() + 'px');
-                $overlay.css('height', $element.height() + 'px');
+
+                // @todo da das Overlay ja innerhalb des containers liegt
+                // sollte immer 100% und 0|0 funktionieren und sich auch mit
+                // vergrößern/verkleinern, bspw wenn der Container zum Erstellen
+                // des Overlays noch unsichtbar war
+                //$overlay.css('top', $element.position().top + 'px');
+                //$overlay.css('left', $element.position().left + 'px');
+                //$overlay.css('width', $element.width() + 'px');
+                //$overlay.css('height', $element.height() + 'px');
 
                 // show the element
                 $overlay.stop().hide().fadeIn(400);
@@ -297,8 +321,8 @@ console.log(container);
         // if a) the button was directly clicked or triggered via "enter" key
         // directly on the button or b) triggered by "enter" on another element.
         // Gecko browsers would support e.originalEvent.explicitOriginalTarget
-        // but all others don't so we use a workaround: we store the name of the
-        // element on which "enter" was pressed in the data attribute on the
+        // but all others don't, so we use a workaround: we store the name of
+        // the element on which "enter" was pressed in the data attribute on the
         // form and compare it to the buttons name in the "click" handler
         // only if there is no name stored (mouse click) or the name equals the
         // buttons name ("enter" directly on the button) the form is submitted.
@@ -309,7 +333,7 @@ console.log(container);
             }
         });
 
-        // reset form.data on keyup (triggered after "click"
+        // reset form.data on keyup (triggered after "click")
         $("body").on('keyup', '.ajax-form', function(e) {
             $(this).data('enter-pressed', "");
         });
