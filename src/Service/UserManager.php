@@ -48,8 +48,9 @@ class UserManager implements
 
     const MSG_USER_VALIDATED = 'message.user.validationSuccessful';
 
-    const VALIDATION_USER  = 'validateUser';
-    const VALIDATION_EMAIL = 'confirmEmail';
+    const VALIDATION_USER     = 'validateUser';
+    const VALIDATION_EMAIL    = 'confirmEmail';
+    const VALIDATION_PASSWORD = 'confirmPasswordRequest';
 
     /**
      * Do not only trigger under the identifier \Vrok\Service\UserManager but also
@@ -96,8 +97,14 @@ class UserManager implements
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_SUCCESSFUL,
-            [$this, 'onValidationSuccessful']
+            [$this, 'onUserValidationSuccessful']
         );
+        $sharedEvents->attach(
+            'ValidationManager',
+            \Vrok\Service\ValidationManager::EVENT_VALIDATION_SUCCESSFUL,
+            [$this, 'onPasswordValidationSuccessful']
+        );
+
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_EXPIRED,
@@ -112,7 +119,7 @@ class UserManager implements
      *
      * @param EventInterface $e
      */
-    public function onValidationSuccessful(EventInterface $e)
+    public function onUserValidationSuccessful(EventInterface $e)
     {
         $validation = $e->getTarget();
         /* @var $validation Validation */
@@ -144,6 +151,32 @@ class UserManager implements
         // tell the ValidationController to redirect to the confirmation page
         return $this->getServiceLocator()->get('ControllerPluginManager')
                 ->get('redirect')->toRoute('account/login');
+    }
+
+    /**
+     * Called when a validation was successfully confirmed.
+     *
+     * @param EventInterface $e
+     */
+    public function onPasswordValidationSuccessful(EventInterface $e)
+    {
+        $validation = $e->getTarget();
+        /* @var $validation Validation */
+        if ($validation->getType() !== self::VALIDATION_PASSWORD) {
+            return;
+        }
+
+        $user = $validation->getReference($this->getEntityManager());
+        if (!$user) {
+            return;
+        }
+
+        $container = new \Zend\Session\Container(__CLASS__);
+        $container['passwordRequestIdentity'] = $user->getUsername();
+
+        // tell the ValidationController to redirect to the password form
+        return $this->getServiceLocator()->get('ControllerPluginManager')
+                ->get('redirect')->toRoute('account/reset-password');
     }
 
     /**
