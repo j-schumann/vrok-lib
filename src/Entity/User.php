@@ -204,9 +204,17 @@ class User extends Entity implements RoleProviderInterface
     public function getEmail($punyEncoded = false)
     {
         if ($punyEncoded) {
-            $idna = new \idna_convert();
-
-            return $idna->encode($this->email);
+            if (extension_loaded('intl')) {
+                // use non-transitional:
+                // http://devblog.plesk.com/2014/12/what-is-the-problem-with-s/
+                return idn_to_ascii(
+                        $this->email,
+                        IDNA_NONTRANSITIONAL_TO_ASCII,
+                        INTL_IDNA_VARIANT_UTS46
+                    ) ?: $this->email;
+            }
+            // @todo currently falls back silently to the original address,
+            // log error if no extension? or throw exception?
         }
 
         return $this->email;
