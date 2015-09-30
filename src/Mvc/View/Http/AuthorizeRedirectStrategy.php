@@ -89,7 +89,9 @@ class AuthorizeRedirectStrategy implements
     public function onDispatch(MvcEvent $event)
     {
         $response = $event->getResponse();
-        if ($response->getStatusCode() != 404) {
+        if (! $response instanceof HttpResponse
+            || $response->getStatusCode() != 404
+        ) {
             // Only handle 404 responses
             return;
         }
