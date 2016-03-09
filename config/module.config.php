@@ -74,14 +74,9 @@ return [
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => [
-
         // classes that have no dependencies or are ServiceLocatorAware
         'invokables' => [
-            'Vrok\Authentication\Adapter\Doctrine'             => 'Vrok\Authentication\Adapter\Doctrine',
-            'Vrok\Authentication\Storage\Doctrine'             => 'Vrok\Authentication\Storage\Doctrine',
             'Vrok\Client\Info'                                 => 'Vrok\Client\Info',
-            'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => 'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver',
-            'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy'     => 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy',
         ],
 
         'factories' => [

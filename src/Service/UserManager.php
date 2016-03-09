@@ -20,8 +20,7 @@ use Zend\EventManager\EventManagerAwareTrait;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\ListenerAggregateTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Contains processes for creating and managing Attendant objects and their
@@ -29,12 +28,10 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  */
 class UserManager implements
     EventManagerAwareInterface,
-    ListenerAggregateInterface,
-    ServiceLocatorAwareInterface
+    ListenerAggregateInterface
 {
     use EventManagerAwareTrait;
     use ListenerAggregateTrait;
-    use ServiceLocatorAwareTrait;
 
     const EVENT_CREATE_GROUP_POST       = 'createGroup.post';
     const EVENT_CREATE_USER             = 'createUser';
@@ -86,6 +83,34 @@ class UserManager implements
         'good'  => 25,
         'great' => 30,
     ];
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Class constructor - stores the ServiceLocator instance.
+     * We inject the locator directly as not all services are lazy loaded
+     * but some are only used in rare cases.
+     * @todo lazyload all required services and include them in the factory
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    private function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
 
     /**
      * {@inheritDoc}

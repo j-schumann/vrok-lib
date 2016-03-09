@@ -8,11 +8,10 @@
 
 namespace Vrok\Authentication\Adapter;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Vrok\Entity\User as UserEntity;
 use Zend\Authentication\Adapter\AbstractAdapter;
 use Zend\Authentication\Result;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Checks the database for a match of the given identity and validates the users
@@ -21,10 +20,8 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @todo do not use servicelocator but inject the usermanager. (we need the user
  * repository, the entityManager to persist, the temp ban repo)
  */
-class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
+class Doctrine extends AbstractAdapter
 {
-    use ServiceLocatorAwareTrait;
-
     const MSG_IDENTITYNOTFOUND  = 'message.authentication.identityNotFound';
     const MSG_INVALIDCREDENTIAL = 'message.authentication.invalidCredential';
     const MSG_UNCATEGORIZED     = 'message.authentication.uncategorizedFailure';
@@ -33,12 +30,26 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
     const MSG_SUCCESS           = 'message.authentication.success';
 
     /**
+     * @var ObjectManager
+     */
+    protected $entityManager = null;
+
+    /**
+     * Class constructor - stores the EntityManager instance.
+     *
+     * @param ObjectManager $entityManager
+     */
+    public function __construct(ObjectManager $entityManager)
+    {
+        $this->entityManager = $entityManager;;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function authenticate()
     {
-        $em         = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-        $repository = $em->getRepository('Vrok\Entity\User');
+        $repository = $this->entityManager->getRepository('Vrok\Entity\User');
 
         $user = $repository->findOneBy(['username' => $this->identity]);
         /* @var $user UserEntity */
@@ -77,7 +88,7 @@ class Doctrine extends AbstractAdapter implements ServiceLocatorAwareInterface
 
             $user->setIsRandomPassword($isRandom);
             $user->setPasswordDate($passwordDate);
-            $em->flush();
+            $this->entityManager->flush();
         }
 
         return $this->getResult(self::MSG_SUCCESS, $user->getId());

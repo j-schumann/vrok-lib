@@ -9,17 +9,41 @@
 namespace Vrok\Doctrine\ORM\Mapping;
 
 use Doctrine\ORM\Mapping\DefaultEntityListenerResolver;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Extends the default implementation to use the serviecManager to allow listeners
  * with dependencies.
  */
 class EntityListenerResolver extends DefaultEntityListenerResolver
-    implements ServiceLocatorAwareInterface
 {
-    use ServiceLocatorAwareTrait;
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Class constructor - stores the ServiceLocator instance.
+     * We inject the locator directly as not all services are lazy loaded
+     * but some are only used in rare cases.
+     * @todo lazyload all required services and include them in the factory
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    private function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
 
     /**
      * Retrieve the requested entity listener.

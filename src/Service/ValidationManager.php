@@ -15,8 +15,7 @@ use Vrok\Entity\Validation as ValidationEntity;
 use Vrok\Entity\Filter\ValidationFilter;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Manages validations and triggers events when a validation fails or succeeds.
@@ -25,10 +24,9 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * URL-Viewhelper. We don't want to inject the last two as we need them only in
  * special cases and want to avoid instantiation if possible.
  */
-class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwareInterface
+class ValidationManager implements EventManagerAwareInterface
 {
     use EventManagerAwareTrait;
-    use ServiceLocatorAwareTrait;
 
     const EVENT_VALIDATION_EXPIRED    = 'validationExpired';
     const EVENT_VALIDATION_FAILED     = 'validationFailed';
@@ -60,6 +58,34 @@ class ValidationManager implements EventManagerAwareInterface, ServiceLocatorAwa
     protected $timeouts = [];
 
     /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Class constructor - stores the ServiceLocator instance.
+     * We inject the locator directly as not all services are lazy loaded
+     * but some are only used in rare cases.
+     * @todo lazyload all required services and include them in the factory
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    private function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
+
+        /**
      * Creates a new validation of the given type for the given owner.
      *
      * @param string          $type

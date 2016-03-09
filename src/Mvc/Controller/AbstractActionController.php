@@ -9,6 +9,7 @@
 namespace Vrok\Mvc\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController as ZendController;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -20,6 +21,34 @@ abstract class AbstractActionController extends ZendController
 {
     const MESSAGE_PARAM_MISSING = 'message.controller.paramMissing';
     const MESSAGE_PARAM_INVALID = 'message.controller.paramInvalid';
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Class constructor - stores the ServiceLocator instance.
+     * We inject the locator directly as not all services are lazy loaded
+     * but some are only used in rare cases.
+     * @todo lazyload all required services and include them in the factory
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    public function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
 
     /**
      * Creates a new ViewModel with the flashmessenger preset and additional

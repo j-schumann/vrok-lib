@@ -8,18 +8,15 @@
 
 namespace Vrok\Authentication\Storage;
 
+use Doctrine\Common\Persistence\ObjectManager;
 use Zend\Authentication\Storage;
 use Zend\Authentication\Storage\StorageInterface;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Stores the user ID in the session, retrieves the object from the database.
  */
-class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
+class Doctrine implements StorageInterface
 {
-    use ServiceLocatorAwareTrait;
-
     /**
      * @var StorageInterface
      */
@@ -29,6 +26,21 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
      * @var mixed
      */
     protected $resolvedIdentity;
+
+    /**
+     * @var ObjectManager
+     */
+    protected $entityManager = null;
+
+    /**
+     * Class constructor - stores the EntityManager instance.
+     *
+     * @param ObjectManager $entityManager
+     */
+    public function __construct(ObjectManager $entityManager)
+    {
+        $this->entityManager = $entityManager;;
+    }
 
     /**
      * Returns true if and only if storage is empty.
@@ -62,8 +74,7 @@ class Doctrine implements ServiceLocatorAwareInterface, StorageInterface
         $identity = $this->getStorage()->read();
 
         if (is_int($identity) || is_scalar($identity)) {
-            $em       = $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
-            $identity = $em->getRepository('Vrok\Entity\User')->find($identity);
+            $identity = $this->entityManager->getRepository('Vrok\Entity\User')->find($identity);
         }
 
         if ($identity) {

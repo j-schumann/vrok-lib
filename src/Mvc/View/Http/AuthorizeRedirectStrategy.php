@@ -18,8 +18,7 @@ use Zend\Http\Request as HttpRequest;
 use Zend\Http\Response as HttpResponse;
 use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Stdlib\ResponseInterface as ResponseInterface;
 use Zend\View\Model\ViewModel;
 
@@ -37,11 +36,9 @@ use Zend\View\Model\ViewModel;
  * fetch/instantiate those on every single page hit.
  */
 class AuthorizeRedirectStrategy implements
-    ListenerAggregateInterface,
-    ServiceLocatorAwareInterface
+    ListenerAggregateInterface
 {
     use ListenerAggregateTrait;
-    use ServiceLocatorAwareTrait;
 
     const DEFAULT_TTL = 1800; // 30*60
 
@@ -57,6 +54,34 @@ class AuthorizeRedirectStrategy implements
      * @var int
      */
     protected $ttl = null;
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Class constructor - stores the ServiceLocator instance.
+     * We inject the locator directly as not all services are lazy loaded
+     * but some are only used in rare cases.
+     * @todo lazyload all required services and include them in the factory
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    private function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
 
     /**
      * {@inheritDoc}

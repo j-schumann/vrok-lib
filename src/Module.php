@@ -49,7 +49,7 @@ class Module implements
                     $serviceLocator = $controllerPluginManager->getServiceLocator();
                     $url = $serviceLocator->get('viewhelpermanager')->get('url');
 
-                    $helper = new \Vrok\Mvc\Controller\Plugin\LoginRedirector();
+                    $helper = new Mvc\Controller\Plugin\LoginRedirector();
                     $helper->setUrlHelper($url);
                     $helper->setRequest($serviceLocator->get('Request'));
 
@@ -80,11 +80,25 @@ class Module implements
                     }
                     $vm = $sm->get('ViewManager');
 
-                    return new \Vrok\Asset\ViewScriptResolver($vm, $map);
+                    return new Asset\ViewScriptResolver($vm, $map);
+                },
+                'Vrok\Authentication\Adapter\Doctrine' => function ($sm) {
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    return new Authentication\Adapter\Doctrine($em);
+                },
+                'Vrok\Authentication\Storage\Doctrine' => function ($sm) {
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    return new Authentication\Storage\Doctrine($em);
+                },
+                'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => function ($sm) {
+                    return new Doctrine\ORM\Mapping\EntityListenerResolver($sm);
+                },
+                'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => function ($sm) {
+                    return new Mvc\View\Http\AuthorizeRedirectStrategy($sm);
                 },
                 'Vrok\Service\Email' => function ($sm) {
                     $vhm = $sm->get('ViewHelperManager');
-                    $service = new \Vrok\Service\Email($vhm);
+                    $service = new Service\Email($vhm);
 
                     $config = $sm->get('Config');
                     if (!empty($config['email_service'])) {
@@ -95,7 +109,7 @@ class Module implements
                 },
                 'Vrok\Service\Meta' => function ($sm) {
                     $em = $sm->get('Doctrine\ORM\EntityManager');
-                    $service = new \Vrok\Service\Meta($em);
+                    $service = new Service\Meta($em);
 
                     $config = $sm->get('Config');
                     if (!empty($config['meta_service']['defaults'])) {
@@ -106,7 +120,7 @@ class Module implements
                 },
                 'Vrok\Service\Owner' => function ($sm) {
                     $em = $sm->get('Doctrine\ORM\EntityManager');
-                    $service = new \Vrok\Service\Owner($em);
+                    $service = new Service\Owner($em);
 
                     $config = $sm->get('Config');
                     if (!empty($config['owner_service']['allowed_owners'])) {
@@ -117,7 +131,7 @@ class Module implements
                     return $service;
                 },
                 'Vrok\Service\Todo' => function ($sm) {
-                    $service = new \Vrok\Service\Todo();
+                    $service = new Service\Todo();
                     $service->setServiceLocator($sm);
 
                     $config = $sm->get('Config');
@@ -128,7 +142,7 @@ class Module implements
                     return $service;
                 },
                 'Vrok\Service\UserManager' => function ($sm) {
-                    $manager = new \Vrok\Service\UserManager();
+                    $manager = new Service\UserManager($sm);
 
                     $config = $sm->get('Config');
                     if (!empty($config['user_manager'])) {
@@ -138,7 +152,7 @@ class Module implements
                     return $manager;
                 },
                 'Vrok\Service\ValidationManager' => function ($sm) {
-                    $manager = new \Vrok\Service\ValidationManager();
+                    $manager = new Service\ValidationManager($sm);
 
                     $config = $sm->get('Config');
                     if (!empty($config['validation_manager']['timeouts'])) {
