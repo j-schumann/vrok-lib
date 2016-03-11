@@ -11,7 +11,6 @@ namespace Vrok\Form;
 use Traversable;
 use Zend\Form\ElementInterface;
 use Zend\Form\Fieldset;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\Stdlib\ArrayUtils;
 
 /**
@@ -19,11 +18,8 @@ use Zend\Stdlib\ArrayUtils;
  *
  * Form class must be instantiated by the formElementManager or the
  * serviceLocator won't be injected!
- *
- * @todo dont use servicelocatoraware, inject only the necessary dependencies. but how
- * can we do that without writing hundreds of factories?
  */
-class Form extends \Zend\Form\Form implements ServiceLocatorAwareInterface
+class Form extends \Zend\Form\Form
 {
     use SharedFunctions;
 

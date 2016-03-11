@@ -27,7 +27,7 @@ class ActionLoggerServiceFactory implements FactoryInterface
     {
         $em = $serviceLocator->get('Doctrine\ORM\EntityManager');
         $as = $serviceLocator->get('AuthenticationService');
-        $ci = $serviceLocator->get('ClientInfo');
+        $ci = $serviceLocator->get('Vrok\Client\Info');
 
         $logger = new ActionLogger($em, $as, $ci);
 

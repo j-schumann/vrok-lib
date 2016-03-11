@@ -14,7 +14,7 @@ use AssetManager\Exception;
 use AssetManager\Resolver\MimeResolverAwareInterface;
 use AssetManager\Resolver\ResolverInterface;
 use AssetManager\Service\MimeResolver;
-use Zend\Mvc\View\Http\ViewManager;
+use Zend\View\Renderer\PhpRenderer;
 
 /**
  * This resolver allows to use view scripts within the viewManagers path as
@@ -33,21 +33,21 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
     protected $mimeResolver;
 
     /**
-     * @var ViewManager
+     * @var PhpRenderer
      */
-    protected $viewManager;
+    protected $renderer;
 
     /**
      * Constructor.
      *
      * Instantiate and optionally populate map.
      *
-     * @param ViewManager       $viewManager
+     * @param PhpRenderer       $renderer
      * @param array|Traversable $map
      */
-    public function __construct(ViewManager $viewManager, $map = [])
+    public function __construct(PhpRenderer $renderer, $map = [])
     {
-        $this->viewManager = $viewManager;
+        $this->renderer = $renderer;
         $this->setMap($map);
     }
 
@@ -117,9 +117,9 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
         }
 
         $file  = $this->map[$name];
-        $asset = new ViewScriptAsset($file, $this->viewManager->getRenderer());
+        $asset = new ViewScriptAsset($file, $this->renderer);
 
-        $realFile        = $this->viewManager->getRenderer()->resolver($file);
+        $realFile        = $this->renderer->resolver($file);
         $asset->mimetype = $this->getMimeResolver()->getMimeType($realFile);
 
         return $asset;

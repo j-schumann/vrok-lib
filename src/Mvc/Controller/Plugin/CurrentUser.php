@@ -23,7 +23,7 @@ class CurrentUser extends AbstractPlugin
     public function __invoke()
     {
         $um = $this->getController()->getServiceLocator()
-                ->get('UserManager');
+                ->get('Vrok\Service\UserManager');
 
         return $um->getCurrentUser();
     }

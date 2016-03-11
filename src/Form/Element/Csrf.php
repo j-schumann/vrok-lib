@@ -64,7 +64,7 @@ class Csrf extends ZendCsrf
                     'name'                   => 'Zend\Validator\NotEmpty',
                     'break_chain_on_failure' => true,
                     'options'                => [
-                        'messages' => [
+                        'messageTemplates' => [
                             \Zend\Validator\NotEmpty::IS_EMPTY => 'validate.form.csrfInvalid',
                         ],
                     ],

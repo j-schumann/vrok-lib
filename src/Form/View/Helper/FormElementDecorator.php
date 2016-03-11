@@ -71,7 +71,12 @@ class FormElementDecorator extends AbstractHelper
 
         $ph = $this->getPartialHelper();
 
-        return $ph('vrok/partials/form/element', [
+        $partial = 'vrok/partials/form/element';
+        if (!empty($this->options['partial'])) {
+            $partial = $this->options['partial'];
+        }
+
+        return $ph($partial, [
             'element' => $element,
         ]);
     }

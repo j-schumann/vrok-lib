@@ -9,16 +9,41 @@
 namespace Vrok\Form;
 
 use Doctrine\ORM\EntityManager;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Used to extend our fieldset and form classes by this functions because they
  * can not inherit from the same base.
+ *
+ * @todo dont use the servicelocator, inject only the necessary dependencies.
+ * but how can we do that without writing hundreds of factories?
  */
 trait SharedFunctions
 {
-    // @todo bad practice to make every form use the serviceLocator...
-    use ServiceLocatorAwareTrait;
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    public function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @param ServiceLocatorInterface
+     */
+    public function setServiceLocator(ServiceLocatorInterface $sl)
+    {
+        $this->serviceLocator = $sl;
+    }
 
     /**
      * Adds a CSRF protection element to the form.
@@ -41,7 +66,8 @@ trait SharedFunctions
                      // not translated because Zend\Form\Element\Csrf would not do
                      // this by default and we have no access to the translator in
                      // the element class.
-                    'translator' => $this->getServiceLocator()->getServiceLocator()
+                    'translator' => $this->getServiceLocator()
+                        ->getServiceLocator()
                         ->get('translator'),
                 ],
             ],

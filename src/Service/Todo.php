@@ -18,8 +18,7 @@ use Vrok\Entity\UserTodo;
 use Vrok\Entity\Filter\TodoFilter;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
  * Handles todos for users (and the system), triggering an event when a deadline is
@@ -29,10 +28,9 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * we don't want to inject these as the last two are only needed in some cases, so
  * we don't want to instantiate them always.
  */
-class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
+class Todo implements EventManagerAwareInterface
 {
     use EventManagerAwareTrait;
-    use ServiceLocatorAwareTrait;
 
     const EVENT_TODO_COMPLETED = 'todoCompleted';
     const EVENT_TODO_OVERDUE   = 'todoOverdue';
@@ -43,6 +41,34 @@ class Todo implements EventManagerAwareInterface, ServiceLocatorAwareInterface
      * @var string
      */
     protected $partial = 'vrok/partials/todo-list';
+
+    /**
+     * @var ServiceLocatorInterface
+     */
+    protected $serviceLocator = null;
+
+    /**
+     * Class constructor - stores the ServiceLocator instance.
+     * We inject the locator directly as not all services are lazy loaded
+     * but some are only used in rare cases.
+     * @todo lazyload all required services and include them in the factory
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     */
+    public function __construct(ServiceLocatorInterface $serviceLocator)
+    {
+        $this->serviceLocator = $serviceLocator;;
+    }
+
+    /**
+     * Retrieve the stored service manager instance.
+     *
+     * @return ServiceLocatorInterface
+     */
+    private function getServiceLocator()
+    {
+        return $this->serviceLocator;
+    }
 
     /**
      * Creates a todo of the given type.

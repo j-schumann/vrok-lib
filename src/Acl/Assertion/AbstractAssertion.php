@@ -8,6 +8,7 @@
 
 namespace Vrok\Acl\Assertion;
 
+use Vrok\Service\UserManager;
 use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionInterface;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
@@ -37,7 +38,7 @@ abstract class AbstractAssertion implements AssertionInterface
      */
     protected function getUserManager()
     {
-        return $this->getServiceLocator()->get('UserManager');
+        return $this->getServiceLocator()->get(UserManager::class);
     }
 
     /**

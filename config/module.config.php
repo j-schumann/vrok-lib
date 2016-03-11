@@ -74,9 +74,9 @@ return [
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => [
-        // classes that have no dependencies or are ServiceLocatorAware
+        // classes that have no dependencies
         'invokables' => [
-            'Vrok\Client\Info'                                 => 'Vrok\Client\Info',
+            'Vrok\Client\Info' => 'Vrok\Client\Info',
         ],
 
         'factories' => [

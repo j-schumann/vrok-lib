@@ -31,7 +31,7 @@ use Zend\View\Model\ViewModel;
  * Listens to the routeEvent to log the user out if the activitityTimeout is
  * reached (independently from the session timeout).
  *
- * This strategy is serviceLocatorAware as the dependencies (urlHelper,
+ * This strategy uses the serviceLocator as the dependencies (urlHelper,
  * flashMessenger, config) are only used in rare cases, we don't want to
  * fetch/instantiate those on every single page hit.
  */
@@ -152,7 +152,7 @@ class AuthorizeRedirectStrategy implements
         $now     = time();
         $session = new \Zend\Session\Container(__CLASS__);
         if (isset($session['activityTimeout']) && $session['activityTimeout'] < $now) {
-            $manager = $this->getServiceLocator()->get('UserManager');
+            $manager = $this->getServiceLocator()->get('Vrok\Service\UserManager');
             $manager->logout();
 
             $translator = $this->getServiceLocator()

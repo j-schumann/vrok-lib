@@ -17,13 +17,6 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
         $this->ownerService = $serviceManager->get('Vrok\Service\Owner');
     }
 
-    public function testServiceShortNameIsAvailable()
-    {
-        $serviceManager = Bootstrap::getServiceManager();
-        $service        = $serviceManager->get('OwnerService');
-        $this->assertInstanceOf('Vrok\Service\Owner', $service);
-    }
-
     public function testStrategyEventIsTriggered()
     {
         $em        = $this->ownerService->getEventManager();

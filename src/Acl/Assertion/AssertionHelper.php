@@ -13,10 +13,10 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 /**
  * The ACL cannot be cached if the assertions have dependencies (like the
  * usermanager) that can not be serialized.
- * Only solution atm is to exclude the dependencies from the assertions, not
- * using ServiceLocatorAwareInterface and not using factories and fetch them
- * on execution from a known context. We could try to access $application or
- * anything else but that could be unavailable.
+ * Only solution atm is to exclude the dependencies from the assertions and not
+ * using factories and fetch the dependencies on execution from a known context.
+ * We could try to access $application or anything else but that could be
+ * unavailable.
  *
  * This class simply provides a static context to keep a serviceLocator reference,
  * it should be initialized onBootstrap from the application module.

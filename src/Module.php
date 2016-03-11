@@ -12,6 +12,7 @@ use Zend\EventManager\EventInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ControllerPluginProviderInterface;
+use Zend\ModuleManager\Feature\FormElementProviderInterface;
 use Zend\ModuleManager\Feature\ServiceProviderInterface;
 use Zend\ModuleManager\Feature\ViewHelperProviderInterface;
 
@@ -22,6 +23,7 @@ class Module implements
     BootstrapListenerInterface,
     ConfigProviderInterface,
     ControllerPluginProviderInterface,
+    FormElementProviderInterface,
     ServiceProviderInterface,
     ViewHelperProviderInterface
 {
@@ -68,6 +70,25 @@ class Module implements
      *
      * @return array
      */
+    public function getFormElementConfig()
+    {
+        return [
+            'factories' => [
+                'Vrok\Form\ConfirmationForm' => function ($sm) {
+                    $form = new Form\ConfirmationForm();
+                    $form->setServiceLocator($sm);
+                    return $form;
+                },
+            ],
+        ];
+    }
+
+    /**
+     * Return additional serviceManager config with closures that should not be in the
+     * config files to allow caching of the complete configuration.
+     *
+     * @return array
+     */
     public function getServiceConfig()
     {
         return [
@@ -78,9 +99,9 @@ class Module implements
                     if (isset($config['asset_manager']['resolver_configs']['view_scripts'])) {
                         $map = $config['asset_manager']['resolver_configs']['view_scripts'];
                     }
-                    $vm = $sm->get('ViewManager');
 
-                    return new Asset\ViewScriptResolver($vm, $map);
+                    $vr = $sm->get('ViewRenderer');
+                    return new Asset\ViewScriptResolver($vr, $map);
                 },
                 'Vrok\Authentication\Adapter\Doctrine' => function ($sm) {
                     $em = $sm->get('Doctrine\ORM\EntityManager');
@@ -131,8 +152,7 @@ class Module implements
                     return $service;
                 },
                 'Vrok\Service\Todo' => function ($sm) {
-                    $service = new Service\Todo();
-                    $service->setServiceLocator($sm);
+                    $service = new Service\Todo($sm);
 
                     $config = $sm->get('Config');
                     if (!empty($config['todo_service']['timeouts'])) {
@@ -220,7 +240,7 @@ class Module implements
                 return;
             }
 
-            $userManager = $sm->get('UserManager');
+            $userManager = $sm->get('Vrok\Service\UserManager');
 
             return new \Vrok\Owner\UserStrategy($userManager);
         });
