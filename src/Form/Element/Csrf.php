@@ -50,6 +50,8 @@ class Csrf extends ZendCsrf
      */
     public function getInputSpecification()
     {
+        // @todo https://github.com/j-schumann/vrok-lib/issues/2
+        // der notEmpty Validator wird ignoriert
         return [
             'name'     => $this->getName(),
             'required' => true,
@@ -64,7 +66,7 @@ class Csrf extends ZendCsrf
                     'name'                   => 'Zend\Validator\NotEmpty',
                     'break_chain_on_failure' => true,
                     'options'                => [
-                        'messageTemplates' => [
+                        'messages' => [
                             \Zend\Validator\NotEmpty::IS_EMPTY => 'validate.form.csrfInvalid',
                         ],
                     ],
