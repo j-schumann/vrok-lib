@@ -26,7 +26,7 @@ class ActionLoggerServiceFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $em = $serviceLocator->get('Doctrine\ORM\EntityManager');
-        $as = $serviceLocator->get('AuthenticationService');
+        $as = $serviceLocator->get('Zend\Authentication\AuthenticationService');
         $ci = $serviceLocator->get('Vrok\Client\Info');
 
         $logger = new ActionLogger($em, $as, $ci);

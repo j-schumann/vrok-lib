@@ -68,7 +68,7 @@ trait SharedFunctions
                      // the element class.
                     'translator' => $this->getServiceLocator()
                         ->getServiceLocator()
-                        ->get('translator'),
+                        ->get('MvcTranslator'),
                 ],
             ],
         ]);
@@ -86,7 +86,7 @@ trait SharedFunctions
      */
     public function setUntranslatedMessages($messages)
     {
-        $translator = $this->getServiceLocator()->getServiceLocator()->get('translator');
+        $translator = $this->getServiceLocator()->getServiceLocator()->get('MvcTranslator');
         foreach ($messages as &$messageSet) {
             foreach ($messageSet as &$message) {
                 $message = $translator->translate($message);
@@ -104,7 +104,7 @@ trait SharedFunctions
      */
     public function setElementMessage($element, $message)
     {
-        $translator = $this->getServiceLocator()->getServiceLocator()->get('translator');
+        $translator = $this->getServiceLocator()->getServiceLocator()->get('MvcTranslator');
         $this->get($element)->setMessages([$translator->translate($message)]);
     }
 

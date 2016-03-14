@@ -382,9 +382,7 @@ class UserManager implements
      */
     public function getCurrentUser()
     {
-        $authService = $this->getServiceLocator()->get('AuthenticationService');
-
-        return $authService->getIdentity();
+        return $this->getAuthService()->getIdentity();
     }
 
     /**
@@ -511,7 +509,8 @@ class UserManager implements
      */
     public function getAuthService()
     {
-        return $this->getServiceLocator()->get('AuthenticationService');
+        return $this->getServiceLocator()
+                ->get('Zend\Authentication\AuthenticationService');
     }
 
     /**
@@ -533,7 +532,7 @@ class UserManager implements
     public function getAuthValidator()
     {
         $validator = new AuthValidator();
-        $validator->setTranslator($this->getServiceLocator()->get('translator'));
+        $validator->setTranslator($this->getServiceLocator()->get('MvcTranslator'));
         $validator->setIdentity('username');
         $validator->setCredential('password');
         $validator->setAdapter($this->getAuthAdapter());

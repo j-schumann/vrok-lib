@@ -186,7 +186,8 @@ abstract class AbstractActionController extends ZendController
      */
     public function getErrorResponse($message = null, $url = '/')
     {
-        $translator = $this->getServiceLocator()->get('translator');
+        // @todo use controller plugin translate()
+        $translator = $this->getServiceLocator()->get('MvcTranslator');
         $message    = $translator->translate($message ?: 'message.invalidAjaxRequest');
 
         $data = [

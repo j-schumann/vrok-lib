@@ -135,7 +135,7 @@ class Todo implements EventManagerAwareInterface
      */
     public function completeObjectTodo($type, EntityInterface $object, $flush = true)
     {
-        $authService = $this->getServiceLocator()->get('AuthenticationService');
+        $authService = $this->getServiceLocator()->get('Zend\Authentication\AuthenticationService');
         $identity    = $authService->getIdentity();
 
         $filter = $this->getTodoFilter('t', $type);

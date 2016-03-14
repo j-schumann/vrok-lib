@@ -8,10 +8,12 @@
 
 namespace Vrok\View\Helper;
 
+use Zend\View\Helper\FlashMessenger as ZendMessenger;
+
 /**
  * Extends the Zend helper to render all messages at once.
  */
-class FlashMessenger extends \Zend\View\Helper\FlashMessenger
+class FlashMessenger extends ZendMessenger
 {
     protected $messageOpenFormat      = '<div class="alert alert-%s">';
     protected $messageSeparatorString = '</div><div class="alert alert-%s">';
@@ -45,21 +47,58 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
     }
 
     /**
-     * Render Messages
-     * The original helper would escape HTML, we don't want this to enable providing
-     * links in the flash messages.
+     * Retrieve all stored messages.
+     * Used for custom rendering.
      *
-     * @param array  $messages
-     * @param string $class
-     *
-     * @return string
+     * @return array
      */
-    protected function format($messages, $class)
+    public function getAll()
     {
-        if (empty($messages)) {
-            return '';
-        }
+        // use the injected instance if available as getPLuginFlashMessenger
+        // creates a new instance and messages from the previous page call are
+        // lost if messages were added in this page call too!
+        $flashMessenger = $this->getView()->flashMessenger ?:
+                $this->getPluginFlashMessenger();
 
+        // retrieve all messages from a previous page call and all messages from
+        // the current page call
+
+        $messages['default'] = array_merge(
+            $this->prepareMessages($flashMessenger->getMessages()),
+            $this->prepareMessages($flashMessenger->getCurrentMessages())
+        );
+        $messages['success'] = array_merge(
+            $this->prepareMessages($flashMessenger->getSuccessMessages()),
+            $this->prepareMessages($flashMessenger->getCurrentSuccessMessages())
+        );
+        $messages['info'] = array_merge(
+            $this->prepareMessages($flashMessenger->getInfoMessages()),
+            $this->prepareMessages($flashMessenger->getCurrentInfoMessages())
+        );
+        $messages['warning'] = array_merge(
+            $this->prepareMessages($flashMessenger->getWarningMessages()),
+            $this->prepareMessages($flashMessenger->getCurrentWarningMessages())
+        );
+        $messages['error'] = array_merge(
+            $this->prepareMessages($flashMessenger->getErrorMessages()),
+            $this->prepareMessages($flashMessenger->getCurrentErrorMessages())
+        );
+
+        // we don't want to carry messages that were in this page call
+        // onto the next page
+        $flashMessenger->clearCurrentMessagesFromContainer();
+
+        return $messages;
+    }
+
+    /**
+     * Flatten the given array and translate the messages.
+     *
+     * @param array $messages
+     * @return array
+     */
+    protected function prepareMessages($messages)
+    {
         // Flatten message array
         $messagesToPrint = [];
 
@@ -76,6 +115,26 @@ class FlashMessenger extends \Zend\View\Helper\FlashMessenger
             $messagesToPrint[] = $item;
         });
 
+        return $messagesToPrint;
+    }
+
+    /**
+     * Render Messages
+     * The original helper would escape HTML, we don't want this to enable providing
+     * links in the flash messages.
+     *
+     * @param array  $messages
+     * @param string $class
+     *
+     * @return string
+     */
+    protected function format($messages, $class)
+    {
+        if (empty($messages)) {
+            return '';
+        }
+
+        $messagesToPrint = $this->prepareMessages($messages);
         if (empty($messagesToPrint)) {
             return '';
         }

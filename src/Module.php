@@ -196,7 +196,7 @@ class Module implements
             'factories' => [
                 'currentUser' => function ($helperPluginManager) {
                     $serviceLocator = $helperPluginManager->getServiceLocator();
-                    $authService = $serviceLocator->get('AuthenticationService');
+                    $authService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
 
                     $helper = new \Vrok\View\Helper\CurrentUser();
                     $helper->setAuthService($authService);
