@@ -47,7 +47,7 @@
                 Vrok.Tools.processResponse(data, $container, defaults);
 
                 if (typeof(defaults.callback) === 'function') {
-                    defaults.callback($container);
+                    defaults.callback($container, data);
                 }
             },
             error: function (data) {
@@ -119,24 +119,21 @@
             return false;
         }
 
-        // add a sender element as image elements/buttons are not sent to the
-        // server by default but maybe we want to detect which image/button was
-        // clicked to trigger separate actions
-        if (senderName) {
-            var sender = $('<input type="hidden" value="'+senderValue
-                    +'" name="'+senderName+'" />');
-            form.append(sender);
-        }
+        // fetch the data before setting the loading animation as this disables
+        // all elements and disabled elements aren't serialized...
+        var data = form.serialize();
 
         // add a flag so the server can detect if this was an AJAX submit, which
         // may not be possible otherwise, e.g. when using a hidden iframe as
         // transport method
-        var ajaxRequest = $('<input type="hidden" value="1" name="ajaxRequest" />');
-        form.append(ajaxRequest);
+        data += '&ajaxRequest=1';
 
-        // fetch the data before setting the loading animation as this disables
-        // all elements and disabled elements aren't serialized...
-        var data = form.serialize();
+        // add a sender element as image elements/buttons are not sent to the
+        // server by default but maybe we want to detect which image/button was
+        // clicked to trigger separate actions
+        if (senderName) {
+            data += '&'+senderName+'='+senderValue;
+        }
 
         // the result container, the form itself or the DOM node given via id
         if (typeof(container) === 'string') {
@@ -159,7 +156,7 @@
                 Vrok.Tools.processResponse(data, $container, defaults);
 
                 if (typeof(defaults.callback) === 'function') {
-                    defaults.callback($container);
+                    defaults.callback($container, data);
                 }
             },
             error: function (data) {
@@ -232,7 +229,7 @@
 
             if (options.scrollTo) {
                 $('html,body').animate({
-                    scrollTop: Math.max(container.offset().top-50, 0)
+                    scrollTop: Math.max(container.offset().top - 50, 0)
                 });
             }
         }

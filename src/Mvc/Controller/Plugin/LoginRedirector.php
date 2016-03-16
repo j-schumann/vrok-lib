@@ -62,12 +62,13 @@ class LoginRedirector extends AbstractPlugin
      * Redirect the user to the login page.
      * Result may be directly returned from the controller.
      *
+     * @param string $route     (optional) alternative login route
      * @return Response|JsonModel
      */
-    public function gotoLogin()
+    public function gotoLogin($route = null)
     {
         $helper = $this->urlHelper;
-        $url    = $helper($this->loginRoute);
+        $url    = $helper($route ?: $this->loginRoute);
 
         /*
          * Detection of XHR is based an the X_REQUESTED_WITH header, any AJAX
