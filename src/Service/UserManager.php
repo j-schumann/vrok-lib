@@ -8,10 +8,15 @@
 
 namespace Vrok\Service;
 
+use DateTime;
 use Doctrine\ORM\EntityManager;
+use Vrok\Entity\Filter\LoginKeyFilter;
+use Vrok\Entity\Filter\UserFilter;
 use Vrok\Entity\Group as GroupEntity;
+use Vrok\Entity\LoginKey;
 use Vrok\Entity\User as UserEntity;
 use Vrok\Entity\Validation;
+use Vrok\Stdlib\DateInterval;
 use Vrok\Stdlib\PasswordStrength;
 use Zend\Authentication\Validator\Authentication as AuthValidator;
 use Zend\EventManager\EventInterface;
@@ -83,6 +88,27 @@ class UserManager implements
         'good'  => 25,
         'great' => 30,
     ];
+
+    /**
+     * The domain which is used for setcookie() when setting the authCookie.
+     *
+     * @var string
+     */
+    protected $cookieDomain = '';
+
+    /**
+     * Time in seconds a loginKey is valid.
+     *
+     * @var int
+     */
+    protected $loginKeyTimeout = 2592000; // 30*24*60*60
+
+    /**
+     * Wether the user can be logged in using his authToken cookie or not.
+     *
+     * @var bool
+     */
+    protected $cookieLoginEnabled = false;
 
     /**
      * @var ServiceLocatorInterface
@@ -306,7 +332,9 @@ class UserManager implements
 
         $user->setIsActive(false);
         $user->removePassword();
-        $user->setDeletedAt(new \DateTime());
+        $user->setDeletedAt(new DateTime());
+
+        $this->clearUserLoginKeys($user);
 
         // @todo event für softdelete für Aufräumarbeiten?
         $fh = $this->getServiceLocator()->get('Vrok\Service\FieldHistory');
@@ -331,27 +359,37 @@ class UserManager implements
         }
 
         // ask if someone wants to prevent the deletion
-        $results = $this->getEventManager()->trigger(
+        $preDelete = $this->getEventManager()->trigger(
             self::EVENT_DELETE_ACCOUNT_PRE,
             $user
         );
 
         // if the event is stopped the deletion is prohibited, return the
         // results, they should contain messages explaining the reasons.
-        if ($results->stopped()) {
-            return $results;
+        if ($preDelete->stopped()) {
+            return $preDelete;
         }
 
         $data = $this->getUserRepository()->getInstanceData($user);
 
-        $this->softDeleteUser($user);
-        $this->logout();
-        // allow cleanup actions and messages
-        $results = $this->getEventManager()->trigger(
-            self::EVENT_DELETE_ACCOUNT_POST,
-            $user,
-            ['data' => $data]
-        );
+        $em = $this->getEntityManager();
+        $em->getConnection()->beginTransaction();
+        try {
+            $this->softDeleteUser($user);
+            $this->logout();
+
+            // allow cleanup actions and messages
+            $results = $this->getEventManager()->trigger(
+                self::EVENT_DELETE_ACCOUNT_POST,
+                $user,
+                ['data' => $data]
+            );
+
+            $em->getConnection()->commit();
+        } catch (Exception $e) {
+            $em->getConnection()->rollBack();
+            throw $e;
+        }
 
         return $results;
     }
@@ -427,21 +465,26 @@ class UserManager implements
      *
      * @param string $username
      * @param string $password
+     * @param bool $rememberMe  wether or not the user stays logged in using the authToken
      *
      * @return User|array
      */
-    public function login($username, $password)
+    public function login($username, $password, $rememberMe = false)
     {
         $validator = $this->getAuthValidator();
         if (!$validator->isValid($password, ['username' => $username])) {
             return $validator->getMessages();
         }
 
-        $now  = new \DateTime();
+        $now  = new DateTime();
         $user = $this->getCurrentUser();
         $user->setLastLogin($now);
         $user->setLastSession($now);
         $this->getEntityManager()->flush();
+
+        if ($rememberMe && $this->cookieLoginEnabled) {
+            $this->setAuthCookie($user);
+        }
 
         return $user;
     }
@@ -449,9 +492,13 @@ class UserManager implements
     /**
      * Logs the current user out.
      *
+     * @param bool $global  if true the users loginkeys will be deleted, logging
+     *     him out on other devices too
+     *
      * @return bool
+     * @todo how can active sessions on other devices be logged out too?
      */
-    public function logout()
+    public function logout($global = false)
     {
         $authService = $this->getAuthService();
         if (!$authService->hasIdentity()) {
@@ -460,6 +507,15 @@ class UserManager implements
 
         $user = $authService->getIdentity();
         $authService->clearIdentity();
+
+        if ($this->cookieLoginEnabled) {
+            $this->deleteAuthCookie();
+
+            if ($global) {
+                $this->clearUserLoginKeys($user);
+            }
+        }
+
         $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
 
         // when using destroy() we could not set any messenger notifications afterwarss
@@ -467,6 +523,185 @@ class UserManager implements
         \Zend\Session\Container::getDefaultManager()->regenerateId();
 
         return true;
+    }
+
+    /**
+     * Checks if a user is already logged in, if not if the auth cookie is set
+     * and valid. Tries to login the user specified in the token.
+     *
+     * @return UserEntity|null
+     */
+    public function checkAuthCookie()
+    {
+        if (!$this->cookieLoginEnabled || $this->getCurrentUser()) {
+            return;
+        }
+
+        $credential = $this->getAuthCookie();
+        if (!$credential) {
+            return;
+        }
+
+        $adapter = $this->getCookieAuthAdapter();
+        $adapter->getIdentity($credential[0]);
+        $adapter->setCredential($credential);
+
+        $service = $this->getAuthService();
+        $result = $service->authenticate($adapter);
+        if ($result->getCode() != \Zend\Authentication\Result::SUCCESS) {
+            // @todo log failed auth attempt for temp bans
+            $this->deleteAuthCookie();
+
+            return;
+        }
+
+        $now  = new DateTime();
+        $user = $this->getCurrentUser();
+        $user->setLastSession($now);
+        $this->getEntityManager()->flush();
+
+        // update cookies, e.g. to get new future key
+        $this->setAuthCookie($user);
+
+        return $user;
+    }
+
+    /**
+     * Retrieve the users current loginKeys.
+     *
+     * @param UserEntity $user
+     * @return LoginKey[]
+     */
+    public function getUserLoginKeys(UserEntity $user)
+    {
+        // purge all expired keys in the table
+        $this->purgeLoginKeys();
+
+        $keys = $this->getLoginKeyFilter()
+            ->byUser($user)
+            ->getResult();
+
+        // user has two not expired keys -> nothing else to do
+        if (count($keys) > 1) {
+            return $keys;
+        }
+
+        $em = $this->getEntityManager();
+        $current = null;
+        $interval = new DateInterval('PT'.$this->loginKeyTimeout.'S');
+
+        // no keys -> generate new current key
+        if (count($keys) == 0) {
+            $now = new DateTime();
+            $current = new LoginKey();
+            $current->setExpirationDate($now->add($interval));
+            $current->setToken(\Vrok\Stdlib\Random::getRandomToken(64));
+            $current->setUser($user);
+            $em->persist($current);
+        }
+        // remaining entry is the current key
+        else {
+            $current = $keys[0];
+        }
+
+        // now generate a new future key which expires after the current key
+        $expiration = clone $current->getExpirationDate();
+        $future = new LoginKey();
+        $future->setExpirationDate($expiration->add($interval));
+        $future->setToken(\Vrok\Stdlib\Random::getRandomToken(64));
+        $future->setUser($user);
+        $em->persist($future);
+
+        $em->flush();
+        return [$current, $future];
+    }
+
+    /**
+     * Parses the current visitors auth cookie.
+     *
+     * @return array    [0 => id, 1 => currentKey, 2 => futureKey]
+     *                  or null if cookie is invalid
+     */
+    protected function getAuthCookie()
+    {
+        if(empty($_COOKIE['authToken'])) {
+            return null;
+        }
+
+        $values = explode('|', $_COOKIE['authToken']);
+        if (count($values) != 3) {
+            // delete corrupt cookie;
+            $this->deleteAuthCookie();
+            return null;
+        }
+
+        return $values;
+    }
+
+    /**
+     * Sets the users auth cookie with current and future login key.
+     *
+     * @param UserEntity $user
+     */
+    protected function setAuthCookie(UserEntity $user)
+    {
+        if(headers_sent()) {
+            return;
+        }
+
+        // delete the auth cookie if the user has an old password, force re-login
+        if (password_needs_rehash($user->getPassword(), PASSWORD_DEFAULT)) {
+            $this->deleteAuthCookie();
+            return;
+        }
+
+        // cookie expires in twice the timeout for one key
+        $expires = time() + $this->loginKeyTimeout * 2;
+
+        // build cookie content from the users current keys
+        $keys = $this->getUserLoginKeys($user);
+        $content = implode('|', [
+            $user->getId(),
+            $keys[0]->getToken(),
+            $keys[1]->getToken()
+        ]);
+
+        setcookie('authToken', $content, $expires, '/', $this->cookieDomain, false, true);
+    }
+
+    /**
+     * Deletes the users auth cookie
+     */
+    protected function deleteAuthCookie()
+    {
+        if(headers_sent()) {
+            return;
+        }
+
+        unset($_COOKIE['authToken']);
+        setcookie('authToken', '', 0, '/', $this->cookieDomain, false, true);
+    }
+
+    /**
+     * Removes all loginKeys for the given user.
+     *
+     * @param \Vrok\Service\User $user
+     */
+    public function clearUserLoginKeys(UserEntity $user)
+    {
+        $this->getLoginKeyFilter()
+            ->byUser($user)
+            ->delete()->getQuery()->execute();
+    }
+
+    /**
+     * Removes all expired loginKeys from the database.
+     */
+    public function purgeLoginKeys()
+    {
+        $this->getLoginKeyFilter()
+            ->areExpired()
+            ->delete()->getQuery()->execute();
     }
 
     /**
@@ -516,12 +751,23 @@ class UserManager implements
     /**
      * Returns the default authentication adapter.
      *
-     * @return \VrokAuthentication\Adapter\Doctrine
+     * @return \Vrok\Authentication\Adapter\Doctrine
      */
     public function getAuthAdapter()
     {
         return $this->getServiceLocator()
-                ->get('Vrok\Authentication\Adapter\Doctrine');
+                ->get(\Vrok\Authentication\Adapter\Doctrine::class);
+    }
+
+    /**
+     * Returns the default authentication adapter.
+     *
+     * @return \Vrok\Authentication\Adapter\Cookie
+     */
+    public function getCookieAuthAdapter()
+    {
+        return $this->getServiceLocator()
+                ->get(\Vrok\Authentication\Adapter\Cookie::class);
     }
 
     /**
@@ -676,6 +922,66 @@ class UserManager implements
     }
 
     /**
+     * Sets the loginKey timeout.
+     *
+     * @param int $value
+     */
+    public function setLoginKeyTimeout($value)
+    {
+        $this->loginKeyTimeout = (int) $value;
+    }
+
+    /**
+     * Retrieve the current loginKey timeout.
+     *
+     * @return int
+     */
+    public function getLoginKeyTimeout()
+    {
+        return $this->loginKeyTimeout;
+    }
+
+    /**
+     * Sets the cookie domain.
+     *
+     * @param string $value
+     */
+    public function setCookieDomain($value)
+    {
+        $this->cookieDomain = (string) $value;
+    }
+
+    /**
+     * Retrieve the cookie domain.
+     *
+     * @return string
+     */
+    public function getCookieDomain()
+    {
+        return $this->cookieDomain;
+    }
+
+    /**
+     * Sets wether login via cookie is enabled or not.
+     *
+     * @param bool $value
+     */
+    public function setCookieLoginEnabled($value)
+    {
+        $this->cookieLoginEnabled = (bool) $value;
+    }
+
+    /**
+     * Returns true if login via cookie is enabled, else false.
+     *
+     * @return bool
+     */
+    public function getCookieLoginEnabled()
+    {
+        return $this->cookieLoginEnabled;
+    }
+
+    /**
      * Calculates the password strength and returns it together with a rating
      * between BAD and GREAT and a translation message for this rating.
      *
@@ -706,12 +1012,27 @@ class UserManager implements
      *
      * @param string $alias the alias for the user record
      *
-     * @return \Vrok\Entity\Filter\UserFilter
+     * @return UserFilter
      */
     public function getUserFilter($alias = 'u')
     {
         $qb     = $this->getUserRepository()->createQueryBuilder($alias);
-        $filter = new \Vrok\Entity\Filter\UserFilter($qb);
+        $filter = new UserFilter($qb);
+
+        return $filter;
+    }
+
+    /**
+     * Retrieve a new loginKey filter instance.
+     *
+     * @param string $alias the alias for the loginKey record
+     *
+     * @return LoginKeyFilter
+     */
+    public function getLoginKeyFilter($alias = 'l')
+    {
+        $qb     = $this->getLoginKeyRepository()->createQueryBuilder($alias);
+        $filter = new LoginKeyFilter($qb);
 
         return $filter;
     }
@@ -733,7 +1054,7 @@ class UserManager implements
      */
     public function getUserRepository()
     {
-        return $this->getEntityManager()->getRepository('Vrok\Entity\User');
+        return $this->getEntityManager()->getRepository(UserEntity::class);
     }
 
     /**
@@ -743,7 +1064,17 @@ class UserManager implements
      */
     public function getGroupRepository()
     {
-        return $this->getEntityManager()->getRepository('Vrok\Entity\Group');
+        return $this->getEntityManager()->getRepository(GroupEntity::class);
+    }
+
+    /**
+     * Retrieve the loginKey repository instance.
+     *
+     * @return \Vrok\Doctrine\EntityRepository
+     */
+    public function getLoginKeyRepository()
+    {
+        return $this->getEntityManager()->getRepository(LoginKey::class);
     }
 
     /**
@@ -761,7 +1092,15 @@ class UserManager implements
         if (!empty($config['search_route'])) {
             $this->setUserAdminRoute($config['search_route']);
         }
-
+        if (!empty($config['loginkey_timeout'])) {
+            $this->setLoginKeyTimeout($config['loginkey_timeout']);
+        }
+        if (!empty($config['cookie_domain'])) {
+            $this->setCookieDomain($config['cookie_domain']);
+        }
+        if (!empty($config['cookielogin_enabled'])) {
+            $this->setCookieLoginEnabled($config['cookielogin_enabled']);
+        }
         if (!empty($config['password_strength_thresholds'])) {
             $this->setPasswordStrengthThresholds($config['password_strength_thresholds']);
         }

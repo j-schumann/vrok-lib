@@ -16,9 +16,6 @@ use Zend\Authentication\Result;
 /**
  * Checks the database for a match of the given identity and validates the users
  * state and credential.
- *
- * @todo do not use servicelocator but inject the usermanager. (we need the user
- * repository, the entityManager to persist, the temp ban repo)
  */
 class Doctrine extends AbstractAdapter
 {
@@ -41,7 +38,7 @@ class Doctrine extends AbstractAdapter
      */
     public function __construct(ObjectManager $entityManager)
     {
-        $this->entityManager = $entityManager;;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -49,7 +46,7 @@ class Doctrine extends AbstractAdapter
      */
     public function authenticate()
     {
-        $repository = $this->entityManager->getRepository('Vrok\Entity\User');
+        $repository = $this->entityManager->getRepository(UserEntity::class);
 
         $user = $repository->findOneBy(['username' => $this->identity]);
         /* @var $user UserEntity */

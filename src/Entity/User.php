@@ -36,6 +36,7 @@ class User extends Entity implements RoleProviderInterface
     public function __construct()
     {
         $this->groups = new ArrayCollection();
+        $this->loginKeys = new ArrayCollection();
     }
 
     /**
@@ -369,6 +370,22 @@ class User extends Entity implements RoleProviderInterface
         $this->lastLogin = $lastLogin;
 
         return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="loginKeys">
+    /**
+     * @ORM\OneToMany(targetEntity="LoginKey", mappedBy="user", cascade={"persist", "remove"})
+     */
+    protected $loginKeys;
+
+    /**
+     * Retrieve the LoginKeys for this User.
+     *
+     * @return LoginKey[]
+     */
+    public function getLoginKeys()
+    {
+        return $this->loginKeys;
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="passwordDate">

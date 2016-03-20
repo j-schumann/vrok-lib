@@ -25,7 +25,7 @@ class ControllerGuard extends OriginalGuard
      *
      * @param MvcEvent $event
      *
-     * @return void
+     * @return null|Zend\Mvc\Router\RouteMatch
      */
     public function onDispatch(MvcEvent $event)
     {
@@ -60,6 +60,6 @@ class ControllerGuard extends OriginalGuard
             return $results->last();
         }
 
-        return $e->getParams();
+        return $event->getParams();
     }
 }

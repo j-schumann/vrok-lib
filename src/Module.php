@@ -103,6 +103,10 @@ class Module implements
                     $vr = $sm->get('ViewRenderer');
                     return new Asset\ViewScriptResolver($vr, $map);
                 },
+                'Vrok\Authentication\Adapter\Cookie' => function ($sm) {
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    return new Authentication\Adapter\Cookie($em);
+                },
                 'Vrok\Authentication\Adapter\Doctrine' => function ($sm) {
                     $em = $sm->get('Doctrine\ORM\EntityManager');
                     return new Authentication\Adapter\Doctrine($em);
