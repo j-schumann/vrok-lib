@@ -25,6 +25,7 @@ class NumberFormat extends ZendFormat
      * @param int       $formatType
      * @param string    $locale
      * @param int|array $decimals    e.g. 3 or [3, 4]
+     * @param array|null $textAttributes
      *
      * @return string
      */
@@ -33,7 +34,8 @@ class NumberFormat extends ZendFormat
         $formatStyle = null,
         $formatType = null,
         $locale = null,
-        $decimals = null
+        $decimals = null,
+        array $textAttributes = NULL
     ) {
         if (null === $locale) {
             $locale = $this->getLocale();
@@ -48,23 +50,29 @@ class NumberFormat extends ZendFormat
             $decimals = $this->getDecimals();
         }
 
-        $formatterId = md5($formatStyle."\0".$locale."\0".json_encode($decimals));
+        $formatterId = md5(
+            $formatStyle . "\0" . $locale . "\0" . $decimals . "\0"
+            . md5(serialize($textAttributes))
+        );
 
         if (!isset($this->formatters[$formatterId])) {
-            $this->formatters[$formatterId] = new NumberFormatter(
-                $locale,
-                $formatStyle
-            );
+            $formatter = new NumberFormatter($locale, $formatStyle);
 
             if ($decimals !== null) {
                 if (is_array($decimals)) {
-                    $this->formatters[$formatterId]->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $decimals[0]);
-                    $this->formatters[$formatterId]->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $decimals[1]);
+                    $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $decimals[0]);
+                    $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $decimals[1]);
                 } else {
-                    $this->formatters[$formatterId]->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $decimals);
-                    $this->formatters[$formatterId]->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $decimals);
+                    $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $decimals);
+                    $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $decimals);
                 }
             }
+
+            foreach ($textAttributes as $textAttribute => $value) {
+                $formatter->setTextAttribute($textAttribute, $value);
+            }
+
+            $this->formatters[$formatterId] = $formatter;
         }
 
         return $this->formatters[$formatterId]->format($number, $formatType);
