@@ -49,6 +49,9 @@ class NumberFormat extends ZendFormat
         if (!is_array($decimals) && $decimals < 0) {
             $decimals = $this->getDecimals();
         }
+        if (!is_array($textAttributes)) {
+            $textAttributes = $this->getTextAttributes();
+        }
 
         $formatterId = md5(
             $formatStyle . "\0" . $locale . "\0" . $decimals . "\0"
