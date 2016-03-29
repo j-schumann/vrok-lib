@@ -54,7 +54,7 @@ class NumberFormat extends ZendFormat
         }
 
         $formatterId = md5(
-            $formatStyle . "\0" . $locale . "\0" . $decimals . "\0"
+            $formatStyle . "\0" . $locale . "\0" . json_encode($decimals) . "\0"
             . md5(serialize($textAttributes))
         );
 
