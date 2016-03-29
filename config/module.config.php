@@ -19,8 +19,10 @@ return [
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="controller_plugins">
     'controller_plugins' => [
+        // @todo alias + invokablefactory
         'invokables' => [
             'translate' => 'Vrok\Mvc\Controller\Plugin\Translate',
+            'currentUser' => 'Vrok\Mvc\Controller\Plugin\CurrentUser',
         ],
     ],
 // </editor-fold>
@@ -92,7 +94,6 @@ return [
     'service_manager' => [
         'factories' => [
             'Vrok\Client\Info'          => 'Zend\ServiceManager\Factory\InvokableFactory',
-            'Vrok\Form\ConfirmationForm' => 'Vrok\Form\AbstractFormFactory',
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
             'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
             'LazyServiceFactory'        => 'Zend\ServiceManager\Proxy\LazyServiceFactoryFactory',
@@ -115,16 +116,17 @@ return [
 // <editor-fold defaultstate="collapsed" desc="slm_queue">
     'slm_queue' => [
         'job_manager' => [
-            'invokables' => [
-                'Vrok\SlmQueue\Job\CheckTodos'       => 'Vrok\SlmQueue\Job\CheckTodos',
-                'Vrok\SlmQueue\Job\ExitWorker'       => 'Vrok\SlmQueue\Job\ExitWorker',
-                'Vrok\SlmQueue\Job\PurgeValidations' => 'Vrok\SlmQueue\Job\PurgeValidations',
+            'factories' => [
+                'Vrok\SlmQueue\Job\CheckTodos' => 'Zend\ServiceManager\Factory\InvokableFactory',
+                'Vrok\SlmQueue\Job\ExitWorker' => 'Zend\ServiceManager\Factory\InvokableFactory',
+                'Vrok\SlmQueue\Job\PurgeValidations' => 'Zend\ServiceManager\Factory\InvokableFactory',
             ],
         ],
     ],
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="view_helpers">
     'view_helpers' => [
+        // @todo alias + invokablefactory
         'invokables' => [
             'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
 

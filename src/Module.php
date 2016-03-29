@@ -58,9 +58,6 @@ class Module implements
                     return $helper;
                 },
             ],
-            'invokables' => [
-                'currentUser' => 'Vrok\Mvc\Controller\Plugin\CurrentUser',
-            ],
         ];
     }
 
