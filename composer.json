@@ -9,6 +9,7 @@
         "php": ">=5.5",
         "doctrine/doctrine-orm-module": "~0.9.0",
         "gedmo/doctrine-extensions": "~2.4.1",
+        "ocramius/proxy-manager": "~2.0.1",
         "rwoverdijk/assetmanager": "~1.5",
         "zendframework/zendframework": "~2.5.1"
     },
