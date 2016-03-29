@@ -76,7 +76,8 @@ class Module implements
             'factories' => [
                 'Vrok\Form\ConfirmationForm' => function ($sm) {
                     $form = new Form\ConfirmationForm();
-                    $form->setServiceLocator($sm);
+                    $form->setEntityManager($sm->getServiceLocator()->get('Doctrine\ORM\EntityManager'));
+                    $form->setTranslator($sm->getServiceLocator()->get('MvcTranslator'));
                     return $form;
                 },
             ],
@@ -156,7 +157,10 @@ class Module implements
                     return $service;
                 },
                 'Vrok\Service\Todo' => function ($sm) {
-                    $service = new Service\Todo($sm);
+                    $service = new Service\Todo();
+                    $service->setAuthenticationService($sm->get('Zend\Authentication\AuthenticationService'));
+                    $service->setEntityManager($sm->get('Doctrine\ORM\EntityManager'));
+                    $service->setViewHelperManager($sm->get('ViewHelperManager'));
 
                     $config = $sm->get('Config');
                     if (!empty($config['todo_service']['timeouts'])) {
@@ -176,7 +180,10 @@ class Module implements
                     return $manager;
                 },
                 'Vrok\Service\ValidationManager' => function ($sm) {
-                    $manager = new Service\ValidationManager($sm);
+                    $manager = new Service\ValidationManager();
+                    $manager->setEntityManager($sm->get('Doctrine\ORM\EntityManager'));
+                    $manager->setControllerPluginManager($sm->get('ControllerPluginManager'));
+                    $manager->setViewHelperManager($sm->get('ViewHelperManager'));
 
                     $config = $sm->get('Config');
                     if (!empty($config['validation_manager']['timeouts'])) {

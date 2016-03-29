@@ -73,15 +73,42 @@ return [
     ],
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="service_manager">
-    'service_manager' => [
-        // classes that have no dependencies
-        'invokables' => [
-            'Vrok\Client\Info' => 'Vrok\Client\Info',
+    'lazy_services' => [
+        'class_map' => [
+            'ControllerPluginManager'        => 'Zend\Mvc\Controller\PluginManager',
+            'ViewHelperManager'              => 'Zend\View\HelperPluginManager',
+            'Vrok\Service\ActionLogger'      => 'Vrok\Service\ActionLogger',
+            'Vrok\Service\Email'             => 'Vrok\Service\Email',
+            'Vrok\Service\FieldHistory'      => 'Vrok\Service\FieldHistory',
+            'Vrok\Service\Meta'              => 'Vrok\Service\Meta',
+            'Vrok\Service\Owner'             => 'Vrok\Service\Owner',
+            'Vrok\Service\Todo'              => 'Vrok\Service\Todo',
+            'Vrok\Service\UserManager'       => 'Vrok\Service\UserManager',
+            'Vrok\Service\ValidationManager' => 'Vrok\Service\ValidationManager',
+            'Zend\Authentication\AuthenticationService' => 'Zend\Authentication\AuthenticationService',
         ],
+    ],
 
+    'service_manager' => [
         'factories' => [
+            'Vrok\Client\Info'          => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\Form\ConfirmationForm' => 'Vrok\Form\AbstractFormFactory',
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
             'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
+            'LazyServiceFactory'        => 'Zend\ServiceManager\Proxy\LazyServiceFactoryFactory',
+        ],
+
+        'delegators' => [
+            'ControllerPluginManager'        => ['LazyServiceFactory'],
+            'ViewHelperManager'              => ['LazyServiceFactory'],
+            'Vrok\Service\ActionLogger'      => ['LazyServiceFactory'],
+            'Vrok\Service\Email'             => ['LazyServiceFactory'],
+            'Vrok\Service\FieldHistory'      => ['LazyServiceFactory'],
+            'Vrok\Service\Meta'              => ['LazyServiceFactory'],
+            'Vrok\Service\Owner'             => ['LazyServiceFactory'],
+            'Vrok\Service\Todo'              => ['LazyServiceFactory'],
+            'Vrok\Service\ValidationManager' => ['LazyServiceFactory'],
+            'Zend\Authentication\AuthenticationService' => ['LazyServiceFactory'],
         ],
     ],
 // </editor-fold>

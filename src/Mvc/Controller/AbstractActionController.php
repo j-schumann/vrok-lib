@@ -37,7 +37,7 @@ abstract class AbstractActionController extends ZendController
      */
     public function __construct(ServiceLocatorInterface $serviceLocator)
     {
-        $this->serviceLocator = $serviceLocator;;
+        $this->serviceLocator = $serviceLocator;
     }
 
     /**

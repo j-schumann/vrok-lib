@@ -16,17 +16,14 @@ use Vrok\Entity\User;
 use Vrok\Entity\AbstractTodo as TodoEntity;
 use Vrok\Entity\UserTodo;
 use Vrok\Entity\Filter\TodoFilter;
+use Zend\Authentication\AuthenticationServiceInterface;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
  * Handles todos for users (and the system), triggering an event when a deadline is
  * reached.
- *
- * Uses the serviceLocator for the EntityManager, URL-ViewHelper and AuthService,
- * we don't want to inject these as the last two are only needed in some cases, so
- * we don't want to instantiate them always.
  */
 class Todo implements EventManagerAwareInterface
 {
@@ -43,31 +40,48 @@ class Todo implements EventManagerAwareInterface
     protected $partial = 'vrok/partials/todo-list';
 
     /**
-     * @var ServiceLocatorInterface
+     * @var AuthenticationServiceInterface
      */
-    protected $serviceLocator = null;
+    protected $authenticationService = null;
 
     /**
-     * Class constructor - stores the ServiceLocator instance.
-     * We inject the locator directly as not all services are lazy loaded
-     * but some are only used in rare cases.
-     * @todo lazyload all required services and include them in the factory
-     *
-     * @param ServiceLocatorInterface $serviceLocator
+     * @var EntityManager
      */
-    public function __construct(ServiceLocatorInterface $serviceLocator)
+    protected $entityManager = null;
+
+    /**
+     * @var ViewHelperManager
+     */
+    protected $viewHelperManager = null;
+
+    /**
+     * Sets the AS instance to use.
+     *
+     * @param AuthenticationServiceInterface $as
+     */
+    public function setAuthenticationService(AuthenticationServiceInterface $as)
     {
-        $this->serviceLocator = $serviceLocator;;
+        $this->authenticationService = $as;
     }
 
     /**
-     * Retrieve the stored service manager instance.
+     * Sets the EM instance to use.
      *
-     * @return ServiceLocatorInterface
+     * @param EntityManager $em
      */
-    private function getServiceLocator()
+    public function setEntityManager(EntityManager $em)
     {
-        return $this->serviceLocator;
+        $this->entityManager = $em;
+    }
+
+    /**
+     * Sets the VHM instance to use.
+     *
+     * @param ViewHelperManager $vhm
+     */
+    public function setViewHelperManager(ViewHelperManager $vhm)
+    {
+        $this->viewHelperManager = $vhm;
     }
 
     /**
@@ -89,8 +103,7 @@ class Todo implements EventManagerAwareInterface
         $timeout = null,
         User $creator = null
     ) {
-        $em        = $this->getEntityManager();
-        $classMeta = $em->getClassMetadata('Vrok\Entity\AbstractTodo');
+        $classMeta = $this->entityManager->getClassMetadata('Vrok\Entity\AbstractTodo');
         if (!isset($classMeta->discriminatorMap[$type])) {
             throw new \RuntimeException('Requested Todo type '.$type.' not found!');
         }
@@ -98,10 +111,10 @@ class Todo implements EventManagerAwareInterface
         $className = $classMeta->discriminatorMap[$type];
         $todo      = new $className();
         /* @var $todo TodoEntity */
-        $em->persist($todo);
+        $this->entityManager->persist($todo);
 
         if ($object) {
-            $todo->setReference($em, $object);
+            $todo->setReference($this->entityManager, $object);
         }
 
         if ($timeout) {
@@ -119,7 +132,7 @@ class Todo implements EventManagerAwareInterface
         }
 
         // we need to flush before we can reference UserTodos, they need the ID.
-        $em->flush();
+        $this->entityManager->flush();
 
         return $todo;
     }
@@ -135,8 +148,7 @@ class Todo implements EventManagerAwareInterface
      */
     public function completeObjectTodo($type, EntityInterface $object, $flush = true)
     {
-        $authService = $this->getServiceLocator()->get('Zend\Authentication\AuthenticationService');
-        $identity    = $authService->getIdentity();
+        $identity = $this->authenticationService->getIdentity();
 
         $filter = $this->getTodoFilter('t', $type);
         $filter->byObject($object)
@@ -163,7 +175,7 @@ class Todo implements EventManagerAwareInterface
         }
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -191,7 +203,7 @@ class Todo implements EventManagerAwareInterface
         }
 
         if ($flush) {
-            $this->getEntityManager()->flush();
+            $this->entityManager->flush();
         }
     }
 
@@ -214,7 +226,7 @@ class Todo implements EventManagerAwareInterface
         $userTodo->setStatus($status);
         $userTodo->setTodo($todo);
 
-        $this->getEntityManager()->persist($userTodo);
+        $this->entityManager->persist($userTodo);
 
         return $userTodo;
     }
@@ -233,8 +245,8 @@ class Todo implements EventManagerAwareInterface
         $list = [];
         foreach ($todos as $todo) {
             $todo->setHelpers(
-                $todo->getReference($this->getEntityManager()),
-                $this->getServiceLocator()->get('viewhelpermanager')->get('url')
+                $todo->getReference($this->entityManager),
+                $this->viewHelperManager->get('url')
             );
 
             $list[] = [
@@ -289,7 +301,7 @@ class Todo implements EventManagerAwareInterface
     public function renderUserTodoList(User $assignee, User $user = null)
     {
         $todos   = $this->getUserTodoList($assignee, $user);
-        $partial = $this->getServiceLocator()->get('viewhelpermanager')->get('partial');
+        $partial = $this->viewHelperManager->get('partial');
 
         return $partial($this->getPartial(), [
             'todos' => $todos,
@@ -326,7 +338,7 @@ class Todo implements EventManagerAwareInterface
 
         // flush here, the event listeners may have changed the status of the todos etc.,
         // we don't want each single one to flush() if not necessary.
-        $this->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 
     /**
@@ -354,23 +366,13 @@ class Todo implements EventManagerAwareInterface
     public function getTodoRepository($class = 'Vrok\Entity\AbstractTodo')
     {
         if (strpos('\\', $class) === false) {
-            $meta = $this->getEntityManager()->getClassMetadata('Vrok\Entity\AbstractTodo');
+            $meta = $this->entityManager->getClassMetadata('Vrok\Entity\AbstractTodo');
             if (isset($meta->discriminatorMap[$class])) {
                 $class = $meta->discriminatorMap[$class];
             }
         }
 
-        return $this->getEntityManager()->getRepository($class);
-    }
-
-    /**
-     * Retrieve the entity manager.
-     *
-     * @return EntityManager
-     */
-    public function getEntityManager()
-    {
-        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
+        return $this->entityManager->getRepository($class);
     }
 
     /**

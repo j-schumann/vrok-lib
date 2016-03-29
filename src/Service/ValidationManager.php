@@ -10,19 +10,17 @@ namespace Vrok\Service;
 
 use DateInterval;
 use DateTime;
+use Doctrine\ORM\EntityManager;
 use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\Validation as ValidationEntity;
 use Vrok\Entity\Filter\ValidationFilter;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\Mvc\Controller\PluginManager as ControllerPluginManager;
+use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
  * Manages validations and triggers events when a validation fails or succeeds.
- *
- * Uses the serviceLocator for the EntityManager, for the FlashMessenger and the
- * URL-Viewhelper. We don't want to inject the last two as we need them only in
- * special cases and want to avoid instantiation if possible.
  */
 class ValidationManager implements EventManagerAwareInterface
 {
@@ -58,34 +56,51 @@ class ValidationManager implements EventManagerAwareInterface
     protected $timeouts = [];
 
     /**
-     * @var ServiceLocatorInterface
+     * @var ControllerPluginManager
      */
-    protected $serviceLocator = null;
+    protected $controllerPluginManager = null;
 
     /**
-     * Class constructor - stores the ServiceLocator instance.
-     * We inject the locator directly as not all services are lazy loaded
-     * but some are only used in rare cases.
-     * @todo lazyload all required services and include them in the factory
-     *
-     * @param ServiceLocatorInterface $serviceLocator
+     * @var EntityManager
      */
-    public function __construct(ServiceLocatorInterface $serviceLocator)
+    protected $entityManager = null;
+
+    /**
+     * @var ViewHelperManager
+     */
+    protected $viewHelperManager = null;
+
+    /**
+     * Sets the CPM instance to use.
+     *
+     * @param ControllerPluginManager $cpm
+     */
+    public function setControllerPluginManager(ControllerPluginManager $cpm)
     {
-        $this->serviceLocator = $serviceLocator;;
+        $this->controllerPluginManager = $cpm;
     }
 
     /**
-     * Retrieve the stored service manager instance.
+     * Sets the EM instance to use.
      *
-     * @return ServiceLocatorInterface
+     * @param EntityManager $em
      */
-    private function getServiceLocator()
+    public function setEntityManager(EntityManager $em)
     {
-        return $this->serviceLocator;
+        $this->entityManager = $em;
     }
 
-        /**
+    /**
+     * Sets the VHM instance to use.
+     *
+     * @param ViewHelperManager $vhm
+     */
+    public function setViewHelperManager(ViewHelperManager $vhm)
+    {
+        $this->viewHelperManager = $vhm;
+    }
+
+    /**
      * Creates a new validation of the given type for the given owner.
      *
      * @param string          $type
@@ -95,15 +110,13 @@ class ValidationManager implements EventManagerAwareInterface
      */
     public function createValidation($type, EntityInterface $owner)
     {
-        $em = $this->getEntityManager();
-
         $validation = new ValidationEntity();
         $validation->setType($type);
         $validation->setRandomToken();
-        $validation->setReference($em, $owner);
+        $validation->setReference($this->entityManager, $owner);
 
-        $em->persist($validation);
-        $em->flush();
+        $this->entityManager->persist($validation);
+        $this->entityManager->flush();
 
         return $validation;
     }
@@ -149,14 +162,14 @@ class ValidationManager implements EventManagerAwareInterface
 
             return false;
         }
-        $em      = $this->getEntityManager();
+
         $results = $this->getEventManager()->trigger(
             self::EVENT_VALIDATION_SUCCESSFUL,
             $validation
         );
 
-        $em->remove($validation);
-        $em->flush();
+        $this->entityManager->remove($validation);
+        $this->entityManager->flush();
 
         // return the event result, the controller action returns it again if it is
         // an instance of Zend\Http\Response to allow redirects
@@ -173,7 +186,7 @@ class ValidationManager implements EventManagerAwareInterface
      */
     protected function triggerFail(ValidationEntity $validation = null)
     {
-        $this->getServiceLocator()->get('ControllerPluginManager')
+        $this->controllerPluginManager
                 ->get('flashMessenger')
                 ->addErrorMessage('message.validation.noMatchingValidation');
 
@@ -196,7 +209,7 @@ class ValidationManager implements EventManagerAwareInterface
      */
     public function getConfirmationUrl(ValidationEntity $validation = null)
     {
-        $url = $this->getServiceLocator()->get('viewhelpermanager')->get('url');
+        $url = $this->viewHelperManager->get('url');
         if (!$validation) {
             return $url($this->confirmationRoute);
         }
@@ -274,9 +287,8 @@ class ValidationManager implements EventManagerAwareInterface
         // remove the validation regardless of the event result and flush the EM,
         // there were probably more cleanups through the event listeners so we want
         // to commit them now
-        $em = $this->getEntityManager();
-        $em->remove($validation);
-        $em->flush();
+        $this->entityManager->remove($validation);
+        $this->entityManager->flush();
 
         return true;
     }
@@ -321,7 +333,7 @@ class ValidationManager implements EventManagerAwareInterface
      */
     public function getValidationRepository()
     {
-        return $this->getEntityManager()->getRepository('Vrok\Entity\Validation');
+        return $this->entityManager->getRepository('Vrok\Entity\Validation');
     }
 
     /**
@@ -364,15 +376,5 @@ class ValidationManager implements EventManagerAwareInterface
         foreach ($timeouts as $type => $timeout) {
             $this->setTimeout($type, $timeout);
         }
-    }
-
-    /**
-     * Retrieve the entityManager instance.
-     *
-     * @return EntityManager
-     */
-    protected function getEntityManager()
-    {
-        return $this->getServiceLocator()->get('Doctrine\ORM\EntityManager');
     }
 }

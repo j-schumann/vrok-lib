@@ -9,40 +9,42 @@
 namespace Vrok\Form;
 
 use Doctrine\ORM\EntityManager;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\Mvc\I18n\Translator;
 
 /**
  * Used to extend our fieldset and form classes by this functions because they
  * can not inherit from the same base.
- *
- * @todo dont use the servicelocator, inject only the necessary dependencies.
- * but how can we do that without writing hundreds of factories?
  */
 trait SharedFunctions
 {
     /**
-     * @var ServiceLocatorInterface
+     * @var EntityManager
      */
-    protected $serviceLocator = null;
+    protected $entityManager = null;
 
     /**
-     * Retrieve the stored service manager instance.
-     *
-     * @return ServiceLocatorInterface
+     * @var Translator
      */
-    public function getServiceLocator()
+    protected $translator = null;
+
+    /**
+     * Sets the EM instance to use.
+     *
+     * @param EntityManager $em
+     */
+    public function setEntityManager(EntityManager $em)
     {
-        return $this->serviceLocator;
+        $this->entityManager = $em;
     }
 
     /**
-     * Retrieve the stored service manager instance.
+     * Sets the translator instance to use.
      *
-     * @param ServiceLocatorInterface
+     * @param Translator $t
      */
-    public function setServiceLocator(ServiceLocatorInterface $sl)
+    public function setTranslator(Translator $t)
     {
-        $this->serviceLocator = $sl;
+        $this->translator = $t;
     }
 
     /**
@@ -66,9 +68,7 @@ trait SharedFunctions
                      // not translated because Zend\Form\Element\Csrf would not do
                      // this by default and we have no access to the translator in
                      // the element class.
-                    'translator' => $this->getServiceLocator()
-                        ->getServiceLocator()
-                        ->get('MvcTranslator'),
+                    'translator' => $this->translator,
                 ],
             ],
         ]);
@@ -86,10 +86,9 @@ trait SharedFunctions
      */
     public function setUntranslatedMessages($messages)
     {
-        $translator = $this->getServiceLocator()->getServiceLocator()->get('MvcTranslator');
         foreach ($messages as &$messageSet) {
             foreach ($messageSet as &$message) {
-                $message = $translator->translate($message);
+                $message = $this->translator->translate($message);
             }
         }
 
@@ -104,8 +103,7 @@ trait SharedFunctions
      */
     public function setElementMessage($element, $message)
     {
-        $translator = $this->getServiceLocator()->getServiceLocator()->get('MvcTranslator');
-        $this->get($element)->setMessages([$translator->translate($message)]);
+        $this->get($element)->setMessages([$this->translator->translate($message)]);
     }
 
     /**
@@ -115,8 +113,6 @@ trait SharedFunctions
      */
     public function getEntityManager()
     {
-        return $this->getServiceLocator() // returns the FormElementManager
-            ->getServiceLocator() // returns the ServiceManager
-            ->get('Doctrine\ORM\EntityManager');
+        return $this->entityManager;
     }
 }

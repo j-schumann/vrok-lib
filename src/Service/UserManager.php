@@ -30,6 +30,11 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 /**
  * Contains processes for creating and managing Attendant objects and their
  * associated actions.
+ *
+ * dependencies: ControllerPluginManager, EntityManager, EventManager, Meta,
+ * FieldHistory, BjyAuthorize\Service\Authorize, Email,viewhelpermanager
+ * Zend\Authentication\AuthenticationService, Vrok\Authentication\Adapter\Doctrine,
+ * Vrok\Authentication\Adapter\Cookie, MvcTranslator, config
  */
 class UserManager implements
     EventManagerAwareInterface,
@@ -117,15 +122,17 @@ class UserManager implements
 
     /**
      * Class constructor - stores the ServiceLocator instance.
-     * We inject the locator directly as not all services are lazy loaded
-     * but some are only used in rare cases.
-     * @todo lazyload all required services and include them in the factory
+     * @todo Wir verwenden hier den ServiceLocator statt die vielen dependencies
+     * einzeln zu injizieren, wir bräuchten für jede noch mindestens einen setter,
+     * Damit brauchen wir auch vorerst nicht sämtliche dependencies lazy-loaden,
+     * der UserManager wird ja durch attach() bei jedem page hit instanziiert,
+     * wir würden also zumindest sämtliche proxies instantiieren müssen.
      *
      * @param ServiceLocatorInterface $serviceLocator
      */
     public function __construct(ServiceLocatorInterface $serviceLocator)
     {
-        $this->serviceLocator = $serviceLocator;;
+        $this->serviceLocator = $serviceLocator;
     }
 
     /**
@@ -169,6 +176,8 @@ class UserManager implements
      * @triggers userValidated
      *
      * @param EventInterface $e
+     *
+     * @return Zend\Http\Response
      */
     public function onUserValidationSuccessful(EventInterface $e)
     {
@@ -208,6 +217,8 @@ class UserManager implements
      * Called when a validation was successfully confirmed.
      *
      * @param EventInterface $e
+     *
+     * @return Zend\Http\Response
      */
     public function onPasswordValidationSuccessful(EventInterface $e)
     {
@@ -337,10 +348,10 @@ class UserManager implements
         $this->clearUserLoginKeys($user);
 
         // @todo event für softdelete für Aufräumarbeiten?
-        $fh = $this->getServiceLocator()->get('Vrok\Service\FieldHistory');
+        $fh = $this->getServiceLocator()->get(FieldHistory::class);
         $fh->purgeEntityHistory($user);
 
-        $ms = $this->getServiceLocator()->get('Vrok\Service\Meta');
+        $ms = $this->getServiceLocator()->get(Meta::class);
         $ms->clearObjectMeta($user);
 
         $this->getEntityManager()->flush();
@@ -713,7 +724,7 @@ class UserManager implements
     {
         $password = $user->setRandomPassword();
 
-        $emailService = $this->getServiceLocator()->get('Vrok\Service\Email');
+        $emailService = $this->getServiceLocator()->get(Email::class);
         $mail         = $emailService->createMail();
         $mail->setSubject('mail.user.randomPassword.subject');
 
@@ -773,6 +784,7 @@ class UserManager implements
     /**
      * Returns a preconfigured auth validator instance.
      *
+     * @todo als factory umsetzen
      * @return AuthValidator
      */
     public function getAuthValidator()

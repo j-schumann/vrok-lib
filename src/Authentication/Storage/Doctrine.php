@@ -39,7 +39,7 @@ class Doctrine implements StorageInterface
      */
     public function __construct(ObjectManager $entityManager)
     {
-        $this->entityManager = $entityManager;;
+        $this->entityManager = $entityManager;
     }
 
     /**

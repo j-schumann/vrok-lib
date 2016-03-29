@@ -34,6 +34,9 @@ use Zend\View\Model\ViewModel;
  * This strategy uses the serviceLocator as the dependencies (urlHelper,
  * flashMessenger, config) are only used in rare cases, we don't want to
  * fetch/instantiate those on every single page hit.
+ *
+ * dependencies: BjyAuthorize\Provider\Identity\ProviderInterface, UserManager,
+ * config, Zend\I18n\Translator\TranslatorInterface, ControllerPluginManager
  */
 class AuthorizeRedirectStrategy implements
     ListenerAggregateInterface
@@ -70,7 +73,7 @@ class AuthorizeRedirectStrategy implements
      */
     public function __construct(ServiceLocatorInterface $serviceLocator)
     {
-        $this->serviceLocator = $serviceLocator;;
+        $this->serviceLocator = $serviceLocator;
     }
 
     /**

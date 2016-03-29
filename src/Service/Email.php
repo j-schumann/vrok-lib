@@ -62,6 +62,16 @@ class Email
     }
 
     /**
+     * Retrieve the used VHM instance.
+     *
+     * @return ViewHelperManager
+     */
+    public function getViewHelperManager()
+    {
+        return $this->viewHelperManager;
+    }
+
+    /**
      * Returns a new Message instance and presets the From header with the
      * configured default.
      *
