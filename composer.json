@@ -1,7 +1,7 @@
 {
     "name": "vrok/vrok-lib",
     "description": "Vrok Library",
-    "license": "private",
+    "license": "MIT",
     "homepage": "http://www.vrok.de/",
     "minimum-stability": "dev",
 
