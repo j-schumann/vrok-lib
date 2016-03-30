@@ -148,25 +148,28 @@ class UserManager implements
     /**
      * {@inheritDoc}
      */
-    public function attach(EventManagerInterface $events)
+    public function attach(EventManagerInterface $events, $priority = 1)
     {
         $sharedEvents = $events->getSharedManager();
 
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_SUCCESSFUL,
-            [$this, 'onUserValidationSuccessful']
+            [$this, 'onUserValidationSuccessful'],
+            $priority
         );
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_SUCCESSFUL,
-            [$this, 'onPasswordValidationSuccessful']
+            [$this, 'onPasswordValidationSuccessful'],
+            $priority
         );
 
         $sharedEvents->attach(
             'ValidationManager',
             \Vrok\Service\ValidationManager::EVENT_VALIDATION_EXPIRED,
-            [$this, 'onValidationExpired']
+            [$this, 'onValidationExpired'],
+            $priority
         );
     }
 

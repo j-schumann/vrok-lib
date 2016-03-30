@@ -248,9 +248,9 @@ class Module implements
                 return;
             }
 
-            $userManager = $sm->get('Vrok\Service\UserManager');
+            $userManager = $sm->get(Service\UserManager::class);
 
-            return new \Vrok\Owner\UserStrategy($userManager);
+            return new Owner\UserStrategy($userManager);
         });
     }
 }
