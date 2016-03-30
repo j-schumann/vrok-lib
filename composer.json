@@ -5,6 +5,7 @@
     "license": "MIT",
     "keywords": ["zf2", "doctrine", "auth"],
     "homepage": "http://www.vrok.de/",
+    "minimum-stability": "dev",
 
     "require": {
         "php": ">=5.5",
