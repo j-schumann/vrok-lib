@@ -26,7 +26,6 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
         });
         $this->ownerService->getOwnerStrategy(__CLASS__);
 
-        $triggered = true;
         $this->assertTrue($triggered);
     }
 }
