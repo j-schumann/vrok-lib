@@ -39,4 +39,41 @@ abstract class Convert
             strstr(strstr(serialize($instance), '"'), ':')
         ));
     }
+
+    /**
+     * Encodes the given hostname or mail address in puny code / IDNA.
+     *
+     * @param string $value
+     * @return string
+     * @throws RuntimeException if the intl extension is not installed
+     */
+    public static function toIdna($value)
+    {
+        if (!extension_loaded('intl')) {
+            throw new RuntimeException('ext/intl required to convert to IDNA!');
+        }
+
+        // use non-transitional mode:
+        // http://devblog.plesk.com/2014/12/what-is-the-problem-with-s/
+
+        $matches = [];
+        preg_match('/^(.+)@([^@]+)$/', $value, $matches);
+
+        // check if the value is a mail address, if yes encode only the hostname
+        if (count($matches) === 3) {
+            $host = idn_to_ascii(
+                $matches[2],
+                IDNA_NONTRANSITIONAL_TO_ASCII,
+                INTL_IDNA_VARIANT_UTS46
+            ) ?: $matches[2];
+
+            return $matches[1].'@'.$host;
+        }
+
+        return idn_to_ascii(
+            $value,
+            IDNA_NONTRANSITIONAL_TO_ASCII,
+            INTL_IDNA_VARIANT_UTS46
+        ) ?: $value;
+    }
 }

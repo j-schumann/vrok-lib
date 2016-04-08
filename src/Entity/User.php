@@ -89,8 +89,6 @@ class User extends Entity implements RoleProviderInterface
      */
     public function checkPassword($password)
     {
-        // password_verify implemented by ircmaxell/password-compat or natively
-        // on PHP >= 5.5.0
         return password_verify($password, $this->password);
     }
 
@@ -205,17 +203,7 @@ class User extends Entity implements RoleProviderInterface
     public function getEmail($punyEncoded = false)
     {
         if ($punyEncoded) {
-            if (extension_loaded('intl')) {
-                // use non-transitional:
-                // http://devblog.plesk.com/2014/12/what-is-the-problem-with-s/
-                return idn_to_ascii(
-                        $this->email,
-                        IDNA_NONTRANSITIONAL_TO_ASCII,
-                        INTL_IDNA_VARIANT_UTS46
-                    ) ?: $this->email;
-            }
-            // @todo currently falls back silently to the original address,
-            // log error if no extension? or throw exception?
+            return \Vrok\Stdlib\Convert::toIdna($this->email);
         }
 
         return $this->email;

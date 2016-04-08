@@ -88,7 +88,7 @@ class LoginKey extends Entity
     /**
      * @var User
      * @Orm\Id
-     * @ORM\ManyToOne(targetEntity="Vrok\Entity\User", inversedBy="loginKeys", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="loginKeys", cascade={"persist"})
      * @ORM\JoinColumn(name="user_id", unique=false, referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected $user;

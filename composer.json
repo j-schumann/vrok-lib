@@ -11,9 +11,13 @@
         "php": ">=5.5",
         "doctrine/doctrine-orm-module": "~0.10.0",
         "gedmo/doctrine-extensions": "~2.4.13",
+        "ircmaxell/random-lib": "~1.1.0",
         "ocramius/proxy-manager": "~1.0.2",
         "rwoverdijk/assetmanager": "~1.5.1",
         "zendframework/zendframework": "~2.5.3"
+    },
+    "suggest": {
+        "ext-intl": "Required for translator & IDNA convert"
     },
     "autoload": {
         "psr-4": {

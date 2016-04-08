@@ -212,6 +212,7 @@ class UserManager implements
                 ->get('flashMessenger')->addSuccessMessage(self::MSG_USER_VALIDATED);
 
         // tell the ValidationController to redirect to the confirmation page
+        $e->stopPropagation(true);
         return $this->getServiceLocator()->get('ControllerPluginManager')
                 ->get('redirect')->toRoute('account/login');
     }
@@ -240,6 +241,7 @@ class UserManager implements
         $container['passwordRequestIdentity'] = $user->getUsername();
 
         // tell the ValidationController to redirect to the password form
+        $e->stopPropagation(true);
         return $this->getServiceLocator()->get('ControllerPluginManager')
                 ->get('redirect')->toRoute('account/reset-password');
     }

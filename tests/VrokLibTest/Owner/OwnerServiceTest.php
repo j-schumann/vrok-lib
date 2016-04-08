@@ -1,6 +1,6 @@
 <?php
 
-namespace VrokLibTest\Controller;
+namespace VrokLibTest\Owner;
 
 use VrokLibTest\Bootstrap;
 
@@ -26,6 +26,7 @@ class OwnerServiceTest extends \PHPUnit_Framework_TestCase
         });
         $this->ownerService->getOwnerStrategy(__CLASS__);
 
+        $triggered = true;
         $this->assertTrue($triggered);
     }
 }

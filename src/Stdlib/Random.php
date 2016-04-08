@@ -8,14 +8,44 @@
 
 namespace Vrok\Stdlib;
 
+use RandomLib\Factory;
+use RandomLib\Generator;
+
 /**
- * Helper for generating random bytes / numbers, utilizes the operating system
- * Random Number Generator to get cryptographically secure numbers.
+ * Helper for generating random bytes / numbers, utilizes the RandomLib to
+ * use multiple sources and mix them.
  */
 class Random
 {
     const OUTPUT_HEX   = 'hex';
     const OUTPUT_ALNUM = 'base62';
+
+    /**
+     * @var Generator
+     */
+    protected static $generator = null;
+
+    /**
+     * Retrieve the secure PRNG instance.
+     *
+     * @return Generator
+     */
+    protected static function getGenerator()
+    {
+        if (null !== static::$generator) {
+            return static::$generator;
+        }
+
+        $factory = new Factory();
+
+        // register additional sources not available in RandomLib v1.1.0
+        // @todo check if implemented in a new version
+        $factory->registerSource('Mcrypt', 'Vrok\RandomLib\Source\Mcrypt');
+        $factory->registerSource('Php7', 'Vrok\RandomLib\Source\Php7');
+
+        static::$generator = $factory->getMediumStrengthGenerator();
+        return static::$generator;
+    }
 
     /**
      * Returns secure random bytes using the OS random source(s). If multiple
@@ -30,35 +60,8 @@ class Random
      */
     public static function getRandomBytes($byteCount, $outputType = null)
     {
-        $sources = [];
-        foreach (['getFromOpenSSL', 'getFromMcrypt', 'getFromCOM'] as $func) {
-            $bytes = self::$func($byteCount);
-            if ($bytes) {
-                $sources[] = $bytes;
-            }
-        }
-
-        // /dev/random is blocking, only use it if none of the other sources
-        // is available
-        if (!count($sources)) {
-            $bytes = self::getFromDev($byteCount);
-            if ($bytes) {
-                $sources[] = $bytes;
-            }
-        }
-
-        if (!count($sources)) {
-            throw new Exception\RuntimeException(
-                'No (secure) random byte source available!'
-            );
-        }
-
-        // primitive mixing as suggested in
-        // http://www.rfc-editor.org/rfc/rfc4086.txt
-        $result = array_shift($sources);
-        foreach ($sources as $source) {
-            $result ^= $source;
-        }
+        $generator = self::getGenerator();
+        $result = $generator->generate($byteCount);
 
         switch (strtolower($outputType)) {
             case null:
@@ -99,7 +102,7 @@ class Random
                 break;
 
             case self::OUTPUT_ALNUM:
-                // base62 returns ca 1.3 chars / byte, e.g. 10 bytes result
+                // base62 returns ~1.3 chars per byte, e.g. 10 bytes result
                 // in 13 chars of [0-9a-zA-Z]
                 $byteCount = ceil($length / 1.3);
                 break;
@@ -117,82 +120,6 @@ class Random
         while (strlen($token) < $length);
 
         return substr($token, 0, $length);
-    }
-
-    /**
-     * Get the requested number of random bytes using Mcrypt.
-     *
-     * @param int $byteCount number of bytes to return
-     *
-     * @return string the random bytes, null or false on error
-     */
-    public static function getFromMcrypt($byteCount)
-    {
-        // Don't use the mcrypt function on http://en.wikipedia.org/wiki/Phalanger
-        // as /dev/[u]random is not available
-        if (!function_exists('mcrypt_create_iv') || defined('PHALANGER')) {
-            return;
-        }
-
-        return mcrypt_create_iv($byteCount, MCRYPT_DEV_URANDOM);
-    }
-
-    /**
-     * Get the requested number of random bytes.
-     *
-     * @param int $byteCount number of bytes to return
-     *
-     * @return string
-     */
-    public static function getFromOpenSSL($byteCount)
-    {
-        if (!function_exists('openssl_random_pseudo_bytes')) {
-            return;
-        }
-        // according to the docs "most times" a secure algorithm is used, so we
-        // don't check for the second parameter $isSecure to be true
-        return openssl_random_pseudo_bytes($byteCount);
-    }
-
-    /**
-     * Returns the requested number of random bytes from /dev/random.
-     * Attention: uses blocking filesystem access.
-     *
-     * @param int $byteCount number of bytes to return
-     *
-     * @return string
-     */
-    public static function getFromDev($byteCount)
-    {
-        $value = null;
-
-        $handle = @fopen('/dev/random', 'rb');
-        if ($handle) {
-            $value = fread($handle, $byteCount);
-            fclose($handle);
-        }
-
-        return $value;
-    }
-
-    /**
-     * Uses the CryptoAPI / COM to return random bytes.
-     *
-     * @link http://msdn.microsoft.com/en-us/library/aa388182(VS.85).aspx
-     *
-     * @param int $byteCount number of bytes to return
-     *
-     * @return string
-     */
-    public static function getFromCOM($byteCount)
-    {
-        if (!class_exists('\\COM', 0)) {
-            return;
-        }
-
-        $comObject = new \COM('CAPICOM.Utilities.1');
-        // second parameter to GetRandom sets BASE64 output, binary doesn't work
-        return base64_decode($comObject->GetRandom($byteCount, 0));
     }
 
     /**
