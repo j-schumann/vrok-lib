@@ -129,6 +129,7 @@ return [
         // @todo alias + invokablefactory
         'invokables' => [
             'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
+            'highlightText'  => 'Vrok\View\Helper\HighlightText',
 
             'currencyFormat'  => '\Vrok\I18n\View\Helper\CurrencyFormat',
             'durationFormat'  => '\Vrok\I18n\View\Helper\DurationFormat',

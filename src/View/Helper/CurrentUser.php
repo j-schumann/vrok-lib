@@ -5,6 +5,9 @@ namespace Vrok\View\Helper;
 use Zend\View\Helper\AbstractHelper;
 use Zend\Authentication\AuthenticationService;
 
+/**
+ * @todo existiert nicht schon $this->getIdentity() vom BijAuthorize?
+ */
 class CurrentUser extends AbstractHelper
 {
     /**
