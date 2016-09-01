@@ -20,6 +20,7 @@ use Zend\Mvc\Application;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Stdlib\ResponseInterface as ResponseInterface;
+use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
 /**
@@ -244,12 +245,19 @@ class AuthorizeRedirectStrategy implements
         $provider      = $this->getServiceLocator()->get('BjyAuthorize\Provider\Identity\ProviderInterface');
         $identityRoles = $provider->getIdentityRoles();
 
+        // there is an identity -> the user is logged in but still not authorized
+        // -> show error
         if (in_array($provider->getAuthenticatedRole(), $identityRoles)) {
-            // there is an identity -> the user is logged in but still not authorized
-            // -> show error
-            $model = new ViewModel($viewVariables);
-            $model->setTemplate($this->getTemplate());
-            $event->getViewModel()->addChild($model);
+            if ($event->getRequest()->isXmlHttpRequest()) {
+                $model = new JsonModel([
+                    'script' => "alert('Unauthorized'); window.location.href='/';",
+                ]);
+                $event->setViewModel($model);
+            } else {
+                $model = new ViewModel($viewVariables);
+                $model->setTemplate($this->getTemplate());
+                $event->getViewModel()->addChild($model);
+            }
 
             $response->setStatusCode(403);
             $event->setResponse($response);
@@ -272,8 +280,8 @@ class AuthorizeRedirectStrategy implements
         // @todo how can we differentiate between XHR that only expect JSON etc
         // and those that support the script-redirect for vrok-lib.js?
 
-        // Helper returns JsonModel for XHR and a response with the location
-        // header for "normal" requests
+        // The LoginRedirector helper returns a JsonModel for XHR and a response
+        // with the location header for "normal" requests
         if ($redirect instanceof ViewModel) {
             $event->setViewModel($redirect);
             $response->setStatusCode(403); // else we would see an error 500

@@ -216,7 +216,7 @@
                 return false;
             }
 
-            container.html($.parseHTML( response.html ));
+            container.html($.parseHTML(response.html));
 
             if (options.showOverlay) {
                 container.loading(false);
@@ -274,32 +274,13 @@
                 // append it to the current element and position it correctly
                 $element.append( $overlay ).addClass("js-loading");
 
-                // @todo da das Overlay ja innerhalb des containers liegt
-                // sollte immer 100% und 0|0 funktionieren und sich auch mit
-                // vergrößern/verkleinern, bspw wenn der Container zum Erstellen
-                // des Overlays noch unsichtbar war
-                //$overlay.css('top', $element.position().top + 'px');
-                //$overlay.css('left', $element.position().left + 'px');
-                //$overlay.css('width', $element.width() + 'px');
-                //$overlay.css('height', $element.height() + 'px');
-
                 // show the element
                 $overlay.stop().hide().fadeIn(400);
-
-                // Disables all inputs
-                //$this.find("input,button,.btn")
-                //     .addClass("disabled")
-                //     .prop("disabled", true);
 
             // if we want to destroy this overlay
             } else if(!state) {
                 $element.removeClass("js-loading")
                         .find(".js-loading-overlay").remove();
-
-                // Enable all inputs
-                $this.find("input,button,.btn")
-                     .removeClass("disabled")
-                     .prop("disabled", false);
             }
         });
 
