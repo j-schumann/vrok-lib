@@ -1,0 +1,7 @@
+# Changelog
+
+The project follows Semantic Versioning (http://semver.org/)
+
+## 2.0.0 - 2016-09-02
+### Removed
+- currentUser() view helper & controller plugin
