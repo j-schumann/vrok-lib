@@ -202,15 +202,6 @@ class Module implements
     {
         return [
             'factories' => [
-                'currentUser' => function ($helperPluginManager) {
-                    $serviceLocator = $helperPluginManager->getServiceLocator();
-                    $authService = $serviceLocator->get('Zend\Authentication\AuthenticationService');
-
-                    $helper = new \Vrok\View\Helper\CurrentUser();
-                    $helper->setAuthService($authService);
-
-                    return $helper;
-                },
                 'fullUrl' => function ($helperPluginManager) {
                     $serviceLocator = $helperPluginManager->getServiceLocator();
                     $config = $serviceLocator->get('Config');

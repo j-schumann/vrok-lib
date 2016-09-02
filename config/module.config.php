@@ -22,7 +22,6 @@ return [
         // @todo alias + invokablefactory
         'invokables' => [
             'translate' => 'Vrok\Mvc\Controller\Plugin\Translate',
-            'currentUser' => 'Vrok\Mvc\Controller\Plugin\CurrentUser',
         ],
     ],
 // </editor-fold>

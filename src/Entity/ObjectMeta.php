@@ -14,7 +14,7 @@ use Vrok\Doctrine\HasReferenceInterface;
 use Vrok\Doctrine\Traits\CreationDate;
 use Vrok\Doctrine\Traits\ModificationDate;
 
-// @todo http://www.doctrine-project.org/jira/browse/DDC-3334
+// @todo https://github.com/doctrine/doctrine2/issues/4131
 //use Vrok\Doctrine\Traits\ObjectReference;
 
 /**
