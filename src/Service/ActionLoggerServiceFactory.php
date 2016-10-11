@@ -8,6 +8,7 @@
 
 namespace Vrok\Service;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -19,18 +20,25 @@ class ActionLoggerServiceFactory implements FactoryInterface
     /**
      * Inject the dependencies into the new service instance.
      *
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     * @param ContainerInterface $container
+     * @todo params doc
      *
      * @return \Vrok\Service\ActionLogger
      */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $em = $serviceLocator->get('Doctrine\ORM\EntityManager');
-        $as = $serviceLocator->get('Zend\Authentication\AuthenticationService');
-        $ci = $serviceLocator->get('Vrok\Client\Info');
+        $em = $container->get('Doctrine\ORM\EntityManager');
+        $as = $container->get('Zend\Authentication\AuthenticationService');
+        $ci = $container->get('Vrok\Client\Info');
 
         $logger = new ActionLogger($em, $as, $ci);
 
         return $logger;
+    }
+
+    // @todo remove zf3
+    public function createService(ServiceLocatorInterface $services)
+    {
+        return $this($services, ActionLogger::class);
     }
 }

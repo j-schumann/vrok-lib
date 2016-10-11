@@ -25,7 +25,7 @@ class ControllerGuard extends OriginalGuard
      *
      * @param MvcEvent $event
      *
-     * @return null|Zend\Mvc\Router\RouteMatch
+     * @return null|Zend\Router\RouteMatch
      */
     public function onDispatch(MvcEvent $event)
     {

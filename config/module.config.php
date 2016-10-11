@@ -19,9 +19,11 @@ return [
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="controller_plugins">
     'controller_plugins' => [
-        // @todo alias + invokablefactory
-        'invokables' => [
+        'aliases' => [
             'translate' => 'Vrok\Mvc\Controller\Plugin\Translate',
+        ],
+        'factories' => [
+            'Vrok\Mvc\Controller\Plugin\Translate' => 'Zend\ServiceManager\Factory\InvokableFactory',
         ],
     ],
 // </editor-fold>
@@ -125,20 +127,33 @@ return [
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="view_helpers">
     'view_helpers' => [
-        // @todo alias + invokablefactory
-        'invokables' => [
+        'aliases' => [
             'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
             'highlightText'  => 'Vrok\View\Helper\HighlightText',
 
-            'currencyFormat'  => '\Vrok\I18n\View\Helper\CurrencyFormat',
-            'durationFormat'  => '\Vrok\I18n\View\Helper\DurationFormat',
-            'numberFormat'    => '\Vrok\I18n\View\Helper\NumberFormat',
-            'translatePlural' => '\Vrok\I18n\View\Helper\TranslatePlural',
+            'currencyFormat'  => 'Vrok\I18n\View\Helper\CurrencyFormat',
+            'durationFormat'  => 'Vrok\I18n\View\Helper\DurationFormat',
+            'numberFormat'    => 'Vrok\I18n\View\Helper\NumberFormat',
+            'translatePlural' => 'Vrok\I18n\View\Helper\TranslatePlural',
 
             'formDecorator'        => 'Vrok\Form\View\Helper\FormDecorator',
             'formElementDecorator' => 'Vrok\Form\View\Helper\FormElementDecorator',
             'formDurationSelect'   => 'Vrok\Form\View\Helper\FormDurationSelect',
             'formInterval'         => 'Vrok\Form\View\Helper\FormInterval',
+        ],
+        'factories' => [
+            'Vrok\View\Helper\FlashMessenger' => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\View\Helper\HighlightText'  => 'Zend\ServiceManager\Factory\InvokableFactory',
+
+            'Vrok\I18n\View\Helper\CurrencyFormat'  => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\I18n\View\Helper\DurationFormat'  => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\I18n\View\Helper\NumberFormat'    => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\I18n\View\Helper\TranslatePlural' => 'Zend\ServiceManager\Factory\InvokableFactory',
+
+            'Vrok\Form\View\Helper\FormDecorator'        => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\Form\View\Helper\FormElementDecorator' => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\Form\View\Helper\FormDurationSelect'   => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\Form\View\Helper\FormInterval'         => 'Zend\ServiceManager\Factory\InvokableFactory',
         ],
     ],
 // </editor-fold>

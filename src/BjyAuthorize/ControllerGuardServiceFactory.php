@@ -8,6 +8,7 @@
 
 namespace Vrok\BjyAuthorize;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -21,10 +22,16 @@ class ControllerGuardServiceFactory implements FactoryInterface
      *
      * @return \BjyAuthorize\Guard\Controller
      */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $serviceLocator->get('BjyAuthorize\Config');
+        $config = $container->get('BjyAuthorize\Config');
 
         return new ControllerGuard($config['guards']['BjyAuthorize\Guard\Controller'], $serviceLocator);
+    }
+
+    // @todo remove zf3
+    public function createService(ServiceLocatorInterface $services)
+    {
+        return $this($services, ControllerGuard::class);
     }
 }

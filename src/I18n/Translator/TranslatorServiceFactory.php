@@ -8,6 +8,7 @@
 
 namespace Vrok\I18n\Translator;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -16,9 +17,14 @@ use Zend\ServiceManager\ServiceLocatorInterface;
  */
 class TranslatorServiceFactory implements FactoryInterface
 {
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    /**
+     * {@inheritDoc}
+     *
+     * @return Translator
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config   = $serviceLocator->get('Config');
+        $config   = $container->get('Config');
         $trConfig = isset($config['translator']) ? $config['translator'] : [];
 
         // the default translator factory is not able to use an existing service
@@ -29,5 +35,11 @@ class TranslatorServiceFactory implements FactoryInterface
         $translator = Translator::factory($trConfig);
 
         return $translator;
+    }
+
+    // @todo remove zf3
+    public function createService(ServiceLocatorInterface $services)
+    {
+        return $this($services, Translator::class);
     }
 }
