@@ -25,7 +25,7 @@ class ControllerGuard extends OriginalGuard
      *
      * @param MvcEvent $event
      *
-     * @return void
+     * @return null|ResponseInterface
      */
     public function onDispatch(MvcEvent $event)
     {

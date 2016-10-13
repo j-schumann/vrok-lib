@@ -8,13 +8,13 @@
 
 namespace Vrok\SlmQueue\Job;
 
-use SlmQueue\Job\AbstractJob as SlmJob;
+use SlmQueue\Job\AbstractJob;
 use Zend\EventManager\EventInterface;
 
 /**
  * Checks all open todos if the deadline was missed.
  */
-class CheckTodos extends SlmJob
+class CheckTodos extends AbstractJob
 {
     /**
      * @var Vrok\Service\Todo

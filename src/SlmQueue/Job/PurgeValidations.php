@@ -8,13 +8,13 @@
 
 namespace Vrok\SlmQueue\Job;
 
-use SlmQueue\Job\AbstractJob as SlmJob;
+use SlmQueue\Job\AbstractJob;
 use Zend\EventManager\EventInterface;
 
 /**
  * Purges all expired validations, triggers the validationExpired event for them.
  */
-class PurgeValidations extends SlmJob
+class PurgeValidations extends AbstractJob
 {
     /**
      * @var Vrok\Service\ValidationManager

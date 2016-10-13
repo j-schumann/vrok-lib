@@ -81,6 +81,8 @@ return [
             'Vrok\Client\Info'          => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
             'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
+
+            // overwritten to use our extended controller guard
             'BjyAuthorize\Guard\Controller' => 'Vrok\BjyAuthorize\ControllerGuardServiceFactory',
         ],
 
