@@ -22,6 +22,7 @@ class FormHelper implements InputFilterProviderInterface
     const ERROR_NOTFLOAT     = 'validate.field.notFloat';
     const ERROR_NOTINT       = 'validate.field.notInt';
     const ERROR_TOOLONG      = 'validate.field.tooLong';
+    const ERROR_TOOSHORT     = 'validate.field.tooShort';
     const ERROR_INVALIDDATE  = 'validate.field.invalidDate';
     const ERROR_INVALIDEMAIL = 'validate.field.invalidEmail';
 
