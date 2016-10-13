@@ -133,16 +133,16 @@ class Translator extends ZendTranslator
             $discoveredTextDomain = new TextDomain();
 
             if ($this->isEventManagerEnabled()) {
-                $results = $this->getEventManager()->trigger(
+                $results = $this->getEventManager()->triggerUntil(
+                    function ($r) {
+                        return ($r instanceof TextDomain);
+                    },
                     self::EVENT_NO_MESSAGES_LOADED,
                     $this,
                     [
                         'locale'      => $locale,
                         'text_domain' => $textDomain,
-                    ],
-                    function ($r) {
-                        return ($r instanceof TextDomain);
-                    }
+                    ]
                 );
                 $last = $results->last();
                 if ($last instanceof TextDomain) {

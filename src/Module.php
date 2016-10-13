@@ -24,6 +24,7 @@ class Module implements
     ConfigProviderInterface,
     ControllerPluginProviderInterface,
     FormElementProviderInterface,
+    SlmQueue\JobProviderInterface,
     ServiceProviderInterface,
     ViewHelperProviderInterface
 {
@@ -75,6 +76,27 @@ class Module implements
                     $form->setEntityManager($sm->get('Doctrine\ORM\EntityManager'));
                     $form->setTranslator($sm->get('MvcTranslator'));
                     return $form;
+                },
+            ],
+        ];
+    }
+
+    /**
+     * Retrieve factories for SlmQueue jobs.
+     *
+     * @return array
+     */
+    public function getJobManagerConfig()
+    {
+        return [
+            'factories' => [
+                'Vrok\SlmQueue\Job\CheckTodos' => function ($sl) {
+                    $todoService = $sl->get('Vrok\Service\Todo');
+                    return new SlmQueue\Job\CheckTodos($todoService);
+                },
+                'Vrok\SlmQueue\Job\PurgeValidations' => function ($sl) {
+                    $vm = $sl->get('Vrok\Service\ValidationManager');
+                    return new SlmQueue\Job\PurgeValidations($vm);
                 },
             ],
         ];
@@ -193,27 +215,6 @@ class Module implements
     }
 
     /**
-     * Retrieve factories for SlmQueue jobs.
-     *
-     * @return array
-     */
-    public function getJobManagerConfig()
-    {
-        return [
-            'factories' => [
-                'Vrok\SlmQueue\Job\CheckTodos' => function ($sl) {
-                    $todoService = $sl->get('Vrok\Service\Todo');
-                    return new SlmQueue\Job\CheckTodos($todoService);
-                },
-                'Vrok\SlmQueue\Job\PurgeValidations' => function ($sl) {
-                    $vm = $sl->get('Vrok\Service\ValidationManager');
-                    return new SlmQueue\Job\PurgeValidations($vm);
-                },
-            ],
-        ];
-    }
-
-    /**
      * Retrieve additional view helpers using factories that are not set in the config.
      *
      * @return array
@@ -234,6 +235,27 @@ class Module implements
                 },
             ],
         ];
+    }
+
+    /**
+     * Register the SlmQueue JobManager as ServiceManager to automagically load
+     * the factories from modules implementing our JobProviderInterface.
+     *
+     * @param \Zend\ModuleManager\ModuleManager $moduleManager
+     * @return void
+     */
+    public function init($moduleManager)
+    {
+        $event = $moduleManager->getEvent();
+        $container = $event->getParam('ServiceManager');
+        $serviceListener = $container->get('ServiceListener');
+
+        $serviceListener->addServiceManager(
+            'SlmQueue\Job\JobPluginManager',
+            'job_manager', // slmQueue uses slm_queue/job_manager
+            'Vrok\SlmQueue\JobProviderInterface',
+            'getJobManagerConfig'
+        );
     }
 
     /**
@@ -262,11 +284,5 @@ class Module implements
 
             return new Owner\UserStrategy($userManager);
         });
-
-        // der SlmQueue JobManager wird nicht wie die andern pluginManager
-        // über den ModuleManager konfiguriert -> manuell triggern
-        // @todo doch selbst Interface + Listener implementieren wie ViewHelperManager usw?
-        $jobManager = $sm->get(\SlmQueue\Job\JobPluginManager::class);
-        $jobManager->configure($this->getJobManagerConfig());
     }
 }
