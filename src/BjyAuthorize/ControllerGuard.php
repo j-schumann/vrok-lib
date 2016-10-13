@@ -25,17 +25,17 @@ class ControllerGuard extends OriginalGuard
      *
      * @param MvcEvent $event
      *
-     * @return null|Zend\Router\RouteMatch
+     * @return void
      */
     public function onDispatch(MvcEvent $event)
     {
         /* @var $service \BjyAuthorize\Service\Authorize */
-        $service    = $this->serviceLocator->get('BjyAuthorize\Service\Authorize');
-        $match      = $event->getRouteMatch();
+        $service = $this->serviceLocator->get('BjyAuthorize\Service\Authorize');
+        $match = $event->getRouteMatch();
         $controller = $match->getParam('controller');
-        $action     = $match->getParam('action');
-        $request    = $event->getRequest();
-        $method     = $request instanceof HttpRequest ? strtolower($request->getMethod()) : null;
+        $action = $match->getParam('action');
+        $request = $event->getRequest();
+        $method = $request instanceof HttpRequest ? strtolower($request->getMethod()) : null;
 
         $authorized = $service->isAllowed($this->getResourceName($controller))
             || $service->isAllowed($this->getResourceName($controller, $action))
@@ -55,11 +55,14 @@ class ControllerGuard extends OriginalGuard
 
         /* @var $app \Zend\Mvc\ApplicationInterface */
         $app = $event->getTarget();
-        $results = $app->getEventManager()->trigger(MvcEvent::EVENT_DISPATCH_ERROR, $event);
-        if (count($results)) {
-            return $results->last();
+        $eventManager = $app->getEventManager();
+        $eventManager->setEventPrototype($event);
+        $results = $eventManager->trigger(MvcEvent::EVENT_DISPATCH_ERROR, null, $event->getParams());
+        $return  = $results->last();
+        if (! $return) {
+            return $event->getResult();
         }
 
-        return $event->getParams();
+        return $return;
     }
 }

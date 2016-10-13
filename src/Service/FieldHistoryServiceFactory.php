@@ -9,8 +9,8 @@
 namespace Vrok\Service;
 
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
+
 
 /**
  * Creates an instance of the history service.
@@ -21,8 +21,8 @@ class FieldHistoryServiceFactory implements FactoryInterface
      * Inject the dependencies into the new service instance.
      *
      * @param ContainerInterface $container
-     * @todo params doc
-     *
+     * @param string $requestedName
+     * @param array $options
      * @return \Vrok\Service\FieldHistory
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
@@ -33,11 +33,5 @@ class FieldHistoryServiceFactory implements FactoryInterface
         $service = new FieldHistory($em, $as);
 
         return $service;
-    }
-
-    // @todo remove zf3
-    public function createService(ServiceLocatorInterface $services)
-    {
-        return $this($services, FieldHistory::class);
     }
 }

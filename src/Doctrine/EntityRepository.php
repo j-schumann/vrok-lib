@@ -31,20 +31,20 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
     protected $formHelper = null;
 
     /**
-     * Retrieve the number of all entities within this repository.
+     * Counts entities by a set of criteria.
      *
-     * @return int
+     * @todo remove when Doctrine commit a90035e is stable and the base class
+     * contains this method.
+     *
+     * @param array $criteria
+     *
+     * @return int The quantity of objects that matches the criteria.
      */
-    public function count()
+    public function count(array $criteria)
     {
-        $em = $this->getEntityManager();
-        $qb = $em->createQueryBuilder();
-        $qb->select($qb->expr()->count('e'))
-           ->from($this->getClassName(), 'e');
+        $persister = $this->_em->getUnitOfWork()->getEntityPersister($this->_entityName);
 
-        $query = $qb->getQuery();
-
-        return $query->getSingleScalarResult();
+        return $persister->count($criteria);
     }
 
     /**

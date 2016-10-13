@@ -9,8 +9,8 @@
 namespace Vrok\I18n\Translator;
 
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\EventManager\EventManager;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Creates an instance of our translator injecting the config.
@@ -29,17 +29,16 @@ class TranslatorServiceFactory implements FactoryInterface
 
         // the default translator factory is not able to use an existing service
         if (isset($trConfig['cache']) && is_string($trConfig['cache'])) {
-            $trConfig['cache'] = $serviceLocator->get($trConfig['cache']);
+            $trConfig['cache'] = $container->get($trConfig['cache']);
         }
 
         $translator = Translator::factory($trConfig);
 
-        return $translator;
-    }
+        // ZF3 does not automagically inject a SharedEventManager...
+        $sharedEvents = $container->get('SharedEventManager');
+        $events = new EventManager($sharedEvents);
+        $translator->setEventManager($events);
 
-    // @todo remove zf3
-    public function createService(ServiceLocatorInterface $services)
-    {
-        return $this($services, Translator::class);
+        return $translator;
     }
 }

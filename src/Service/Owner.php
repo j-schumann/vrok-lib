@@ -139,12 +139,12 @@ class Owner implements EventManagerAwareInterface
         // try to find a strategy that feels responsible for the given class or
         // one of its parents, first answer wins
         $results = $this->getEventManager()->triggerUntil(
-            self::EVENT_GET_OWNER_STRATEGY,
-            $this,
-            ['classes' => $classes],
             function ($result) {
                 return $result instanceof StrategyInterface;
-            }
+            },
+            self::EVENT_GET_OWNER_STRATEGY,
+            $this,
+            ['classes' => $classes]
         );
 
         if ($results->stopped()) {

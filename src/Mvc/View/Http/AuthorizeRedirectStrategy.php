@@ -275,7 +275,7 @@ class AuthorizeRedirectStrategy implements
 
         // prevent further listeners, we already decided to return a 403,
         // no need to check for assets etc.
-        $event->stopPropagation();
+        $event->stopPropagation(true);
 
         // @todo how can we differentiate between XHR that only expect JSON etc
         // and those that support the script-redirect for vrok-lib.js?

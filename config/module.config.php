@@ -81,6 +81,7 @@ return [
             'Vrok\Client\Info'          => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
             'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
+            'BjyAuthorize\Guard\Controller' => 'Vrok\BjyAuthorize\ControllerGuardServiceFactory',
         ],
 
         'lazy_services' => [
@@ -104,9 +105,7 @@ return [
     'slm_queue' => [
         'job_manager' => [
             'factories' => [
-                'Vrok\SlmQueue\Job\CheckTodos' => 'Zend\ServiceManager\Factory\InvokableFactory',
                 'Vrok\SlmQueue\Job\ExitWorker' => 'Zend\ServiceManager\Factory\InvokableFactory',
-                'Vrok\SlmQueue\Job\PurgeValidations' => 'Zend\ServiceManager\Factory\InvokableFactory',
             ],
         ],
     ],

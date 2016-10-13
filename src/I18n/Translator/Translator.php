@@ -207,7 +207,7 @@ class Translator extends ZendTranslator
 
     /**
      * Adds the given TextDomain to the available translated messages.
-     * This should be implemented in the original Translator as this coulde
+     * This should be implemented in the original Translator as this code
      * is duplicated multiple times and allows custom code to inject messages
      * that could not be loaded using the default loaders or should be loaded
      * in another order/priority.

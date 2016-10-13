@@ -10,6 +10,7 @@ namespace Vrok\RandomLib\Source;
 
 use RandomLib\Source;
 use SecurityLib\Strength;
+use Throwable;
 
 /**
  * Uses random_bytes() available since PHP7.
@@ -36,10 +37,8 @@ class Php7 implements Source
         try {
             return random_bytes($size);
         }
-        catch(Exception $e) {
+        catch(Throwable $e) {
             return str_repeat(chr(0), $size);
         }
-        // @todo catch TypeError
-        // @see http://php.net/manual/de/function.random-bytes.php
     }
 }

@@ -9,6 +9,7 @@
 namespace Vrok\Stdlib;
 
 use Exception;
+use Throwable;
 
 /**
  * Registers itself as error/shutdown handlers and logs the errors to the file
@@ -106,7 +107,7 @@ class ErrorHandler
                 break;
         }
 
-        $e = $errcontext instanceof Exception
+        $e = $errcontext instanceof Throwable
             ? $errcontext
             : new Exception(''); // empty Exception just for the backtrace
 
@@ -130,11 +131,11 @@ class ErrorHandler
     /**
      * Proxies to the default error handler with the exception details.
      *
-     * @param Exception $e
+     * @param Throwable $e
      */
-    public function exceptionHandler(Exception $e, $nested = false)
+    public function exceptionHandler(Throwable $e, $nested = false)
     {
-        if ($e->getPrevious() instanceof Exception) {
+        if ($e->getPrevious() instanceof Throwable) {
             $this->exceptionHandler($e->getPrevious(), true);
         }
 
@@ -154,7 +155,7 @@ class ErrorHandler
         // default handling we have to display the error ourselves
         $display = ini_get('display_errors');
         if ($display === 'on' || $display == 1) {
-            echo 'Uncaught exception "'.get_class($e).'" with message "'
+            echo 'Uncaught Throwable "'.get_class($e).'" with message "'
                 .$e->getMessage().'" in '.$e->getFile().':'.$e->getLine()."\n"
                 .' Stack trace: '.$e->getTraceAsString();
         }

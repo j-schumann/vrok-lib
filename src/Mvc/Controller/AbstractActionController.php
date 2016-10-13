@@ -142,7 +142,7 @@ abstract class AbstractActionController extends ZendController
      */
     public function renderPartial($partial, $model = [], $module = null)
     {
-        $partialHelper = $this->getServiceLocator()->get('viewhelpermanager')
+        $partialHelper = $this->getServiceLocator()->get('ViewHelperManager')
                 ->get('partial');
 
         return $module

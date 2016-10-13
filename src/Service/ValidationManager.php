@@ -354,12 +354,10 @@ class ValidationManager implements EventManagerAwareInterface
     /**
      * Sets the time in seconds validations of the given type are valid.
      *
-     * @todo validate args
-     *
      * @param string $type
      * @param int    $timeout
      */
-    public function setTimeout($type, $timeout)
+    public function setTimeout(string $type, int $timeout)
     {
         $this->timeouts[$type] = $timeout;
     }

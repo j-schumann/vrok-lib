@@ -50,8 +50,6 @@ class Csrf extends ZendCsrf
      */
     public function getInputSpecification()
     {
-        // @todo https://github.com/j-schumann/vrok-lib/issues/2
-        // der notEmpty Validator wird ignoriert
         return [
             'name'     => $this->getName(),
             'required' => true,

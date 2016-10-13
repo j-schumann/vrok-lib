@@ -47,13 +47,12 @@ class Module implements
     {
         return [
             'factories' => [
-                'loginRedirector' => function ($controllerPluginManager) {
-                    $serviceLocator = $controllerPluginManager->getServiceLocator();
-                    $url = $serviceLocator->get('viewhelpermanager')->get('url');
+                'loginRedirector' => function ($sm) {
+                    $url = $sm->get('ViewHelperManager')->get('url');
 
                     $helper = new Mvc\Controller\Plugin\LoginRedirector();
                     $helper->setUrlHelper($url);
-                    $helper->setRequest($serviceLocator->get('Request'));
+                    $helper->setRequest($sm->get('Request'));
 
                     return $helper;
                 },
@@ -73,8 +72,8 @@ class Module implements
             'factories' => [
                 'Vrok\Form\ConfirmationForm' => function ($sm) {
                     $form = new Form\ConfirmationForm();
-                    $form->setEntityManager($sm->getServiceLocator()->get('Doctrine\ORM\EntityManager'));
-                    $form->setTranslator($sm->getServiceLocator()->get('MvcTranslator'));
+                    $form->setEntityManager($sm->get('Doctrine\ORM\EntityManager'));
+                    $form->setTranslator($sm->get('MvcTranslator'));
                     return $form;
                 },
             ],
@@ -194,6 +193,27 @@ class Module implements
     }
 
     /**
+     * Retrieve factories for SlmQueue jobs.
+     *
+     * @return array
+     */
+    public function getJobManagerConfig()
+    {
+        return [
+            'factories' => [
+                'Vrok\SlmQueue\Job\CheckTodos' => function ($sl) {
+                    $todoService = $sl->get('Vrok\Service\Todo');
+                    return new SlmQueue\Job\CheckTodos($todoService);
+                },
+                'Vrok\SlmQueue\Job\PurgeValidations' => function ($sl) {
+                    $vm = $sl->get('Vrok\Service\ValidationManager');
+                    return new SlmQueue\Job\PurgeValidations($vm);
+                },
+            ],
+        ];
+    }
+
+    /**
      * Retrieve additional view helpers using factories that are not set in the config.
      *
      * @return array
@@ -202,9 +222,8 @@ class Module implements
     {
         return [
             'factories' => [
-                'fullUrl' => function ($helperPluginManager) {
-                    $serviceLocator = $helperPluginManager->getServiceLocator();
-                    $config = $serviceLocator->get('Config');
+                'fullUrl' => function ($sl) {
+                    $config = $sl->get('Config');
                     if (empty($config['general']['full_url'])) {
                         throw new \RuntimeException('"full_url" is not set in the [general] config!');
                     }
@@ -243,5 +262,11 @@ class Module implements
 
             return new Owner\UserStrategy($userManager);
         });
+
+        // der SlmQueue JobManager wird nicht wie die andern pluginManager
+        // über den ModuleManager konfiguriert -> manuell triggern
+        // @todo doch selbst Interface + Listener implementieren wie ViewHelperManager usw?
+        $jobManager = $sm->get(\SlmQueue\Job\JobPluginManager::class);
+        $jobManager->configure($this->getJobManagerConfig());
     }
 }

@@ -8,32 +8,49 @@
 
 namespace Vrok\SlmQueue\Job;
 
+use SlmQueue\Job\AbstractJob as SlmJob;
 use Zend\EventManager\EventInterface;
 
 /**
  * Checks all open todos if the deadline was missed.
  */
-class CheckTodos extends AbstractJob
+class CheckTodos extends SlmJob
 {
+    /**
+     * @var Vrok\Service\Todo
+     */
+    protected $todoService = null;
+
+    /**
+     * Class constructor - save dependency
+     *
+     * @param \Vrok\Service\Todo $ts
+     */
+    public function __construct(\Vrok\Service\Todo $ts)
+    {
+        $this->todoService = $ts;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function execute()
     {
-        $todoService = $this->getServiceLocator()->get('Vrok\Service\Todo');
-        $todoService->checkTodos();
+        $this->todoService->checkTodos();
     }
 
     /**
      * Adds himself to the jobqueue to check the todos.
      * Listener is attached in the module onBootstap.
      *
+     * @todo push without instantiation
      * @param EventInterface $e
      */
     public static function onCronDaily(EventInterface $e)
     {
         $controller = $e->getTarget();
-        $qm         = $controller->getServiceLocator()->get('SlmQueue\Queue\QueuePluginManager');
+        $qm         = $controller->getServiceLocator()
+                ->get('SlmQueue\Queue\QueuePluginManager');
         $queue      = $qm->get('jobs');
         $job        = $queue->getJobPluginManager()->get(__CLASS__);
         $queue->push($job);

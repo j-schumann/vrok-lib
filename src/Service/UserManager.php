@@ -32,7 +32,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
  * associated actions.
  *
  * dependencies: ControllerPluginManager, EntityManager, EventManager, Meta,
- * FieldHistory, BjyAuthorize\Service\Authorize, Email,viewhelpermanager
+ * FieldHistory, BjyAuthorize\Service\Authorize, Email,ViewHelperManager
  * Zend\Authentication\AuthenticationService, Vrok\Authentication\Adapter\Doctrine,
  * Vrok\Authentication\Adapter\Cookie, MvcTranslator, config
  */
@@ -733,9 +733,9 @@ class UserManager implements
         $mail         = $emailService->createMail();
         $mail->setSubject('mail.user.randomPassword.subject');
 
-        $viewHelperManager = $this->getServiceLocator()->get('viewhelpermanager');
+        $viewHelperManager = $this->getServiceLocator()->get('ViewHelperManager');
         $urlHelper         = $viewHelperManager->get('url');
-        $fullUrlHelper     = $viewHelperManager->get('FullUrl');
+        $fullUrlHelper     = $viewHelperManager->get('fullUrl');
         $url               = $urlHelper('account/login');
 
         $mail->setHtmlBody(['mail.user.randomPassword.body', [
