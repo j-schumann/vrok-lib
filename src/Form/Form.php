@@ -11,15 +11,16 @@ namespace Vrok\Form;
 use Traversable;
 use Zend\Form\ElementInterface;
 use Zend\Form\Fieldset;
+use Zend\Form\Form as ZendForm;
 use Zend\Stdlib\ArrayUtils;
 
 /**
  * Common functionality for forms that work with doctrine entities.
  *
- * Form class must be instantiated by the formElementManager or the
- * serviceLocator won't be injected!
+ * Form class must be instantiated by the formElementManager using a
+ * factory, injecting the dependencies (translator, entityManager).
  */
-class Form extends \Zend\Form\Form
+class Form extends ZendForm
 {
     use SharedFunctions;
 
@@ -67,9 +68,7 @@ class Form extends \Zend\Form\Form
         }
 
         // check for empty arrays and clear submit button values
-        $data = $this->filterData($data);
-
-        return parent::setData($data);
+        return parent::setData($this->filterData($data));
     }
 
     /**
@@ -82,6 +81,9 @@ class Form extends \Zend\Form\Form
      * For composite elements returning an array the allowEmpty rule is not
      * checked because an array with empty elements is not considered empty
      * by the Zend\InputFilter\BaseInputFilter.
+     * @todo #4302 wurde geschlossen bei der Migration zu getrennten Component-
+     * Repositories. Reopen in zend-validator? Workaround entfernen weil wir
+     * keine Elemente mit arays verwenden? Prüfen ob das so ist!
      *
      * @param array $data
      *
