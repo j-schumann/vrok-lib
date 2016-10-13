@@ -28,6 +28,16 @@ trait SharedFunctions
     protected $translator = null;
 
     /**
+     * Retrieve the entity manager.
+     *
+     * @return EntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->entityManager;
+    }
+    
+    /**
      * Sets the EM instance to use.
      *
      * @param EntityManager $em
@@ -104,15 +114,5 @@ trait SharedFunctions
     public function setElementMessage($element, $message)
     {
         $this->get($element)->setMessages([$this->translator->translate($message)]);
-    }
-
-    /**
-     * Retrieve the entity manager.
-     *
-     * @return EntityManager
-     */
-    public function getEntityManager()
-    {
-        return $this->entityManager;
     }
 }
