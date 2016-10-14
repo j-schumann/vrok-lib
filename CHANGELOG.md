@@ -2,6 +2,16 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
+## 3.1.0 - 2016-10-14
+### Added
+- Vrok\Hydrator\Strategy\DateTimeFormatterStrategy & NumberFormatterStrategy to
+  support converting localized form inputs with date & numbers to database
+  format and back
+
+### Fixed
+- bin\schema-update.sh executable flag
+- renamed LICENSE and CHANGELOG to *.md
+
 ## 3.0.0 - 2016-10-13
 ### Added
 - SlmQueue\JobProviderInterface for module classes to automatically inject job
