@@ -38,10 +38,9 @@ class Random
 
         $factory = new Factory();
 
-        // register additional sources not available in RandomLib v1.1.0
+        // register additional sources not available in RandomLib v1.2.0
         // @todo check if implemented in a new version
         $factory->registerSource('Mcrypt', 'Vrok\RandomLib\Source\Mcrypt');
-        $factory->registerSource('Php7', 'Vrok\RandomLib\Source\Php7');
 
         static::$generator = $factory->getMediumStrengthGenerator();
         return static::$generator;

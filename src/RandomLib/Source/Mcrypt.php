@@ -29,13 +29,18 @@ class Mcrypt implements Source
      */
     public function generate($size)
     {
-        // Don't use the mcrypt function on http://en.wikipedia.org/wiki/Phalanger
-        // as /dev/[u]random is not available
-        if (!function_exists('mcrypt_create_iv') || defined('PHALANGER') || $size < 1) {
+        if (!self::isSupported() || $size < 1) {
             return str_repeat(chr(0), $size);
         }
 
         return mcrypt_create_iv($size, MCRYPT_DEV_URANDOM)
             ?: str_repeat(chr(0), $size);
+    }
+
+    public static function isSupported(): bool
+    {
+        // Don't use the mcrypt function on http://en.wikipedia.org/wiki/Phalanger
+        // as /dev/[u]random is not available
+        return function_exists('mcrypt_create_iv') && !defined('PHALANGER');
     }
 }

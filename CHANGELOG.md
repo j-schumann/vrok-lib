@@ -11,6 +11,10 @@ The project follows Semantic Versioning (http://semver.org/)
 ### Fixed
 - bin\schema-update.sh executable flag
 - renamed LICENSE and CHANGELOG to *.md
+- RandomLib: custom sources compatibility with version 1.2.0
+
+### Removed
+- Vrok\RandomLib\Source\Php7 - included in new version 1.2.0
 
 ## 3.0.0 - 2016-10-13
 ### Added
