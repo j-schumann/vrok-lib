@@ -77,6 +77,20 @@ return [
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => [
+        'delegators' => [
+            'ControllerPluginManager'        => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'ViewHelperManager'              => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\ActionLogger'      => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Email'             => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\FieldHistory'      => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Meta'              => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Owner'             => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Todo'              => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\UserManager'       => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\ValidationManager' => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Zend\Authentication\AuthenticationService' => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+
+        ],
         'factories' => [
             'Vrok\Client\Info'          => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
