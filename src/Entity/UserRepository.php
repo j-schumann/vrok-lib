@@ -71,7 +71,7 @@ class UserRepository extends EntityRepository
                 break;
 
             case 'displayName':
-                $spec['filter']['stripTags'] = [
+                $spec['filters']['stripTags'] = [
                     'name' => 'Zend\Filter\StripTags',
                 ];
 
