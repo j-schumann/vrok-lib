@@ -11,7 +11,6 @@ namespace Vrok\Service;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-
 /**
  * Creates an instance of the history service.
  */

@@ -1,4 +1,4 @@
 vrok-lib
 ========
 
-ZF2 Module with different extensions / helpers
+ZF3 Module with different extensions / helpers
