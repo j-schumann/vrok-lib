@@ -2,6 +2,11 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
+## 3.1.1 - 2016-10-28
+### Fixed
+- Delegator config for ZF3
+- stripTags filter for user displayName wasn't applied
+
 ## 3.1.0 - 2016-10-14
 ### Added
 - Vrok\Hydrator\Strategy\DateTimeFormatterStrategy & NumberFormatterStrategy to
