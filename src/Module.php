@@ -140,6 +140,18 @@ class Module implements
                 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => function ($sm) {
                     return new Mvc\View\Http\AuthorizeRedirectStrategy($sm);
                 },
+                'Vrok\Mvc\View\Http\ErrorLoggingStrategy' => function ($sm) {
+                    $s = new Mvc\View\Http\ErrorLoggingStrategy();
+
+                    $config = $sm->get('Config');
+                    if (!empty($config['general'])
+                        && !empty($config['general']['log_dir'])
+                    ) {
+                        $s->setLogDir($config['general']['log_dir']);
+                    }
+
+                    return $s;
+                },
                 'Vrok\Service\Email' => function ($sm) {
                     $vhm = $sm->get('ViewHelperManager');
                     $service = new Service\Email($vhm);

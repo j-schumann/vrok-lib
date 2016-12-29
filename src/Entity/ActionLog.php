@@ -66,7 +66,7 @@ class ActionLog extends Entity
     protected $content;
 
     /**
-     * Returns the content to be validated (e.g. new email address).
+     * Returns the content.
      *
      * @return string
      */
@@ -76,7 +76,7 @@ class ActionLog extends Entity
     }
 
     /**
-     * Sets the content to be validated (e.g. new email address).
+     * Sets the content.
      *
      * @param string $value
      *
