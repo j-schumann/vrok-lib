@@ -2,6 +2,14 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
+## 3.2.0 - 2016-12-29
+### Added
+- Vrok\Mvc\View\Http\ErrorLoggingStrategy that allows logging of exceptions/
+  errors that occur within the application but are handled by the application
+  itself instead of bubbleing up to the ErrorHandler
+- Vrok\Entity\Notification that allows to store notifications that should be
+  displayed to the user at the next occassion (login/next page/push notification)
+
 ## 3.1.1 - 2016-10-28
 ### Fixed
 - Delegator config for ZF3

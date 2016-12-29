@@ -68,7 +68,7 @@ class ErrorLoggingStrategy extends AbstractListenerAggregate
         if (empty($error)) {
             return;
         }
-//var_dump($error);exit;
+
         $result = $e->getResult();
         if ($result instanceof Response) {
             return $result;
