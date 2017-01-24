@@ -166,9 +166,12 @@ class ErrorHandler
      */
     public function shutdownHandler()
     {
+        $fatals = [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING,
+            E_COMPILE_ERROR, E_COMPILE_WARNING];
+
         // do nothing if there was no error
         $err = error_get_last();
-        if (!$err || $err['type'] != E_ERROR) {
+        if (!$err || !in_array($err['type'], $fatals)) {
             return;
         }
 
@@ -181,7 +184,7 @@ class ErrorHandler
 
         // there is no backtrace available in the shutdown_handler so we can
         // only get file and line number and eventually the URL
-        $message = "\nShutdown on E_ERROR in ".$err['file'].':'.$err['line'].' - '
+        $message = "\nShutdown on fatal ERROR in ".$err['file'].':'.$err['line'].' - '
             .$err['message'];
         if (isset($_SERVER['REQUEST_URI'])) {
             $message .= ' - URI: '.$_SERVER['REQUEST_URI'];

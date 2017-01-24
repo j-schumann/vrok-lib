@@ -14,8 +14,6 @@ use Vrok\Entity\Filter\LoginKeyFilter;
 use Vrok\Entity\Filter\UserFilter;
 use Vrok\Entity\Group as GroupEntity;
 use Vrok\Entity\LoginKey;
-use Vrok\Entity\Notification;
-use Vrok\Entity\Filter\NotificationFilter;
 use Vrok\Entity\User as UserEntity;
 use Vrok\Entity\Validation;
 use Vrok\Stdlib\DateInterval;
@@ -1057,21 +1055,6 @@ class UserManager implements
     }
 
     /**
-     * Retrieve a new notification filter instance.
-     *
-     * @param string $alias the alias for the notification record
-     *
-     * @return NotificationFilter
-     */
-    public function getNotificationFilter($alias = 'n') : NotificationFilter
-    {
-        $qb     = $this->getNotificationRepository()->createQueryBuilder($alias);
-        $filter = new NotificationFilter($qb);
-
-        return $filter;
-    }
-
-    /**
      * Retrieve the entity manager.
      *
      * @return EntityManager
@@ -1099,16 +1082,6 @@ class UserManager implements
     public function getLoginKeyRepository()
     {
         return $this->getEntityManager()->getRepository(LoginKey::class);
-    }
-
-    /**
-     * Retrieve the notification repository instance.
-     *
-     * @return \Vrok\Doctrine\EntityRepository
-     */
-    public function getNotificationRepository()
-    {
-        return $this->getEntityManager()->getRepository(Notification::class);
     }
 
     /**

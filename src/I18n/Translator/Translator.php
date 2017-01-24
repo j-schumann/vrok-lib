@@ -49,7 +49,8 @@ class Translator extends ZendTranslator
         $translation = $this->getTranslatedMessage($message, $locale, $textDomain);
 
         // the original code checked for $translation !== '',
-        // for us an empty string is perfectly valid
+        // for us an empty string is perfectly valid, maybe we don't want to
+        // show some texts in some languages.
         if ($translation !== null) {
             // additionally replace the parameters in the message, we don't
             // want to implement this functionality in all view helpers etc
@@ -107,7 +108,7 @@ class Translator extends ZendTranslator
         // one of the default loaders, e.g. because it uses multiple files per
         // locale.
         // We also need to ensure our translations get loaded after all module
-        // default translations so instead of implementing a new function
+        // default translations, so instead of implementing a new function
         // "loadMessagesCustom" and to be as open as possible we use a new event
         // for this use case.
         if ($this->isEventManagerEnabled()) {

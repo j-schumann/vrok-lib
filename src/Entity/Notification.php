@@ -8,51 +8,196 @@
 
 namespace Vrok\Entity;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
 use Vrok\Doctrine\Traits\AutoincrementId;
 use Vrok\Doctrine\Traits\CreationDate;
+use Zend\View\HelperPluginManager;
 
 /**
  * Stores a notification that can be displayed to the user after login or
  * can be pushed / pulled to/from a smartphone for things that happened since
  * his last login/etc.
  *
+ * This class implements a very simple system notification that won't be pushed
+ * or sent by email and cannot be pulled, only displayed on the website.
+ * Create a subclass to change the flags as needed and supply different content,
+ * e.g. by using partials for the (HTML) output.
+ *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
  * @ORM\Table(name="notifications")
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="type", type="string")
+ * @ORM\EntityListeners({"Vrok\Entity\Listener\NotificationListener"})
  */
 class Notification extends Entity
 {
     use AutoincrementId;
     use CreationDate;
 
-// <editor-fold defaultstate="collapsed" desc="message">
-    /**
-     * @var string
-     * @ORM\Column(type="text", length=255, nullable=false)
-     */
-    protected $message;
+    // Wether or not the user can "opt out" of this notification: If the user
+    // has disabled email notifications in his profil but forceMail is true
+    // the message will be mailed anyways.
+    const FORCE_MAIL = false;
+
+    const PUSHABLE = false;
+    const PULLABLE = false;
+    const MAILABLE = false;
 
     /**
-     * Returns the message.
+     * EntityManager for fetching entities from the parameters.
+     * Must be injected before calling the getters.
      *
-     * @return string
+     * @var EntityManager
      */
-    public function getMessage() : string
+    protected $entityManager = null;
+
+    /**
+     * View Helper Manager for translating and formatting the message.
+     * Must be injected before calling the getters.
+     *
+     * @var HelperPluginManager
+     */
+    protected $viewHelperManager = null;
+
+    /**
+     * Sets the EntityManager instance to use.
+     *
+     * @param EntityManager $em
+     */
+    public function setEntityManager(EntityManager $em)
     {
-        return $this->message;
+        $this->entityManager = $em;
     }
 
     /**
-     * Sets the message.
+     * Sets the ViewHelperManager instance to use.
      *
-     * @param string $value
+     * @param HelperPluginManager $em
+     */
+    public function setViewHelperManager(HelperPluginManager $em)
+    {
+        $this->viewHelperManager = $em;
+    }
+
+    /**
+     * Returns wether this notification overrides disabled email notification
+     * of the user.
+     *
+     * @return bool
+     */
+    public function forceMail() : bool
+    {
+        return static::FORCE_MAIL;
+    }
+
+    /**
+     * Retrieve the subject to use for emails.
+     *
+     * @return string
+     */
+    public function getMailSubject() : string
+    {
+        return $this->getTitle();
+    }
+
+    /**
+     * Retrieve the text body to use for emails.
+     *
+     * @return string
+     */
+    public function getMailBodyText() : string
+    {
+        return $this->getMessageTextLong();
+    }
+
+    /**
+     * Retrieve the HTML body to use for emails.
+     *
+     * @return string
+     */
+    public function getMailBodyHTML() : string
+    {
+        return $this->getMessageHtml();
+    }
+
+    /**
+     * Retrieve the (short) text to use for this notification, should be simple,
+     * e.g. for text-to-speech output.
+     *
+     * @return string
+     */
+    public function getMessageTextShort() : string
+    {
+        $translate = $this->viewHelperManager->get('translate');
+        $params = $this->getParams();
+        $message = empty($params['message'])
+            ? 'Notification has no message set!'
+            : $params['message'];
+        return $translate([$message, $params]);
+    }
+
+    /**
+     * Retrieve the (long) text to use for this notification, could contain URLs,
+     * e.g if the notification is sent to a chat/messenger/etc.
+     *
+     * @return string
+     */
+    public function getMessageTextLong() : string
+    {
+        return $this->getMessageTextShort();
+    }
+
+    /**
+     * Retrieve the HTML to use for this notification, e.g. for display on the
+     * website, can contain markup/links/buttons.
+     *
+     * @return string
+     */
+    public function getMessageHtml() : string
+    {
+        return $this->getMessageTextLong();
+    }
+
+    /**
+     * Retrieve the title to use for this notification, may be empty.
+     *
+     * @return string
+     */
+    public function getTitle() : string
+    {
+        $translate = $this->viewHelperManager->get('translate');
+        return $translate('message.system.notification');
+    }
+
+// <editor-fold defaultstate="collapsed" desc="mailable">
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default" = false})
+     */
+    protected $mailable = false;
+
+    /**
+     * Returns whether or not the message can be pulled via the API.
+     *
+     * @return bool
+     */
+    public function isMailable() : bool
+    {
+        return $this->mailable;
+    }
+
+    /**
+     * Sets whether or not the message can be pulled via the API.
+     *
+     * @param bool $value
      *
      * @return self
      */
-    public function setMessage(string $value)
+    public function setMailable(bool $value)
     {
-        $this->message = $value;
+        $this->mailable = $value;
 
         return $this;
     }
@@ -94,6 +239,69 @@ class Notification extends Entity
         return $this;
     }
 // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="pullable">
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default" = false})
+     */
+    protected $pullable = false;
+
+    /**
+     * Returns whether or not the message can be pulled via the API.
+     *
+     * @return bool
+     */
+    public function isPullable() : bool
+    {
+        return $this->pullable;
+    }
+
+    /**
+     * Sets whether or not the message can be pulled via the API.
+     *
+     * @param bool $value
+     *
+     * @return self
+     */
+    public function setPullable(bool $value)
+    {
+        $this->pullable = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="pushable">
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default" = false})
+     */
+    protected $pushable = false;
+
+    /**
+     * Returns
+     *
+     * @return bool
+     */
+    public function isPushable() : bool
+    {
+        return $this->pushable;
+    }
+
+    /**
+     * Sets whether or not the message should be pushed to the User, e.g. via
+     * HTTP request.
+     *
+     * @param bool $value
+     *
+     * @return self
+     */
+    public function setPushable(bool $value)
+    {
+        $this->pushable = $value;
+
+        return $this;
+    }
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="dismissed">
     /**
      * @var bool
@@ -124,37 +332,6 @@ class Notification extends Entity
     public function setDismissed(bool $dismissed = true)
     {
         $this->dismissed = $dismissed;
-
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="type">
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=255, nullable=false)
-     */
-    protected $type;
-
-    /**
-     * Returns the type.
-     *
-     * @return string
-     */
-    public function getType() : string
-    {
-        return $this->type;
-    }
-
-    /**
-     * Sets the type.
-     *
-     * @param string $value
-     *
-     * @return self
-     */
-    public function setType(string $value)
-    {
-        $this->type = $value;
 
         return $this;
     }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   (c) 2014-16, Vrok
+ * @copyright   (c) 2014-17, Vrok
  * @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
  * @author      Jakob Schumann <schumann@vrok.de>
  */
@@ -9,6 +9,7 @@
 namespace Vrok;
 
 use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManager;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ControllerPluginProviderInterface;
@@ -137,6 +138,17 @@ class Module implements
                 'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => function ($sm) {
                     return new Doctrine\ORM\Mapping\EntityListenerResolver($sm);
                 },
+                'Vrok\Entity\Listener\NotificationListener' => function ($sm) {
+                    $listener = new Entity\Listener\NotificationListener();
+
+                    // ZF3 does not automagically inject a SharedEventManager...
+                    $sharedEvents = $sm->get('SharedEventManager');
+                    $events = new EventManager($sharedEvents);
+                    $listener->setEventManager($events);
+
+                    return $listener;
+                },
+                // @todo factory for TodoListener to inject sharedEevntManager since ZF3
                 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => function ($sm) {
                     return new Mvc\View\Http\AuthorizeRedirectStrategy($sm);
                 },
@@ -170,6 +182,21 @@ class Module implements
                     $config = $sm->get('Config');
                     if (!empty($config['meta_service']['defaults'])) {
                         $service->setDefaults($config['meta_service']['defaults']);
+                    }
+
+                    return $service;
+                },
+                'Vrok\Service\NotificationService' => function ($sm) {
+                    $es = $sm->get(\Vrok\Service\Email::class);
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $vhm = $sm->get('ViewHelperManager');
+                    $service = new Service\NotificationService($es, $em, $vhm);
+
+                    $config = $sm->get('Config');
+                    if (!empty($config['notifications_service']['http_notifications_enabled'])) {
+                        $service->setHttpNotificationsEnabled(
+                            (bool)$config['notifications_service']['http_notifications_enabled']
+                        );
                     }
 
                     return $service;
@@ -279,11 +306,14 @@ class Module implements
     {
         /* @var $e \Zend\Mvc\MvcEvent */
         $application  = $e->getApplication();
-        $sharedEvents = $application->getEventManager()->getSharedManager();
         $sm           = $application->getServiceManager();
+
+        $notificationService = $sm->get(Service\NotificationService::class);
+        $notificationService->attach($application->getEventManager());
 
         // we want to lazy load the strategy object only when needed, so we use a
         // closure here
+        $sharedEvents = $application->getEventManager()->getSharedManager();
         $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function ($e) use ($sm) {
             // @todo strategy nicht via event laden sondern über config?
             // @todo strategy als service einrichten?

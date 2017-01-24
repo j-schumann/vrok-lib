@@ -2,6 +2,24 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
+## 4.0.0 - @todo
+### Added
+- Vrok\Service\NotificationService that handles pushing/sending of notifications
+  to the user
+
+### Fixed
+- Vrok\Stdlib\ErrorHandler::shutdownHandler did not log all fatal errors
+
+### Changed
+- reworked Vrok\Entity\Notification to now generate the messages itself, use
+  table inheritance for subclassing and differ between pullable/pushable/mailable
+- Vrok\Entity\User now has properties allowing the user to configure if he wants
+  email notifications and to enable HTTP push notifications
+- moved getNotificationFilter & getNotificationRepository from UserManager to
+  NotificationService
+- DB schema update is required
+- require PHP 7.1+
+
 ## 3.2.0 - 2016-12-29
 ### Added
 - Vrok\Mvc\View\Http\ErrorLoggingStrategy that allows logging of exceptions/

@@ -8,7 +8,7 @@
     "minimum-stability": "dev",
 
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.1",
         "doctrine/doctrine-orm-module": "^1.1.0",
         "gedmo/doctrine-extensions": "^3.0.0",
         "ircmaxell/random-lib": "^1.2.0",
