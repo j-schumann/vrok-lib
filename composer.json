@@ -9,20 +9,20 @@
 
     "require": {
         "php": ">=7.1",
-        "doctrine/doctrine-orm-module": "^1.1.0",
+        "doctrine/doctrine-orm-module": "^1.1.1",
         "gedmo/doctrine-extensions": "^3.0.0",
         "ircmaxell/random-lib": "^1.2.0",
-        "ocramius/proxy-manager": "^2.0.3",
+        "ocramius/proxy-manager": "^2.1.0",
         "rwoverdijk/assetmanager": "^1.7.1",
-        "zendframework/zend-component-installer": "^0.3.1",
+        "zendframework/zend-component-installer": "^0.6.0",
         "zendframework/zend-filter": "^2.7.1",
         "zendframework/zend-hydrator": "^2.2.1",
         "zendframework/zend-inputfilter": "^2.7.3",
         "zendframework/zend-log": "^2.9.1",
         "zendframework/zend-i18n": "^2.7.3",
-        "zendframework/zend-mail": "^2.6.1",
+        "zendframework/zend-mail": "^2.7.2",
         "zendframework/zend-math": "^3.0.0",
-        "zendframework/zend-mvc": "^3.0.3",
+        "zendframework/zend-mvc": "^3.0.4",
         "zendframework/zend-mvc-console": "^1.1.11",
         "zendframework/zend-mvc-form": "^1.0.0",
         "zendframework/zend-mvc-i18n": "^1.0.0",
@@ -30,7 +30,7 @@
         "zendframework/zend-mvc-plugin-identity": "^1.0.0",
         "zendframework/zend-navigation": "^2.8.1",
         "zendframework/zend-serializer": "^2.8.0",
-        "zendframework/zend-validator": "^2.8.1"
+        "zendframework/zend-validator": "^2.8.2"
     },
     "suggest": {
         "ext-intl": "Required for translator & IDNA convert"
@@ -42,8 +42,8 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-dev": "3.2.x",
-            "dev-master": "3.1.x"
+            "dev-dev": "4.1.x",
+            "dev-master": "4.0.x"
         }
     }
 }
