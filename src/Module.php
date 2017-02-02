@@ -91,6 +91,11 @@ class Module implements
     {
         return [
             'factories' => [
+                'Vrok\Notifications\SendNotificationJob' => function ($sl) {
+                    $ns = $sl->get(Service\NotificationService::class);
+                    $es = $sl->get(Service\Email::class);
+                    return new Notifications\SendNotificationJob($ns, $es);
+                },
                 'Vrok\SlmQueue\Job\CheckTodos' => function ($sl) {
                     $todoService = $sl->get('Vrok\Service\Todo');
                     return new SlmQueue\Job\CheckTodos($todoService);
@@ -136,25 +141,19 @@ class Module implements
                     return new Authentication\Storage\Doctrine($em);
                 },
                 'Vrok\Doctrine\ORM\Mapping\EntityListenerResolver' => function ($sm) {
+                    // the listenerResolver is a type of serviceManager itself,
+                    // inject the parent service locator
                     return new Doctrine\ORM\Mapping\EntityListenerResolver($sm);
                 },
-                'Vrok\Entity\Listener\NotificationListener' => function ($sm) {
-                    $listener = new Entity\Listener\NotificationListener();
-
-                    // ZF3 does not automagically inject a SharedEventManager...
-                    $sharedEvents = $sm->get('SharedEventManager');
-                    $events = new EventManager($sharedEvents);
-                    $listener->setEventManager($events);
-
-                    return $listener;
-                },
-                // @todo factory for TodoListener to inject sharedEevntManager since ZF3
                 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => function ($sm) {
+                    // @todo refactor to avoid injecting the serviceManager
                     return new Mvc\View\Http\AuthorizeRedirectStrategy($sm);
                 },
                 'Vrok\Mvc\View\Http\ErrorLoggingStrategy' => function ($sm) {
                     $s = new Mvc\View\Http\ErrorLoggingStrategy();
 
+                    // @todo implement setOptions() and move the config check
+                    // there
                     $config = $sm->get('Config');
                     if (!empty($config['general'])
                         && !empty($config['general']['log_dir'])
@@ -163,6 +162,11 @@ class Module implements
                     }
 
                     return $s;
+                },
+                'Vrok\Notifications\DefaultFormatter' => function($sm) {
+                    $vhm = $sm->get('ViewHelperManager');
+                    $formatter = new Notifications\DefaultFormatter($vhm);
+                    return $formatter;
                 },
                 'Vrok\Service\Email' => function ($sm) {
                     $vhm = $sm->get('ViewHelperManager');
@@ -179,6 +183,8 @@ class Module implements
                     $em = $sm->get('Doctrine\ORM\EntityManager');
                     $service = new Service\Meta($em);
 
+                    // @todo implement setOptions() and move the config check
+                    // there
                     $config = $sm->get('Config');
                     if (!empty($config['meta_service']['defaults'])) {
                         $service->setDefaults($config['meta_service']['defaults']);
@@ -187,15 +193,16 @@ class Module implements
                     return $service;
                 },
                 'Vrok\Service\NotificationService' => function ($sm) {
-                    $es = $sm->get(\Vrok\Service\Email::class);
                     $em = $sm->get('Doctrine\ORM\EntityManager');
-                    $vhm = $sm->get('ViewHelperManager');
-                    $service = new Service\NotificationService($es, $em, $vhm);
+                    $cpm = $sm->get('ControllerPluginManager');
+                    $queue = $cpm->get('queue');
+
+                    $service = new Service\NotificationService($em, $queue);
 
                     $config = $sm->get('Config');
-                    if (!empty($config['notifications_service']['http_notifications_enabled'])) {
-                        $service->setHttpNotificationsEnabled(
-                            (bool)$config['notifications_service']['http_notifications_enabled']
+                    if (isset($config['notification_service'])) {
+                        $service->setOptions(
+                            $config['notification_service']
                         );
                     }
 
@@ -205,6 +212,8 @@ class Module implements
                     $em = $sm->get('Doctrine\ORM\EntityManager');
                     $service = new Service\Owner($em);
 
+                    // @todo implement setOptions() and move the config check
+                    // there
                     $config = $sm->get('Config');
                     if (!empty($config['owner_service']['allowed_owners'])) {
                         $allowedOwners = $config['owner_service']['allowed_owners'];
@@ -219,6 +228,8 @@ class Module implements
                     $service->setEntityManager($sm->get('Doctrine\ORM\EntityManager'));
                     $service->setViewHelperManager($sm->get('ViewHelperManager'));
 
+                    // @todo implement setOptions() and move the config check
+                    // there
                     $config = $sm->get('Config');
                     if (!empty($config['todo_service']['timeouts'])) {
                         $service->setTimeouts($config['todo_service']['timeouts']);
@@ -242,6 +253,8 @@ class Module implements
                     $manager->setControllerPluginManager($sm->get('ControllerPluginManager'));
                     $manager->setViewHelperManager($sm->get('ViewHelperManager'));
 
+                    // @todo implement setOptions() and move the config check
+                    // there
                     $config = $sm->get('Config');
                     if (!empty($config['validation_manager']['timeouts'])) {
                         $manager->setTimeouts($config['validation_manager']['timeouts']);
@@ -308,13 +321,12 @@ class Module implements
         $application  = $e->getApplication();
         $sm           = $application->getServiceManager();
 
-        $notificationService = $sm->get(Service\NotificationService::class);
-        $notificationService->attach($application->getEventManager());
+        $em = $application->getEventManager();
+        /* @var $em EventManager */
 
         // we want to lazy load the strategy object only when needed, so we use a
         // closure here
-        $sharedEvents = $application->getEventManager()->getSharedManager();
-        $sharedEvents->attach('OwnerService', 'getOwnerStrategy', function ($e) use ($sm) {
+        $em->getSharedManager()->attach('OwnerService', 'getOwnerStrategy', function ($e) use ($sm) {
             // @todo strategy nicht via event laden sondern über config?
             // @todo strategy als service einrichten?
             $classes = $e->getParam('classes');
@@ -326,5 +338,20 @@ class Module implements
 
             return new Owner\UserStrategy($userManager);
         });
+
+        // simply create Notifications anywhere in the app, they will be mailed/
+        // pushed automatically by the service
+        $notificationService = $sm->get(Service\NotificationService::class);
+        $notificationService->attach($application->getEventManager());
+
+        // always return the defaultFormatter as last resort (low priority)
+        $em->getSharedManager()->attach(
+            'Vrok\Service\NotificationService',
+            'getNotificationFormatter',
+            function() use ($sm) {
+                return $sm->get(Notifications\DefaultFormatter::class);
+            },
+            -5000
+        );
     }
 }

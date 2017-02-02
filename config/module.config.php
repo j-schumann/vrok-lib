@@ -97,6 +97,11 @@ return [
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
             'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
 
+            // the listeners need the shared eventmanager -> use the factory,
+            // else they would be instantiated without applying the initializers
+            'Vrok\Entity\Listener\NotificationListener' => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\Entity\Listener\TodoListener'         => 'Zend\ServiceManager\Factory\InvokableFactory',
+
             // overwritten to use our extended controller guard
             'BjyAuthorize\Guard\Controller' => 'Vrok\BjyAuthorize\ControllerGuardServiceFactory',
         ],

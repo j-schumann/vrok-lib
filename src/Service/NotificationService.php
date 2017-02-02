@@ -9,25 +9,28 @@
 namespace Vrok\Service;
 
 use Doctrine\ORM\EntityManager;
+use SlmQueue\Controller\Plugin\QueuePlugin;
 use Vrok\Entity\Notification;
 use Vrok\Entity\Filter\NotificationFilter;
 use Vrok\Entity\Listener\NotificationListener;
-use Vrok\Service\Email;
+use Vrok\Notifications\FormatterInterface;
 use Zend\EventManager\EventInterface;
+use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerAwareTrait;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ListenerAggregateInterface;
 use Zend\EventManager\ListenerAggregateTrait;
-use Zend\Http\Client;
-use Zend\Http\Client\Adapter\Curl;
-use Zend\Http\Request;
-use Zend\View\HelperPluginManager;
 
 /**
  * Formats and sends notifications for the user.
  */
-class NotificationService implements ListenerAggregateInterface
+class NotificationService
+    implements EventManagerAwareInterface, ListenerAggregateInterface
 {
+    use EventManagerAwareTrait;
     use ListenerAggregateTrait;
+
+    const EVENT_GET_NOTIFICATION_FORMATTER = 'getNotificationFormatter';
 
     /**
      * Global flag wether or not the application should push HTTP notifications.
@@ -37,31 +40,47 @@ class NotificationService implements ListenerAggregateInterface
     protected $httpNotificationsEnabled = true;
 
     /**
-     * @var Email
-     */
-    protected $emailService = null;
-
-    /**
      * @var \Doctrine\Orm\EntityManager
      */
     protected $entityManager = null;
 
     /**
-     * @var HelperPluginManager
+     * @var QueuePlugin
      */
-    protected $viewHelperManager = null;
+    protected $queue = null;
+
+    /**
+     * Hash containing all used strategies to avoid triggering the event multiple times.
+     *
+     * @var array
+     */
+    protected $formatters = [];
 
     /**
      * Class constructor - stores the given dependencies.
      *
-     * @param HelperPluginManager $vhm
+     * @param Vrok\Service\Email $es
+     * @param \Doctrine\Orm\EntityManager $em
      */
-    public function __construct(Email $es, EntityManager $em,
-            HelperPluginManager $vhm)
+    public function __construct(EntityManager $em, QueuePlugin $queue)
     {
-        $this->emailService = $es;
         $this->entityManager = $em;
-        $this->viewHelperManager = $vhm;
+        $this->queue         = $queue;
+    }
+
+    /**
+     * Sets multiple config options at once.
+     *
+     * @todo validate $config
+     *
+     * @param array $config
+     */
+    public function setOptions(array $config) // @todo how to allow ArrayAccess?
+    {
+        if (isset($config['http_notifications_enabled'])) {
+            $this->setHttpNotificationsEnabled(
+                    (bool)$config['http_notifications_enabled']);
+        }
     }
 
     /**
@@ -75,6 +94,16 @@ class NotificationService implements ListenerAggregateInterface
     }
 
     /**
+     * Returns wether the application wants to support http notifications.
+     *
+     * @return bool
+     */
+    public function getHttpNotificationsEnabled() : bool
+    {
+        return $this->httpNotificationsEnabled;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function attach(EventManagerInterface $events, $priority = 1)
@@ -82,140 +111,91 @@ class NotificationService implements ListenerAggregateInterface
         $sharedEvents = $events->getSharedManager();
 
         $this->listeners[] = $sharedEvents->attach(
+            NotificationListener::class, // the prePersist event is triggered
+                // by the Listener instead of the entity class itself
+            NotificationListener::EVENT_NOTIFICATION_PREPERSIST,
+            [$this, 'onNotificationPrePersist'],
+            $priority
+        );
+
+        $this->listeners[] = $sharedEvents->attach(
             NotificationListener::class, // the postPersist event is triggered
                 // by the Listener instead of the entity class itself
             NotificationListener::EVENT_NOTIFICATION_POSTPERSIST,
-            [$this, 'onNotificationCreated'],
+            [$this, 'onNotificationPostPersist'],
             $priority
         );
     }
 
     /**
-     * Called when a notification was created
-     * Sends it to the user if email/push notifications are enabled.
+     * Retrieve the formatter to use for the given notification type.
+     *
+     * @triggers getNotificationFormatter
+     * @param string $type  the notification type which should be formatted
+     * @return FormatterInterface
+     * @throws Exception\RuntimeException when no formatter was found
+     */
+    public function getNotificationFormatter(string $type) : FormatterInterface
+    {
+        if (isset($this->formatters[$type])) {
+            return $this->formatters[$type];
+        }
+
+        // try to find a formatter that feels responsible for the given type
+        $results = $this->getEventManager()->triggerUntil(
+            function ($result) {
+                return $result instanceof FormatterInterface;
+            },
+            self::EVENT_GET_NOTIFICATION_FORMATTER,
+            $this,
+            ['type' => $type]
+        );
+
+        if ($results->stopped()) {
+            $this->formatters[$type] = $results->last();
+            return $this->formatters[$type];
+        }
+
+        throw new Exception\RuntimeException(
+                'No notification formatter for type "'.$type.'" found!');
+    }
+
+    /**
+     * Called when a notification is to be saved. Renders and sets the messages.
      *
      * @param EventInterface $e
+     * @throws Exception\RuntimeException when the notification has no user set
      */
-    public function onNotificationCreated(EventInterface $e)
+    public function onNotificationPrePersist(EventInterface $e)
     {
         $notification = $e->getTarget();
         /* @var $notification Notification */
-        $user = $notification->getUser();
 
-        // This notification is always sent by mail or the user has email
-        // notifications enabled AND the notification can be mailed
-        if ($notification->forceMail() ||
-            ($notification->isMailable() && $user->getEmailNotificationsEnabled())
-        ) {
-            $this->sendEmail($notification);
-        }
+        $formatter = $this->getNotificationFormatter($notification->getType());
 
-        // The applications allows HTTP push and the user has enabled it
-        if ($this->httpNotificationsEnabled
-            && $user->getHttpNotificationsEnabled()
-        ) {
-            $this->pushHttpNotification($notification);
-        }
+        $notification->setHtml($formatter->getHtml($notification));
+        $notification->setTextLong($formatter->getTextLong($notification));
+        $notification->setTextShort($formatter->getTextShort($notification));
+        $notification->setTitle($formatter->getTitle($notification));
     }
 
     /**
-     * Retrieve a array representation of the given notification.
-     * Used for API results and HTTP notifications.
+     * Called when a notification was created
+     * Creates the job which will send it to the user if email/push
+     * notifications are enabled.
      *
-     * @param Notification $notification
-     * return array
+     * @param EventInterface $e
+     * @throws Exception\RuntimeException when the notification has no user set
      */
-    public function convertNotificationToArray(Notification $notification) : array
+    public function onNotificationPostPersist(EventInterface $e)
     {
-        $notification->setEntityManager($this->getEntityManager());
-        $notification->setViewHelperManager($this->viewHelperManager);
+        $notification = $e->getTarget();
+        /* @var $notification Notification */
 
-        return [
-            'messageHtml'      => $notification->getMessageHtml(),
-            'messageTextLong'  => $notification->getMessageTextLong(),
-            'messageTextShort' => $notification->getMessageTextShort(),
-            'title'            => $notification->getTitle(),
-            'timestamp'        => $notification->getCreatedAt()->format('U'),
-            'type'             => get_class($notification),
-            'parameters'       => $notification->getParams(),
-        ];
-    }
-
-    /**
-     * Push the given notification via POST to the URL the user specified.
-     *
-     * @param Notification $notification
-     */
-    protected function pushHttpNotification(Notification $notification)
-    {
-        $options = [
-            'adapter'     => Curl::class,
-            'curloptions' => [
-                \CURLOPT_FOLLOWLOCATION => true,
-                \CURLOPT_MAXREDIRS      => 3,
-            ],
-        ];
-
-        $user = $notification->getUser();
-        if (!$user->getHttpNotificationCertCheck()) {
-            $options['curloptions'][\CURLOPT_SSL_VERIFYPEER] = false;
-            $options['curloptions'][\CURLOPT_SSL_VERIFYHOST] = false;
-        }
-
-        $client  = new Client($user->getHttpNotificationUrl(), $options);
-
-        if ($user->getHttpNotificationUser() && $user->getHttpNotificationPw()) {
-            $client->setAuth(
-                $user->getHttpNotificationUser(),
-                $user->getHttpNotificationPw(),
-                Client::AUTH_BASIC
-            );
-        }
-
-        $client->setMethod(Request::METHOD_POST);
-        $client->setRawBody(json_encode([
-            'notification' => $this->convertNotificationToArray($notification),
-        ]));
-
-        $response = null;
-        try {
-            $response = $client->send();
-            \Doctrine\Common\Util\Debug::dump($response->getStatusCode(), 4);
-            \Doctrine\Common\Util\Debug::dump($response->getBody(), 4);
-        }
-        catch (\Exception $e) {
-            \Doctrine\Common\Util\Debug::dump($e->getMessage(), 4);
-            // @todo new notification with the error
-            // @todo log error? or only new notification for the user
-        }
-
-        if ($response && $response->getStatusCode() != 200) {
-            //$body = $response->getBody();
-            // @todo new notification with the error
-            // @todo log error? or only new notification for the user
-        }
-    }
-
-    /**
-     * Sends the email with the notification to the user.
-     *
-     * @param Notification $notification
-     */
-    public function sendEmail(Notification $notification)
-    {
-        $notification->setEntityManager($this->getEntityManager());
-        $notification->setViewHelperManager($this->viewHelperManager);
-        $user = $notification->getUser();
-
-        $mail = $this->emailService->createMail();
-        $mail->setSubject($notification->getMailSubject());
-        $mail->addTo($user->getEmail(true), $user->getDisplayName());
-
-        $htmlPart = $mail->getHtmlPart($notification->getMailBodyHTML(), false, false);
-        $textPart = $mail->getTextPart($notification->getMailBodyText(), false, true);
-        $mail->setAlternativeBody($textPart, $htmlPart);
-
-        $this->emailService->sendMail($mail);
+        $qh = $this->queue;
+        $qh('jobs')->push('Vrok\Notifications\SendNotificationJob', [
+            'notificationId' => $notification->getId(),
+        ]);
     }
 
     /**

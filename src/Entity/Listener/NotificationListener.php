@@ -21,7 +21,22 @@ class NotificationListener implements EventManagerAwareInterface
 {
     use EventManagerAwareTrait;
 
+    const EVENT_NOTIFICATION_PREPERSIST = 'notification.prePersist';
     const EVENT_NOTIFICATION_POSTPERSIST = 'notification.postPersist';
+
+    /**
+     * Triggers an event when a new notification is to be saved.
+     *
+     * @param Notification       $notification
+     * @triggers notification.prePersist
+     */
+    public function prePersist(Notification $notification)
+    {
+        $this->getEventManager()->trigger(
+            self::EVENT_NOTIFICATION_PREPERSIST,
+            $notification
+        );
+    }
 
     /**
      * Triggers an event when a new notification was created.

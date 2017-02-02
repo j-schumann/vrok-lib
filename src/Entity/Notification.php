@@ -1,34 +1,25 @@
 <?php
 
 /**
- * @copyright   (c) 2014-16, Vrok
+ * @copyright   (c) 2014-17, Vrok
  * @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
 namespace Vrok\Entity;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 use Vrok\Doctrine\Entity;
 use Vrok\Doctrine\Traits\AutoincrementId;
 use Vrok\Doctrine\Traits\CreationDate;
-use Zend\View\HelperPluginManager;
 
 /**
  * Stores a notification that can be displayed to the user after login or
  * can be pushed / pulled to/from a smartphone for things that happened since
  * his last login/etc.
  *
- * This class implements a very simple system notification that won't be pushed
- * or sent by email and cannot be pulled, only displayed on the website.
- * Create a subclass to change the flags as needed and supply different content,
- * e.g. by using partials for the (HTML) output.
- *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
  * @ORM\Table(name="notifications")
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\EntityListeners({"Vrok\Entity\Listener\NotificationListener"})
  */
 class Notification extends Entity
@@ -36,141 +27,92 @@ class Notification extends Entity
     use AutoincrementId;
     use CreationDate;
 
-    // Wether or not the user can "opt out" of this notification: If the user
-    // has disabled email notifications in his profil but forceMail is true
-    // the message will be mailed anyways.
-    const FORCE_MAIL = false;
-
-    const PUSHABLE = false;
-    const PULLABLE = false;
-    const MAILABLE = false;
-
     /**
-     * EntityManager for fetching entities from the parameters.
-     * Must be injected before calling the getters.
-     *
-     * @var EntityManager
+     * Returns an array representation of this notification.
+     * This will be returned when notifications are pulled from the API and
+     * pushed via HTTP.
      */
-    protected $entityManager = null;
-
-    /**
-     * View Helper Manager for translating and formatting the message.
-     * Must be injected before calling the getters.
-     *
-     * @var HelperPluginManager
-     */
-    protected $viewHelperManager = null;
-
-    /**
-     * Sets the EntityManager instance to use.
-     *
-     * @param EntityManager $em
-     */
-    public function setEntityManager(EntityManager $em)
+    public function toArray()
     {
-        $this->entityManager = $em;
+        return [
+            'html'      => $this->getHtml(),
+            'textLong'  => $this->getTextLong(),
+            'textShort' => $this->getTextShort(),
+            'title'     => $this->getTitle(),
+            'timestamp' => $this->getCreatedAt()->format('U'),
+            'type'      => $this->getType(),
+        ];
     }
 
+// <editor-fold defaultstate="collapsed" desc="dismissed">
     /**
-     * Sets the ViewHelperManager instance to use.
-     *
-     * @param HelperPluginManager $em
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default" = false})
      */
-    public function setViewHelperManager(HelperPluginManager $em)
-    {
-        $this->viewHelperManager = $em;
-    }
+    protected $dismissed = false;
 
     /**
-     * Returns wether this notification overrides disabled email notification
-     * of the user.
+     * Returns true if the user has dismissed the notification via the web interface.
+     * Dismissed status of notifications that are pulled via the API must be handled
+     * in the corresponding application.
      *
      * @return bool
      */
-    public function forceMail() : bool
+    public function isDismissed() : bool
     {
-        return static::FORCE_MAIL;
+        return $this->dismissed;
     }
 
     /**
-     * Retrieve the subject to use for emails.
+     * Sets whether or not the user has dismissed the notification in the web
+     * interface.
+     *
+     * @param bool $dismissed
+     *
+     * @return self
+     */
+    public function setDismissed(bool $dismissed = true) : Notification
+    {
+        $this->dismissed = $dismissed;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="html">
+    /**
+     * @var string
+     * @ORM\Column(type="text", length=65535, nullable=true)
+     */
+    protected $html = null;
+
+    /**
+     * Returns the notification html.
      *
      * @return string
      */
-    public function getMailSubject() : string
+    public function getHtml() : string
     {
-        return $this->getTitle();
+        if (!$this->html) {
+            return $this->getTextLong();
+        }
+
+        return $this->html;
     }
 
     /**
-     * Retrieve the text body to use for emails.
+     * Sets the notification html.
      *
-     * @return string
-     */
-    public function getMailBodyText() : string
-    {
-        return $this->getMessageTextLong();
-    }
-
-    /**
-     * Retrieve the HTML body to use for emails.
+     * @param string $value
      *
-     * @return string
+     * @return self
      */
-    public function getMailBodyHTML() : string
+    public function setHtml(?string $value) : Notification
     {
-        return $this->getMessageHtml();
-    }
+        $this->html = $value;
 
-    /**
-     * Retrieve the (short) text to use for this notification, should be simple,
-     * e.g. for text-to-speech output.
-     *
-     * @return string
-     */
-    public function getMessageTextShort() : string
-    {
-        $translate = $this->viewHelperManager->get('translate');
-        $params = $this->getParams();
-        $message = empty($params['message'])
-            ? 'Notification has no message set!'
-            : $params['message'];
-        return $translate([$message, $params]);
+        return $this;
     }
-
-    /**
-     * Retrieve the (long) text to use for this notification, could contain URLs,
-     * e.g if the notification is sent to a chat/messenger/etc.
-     *
-     * @return string
-     */
-    public function getMessageTextLong() : string
-    {
-        return $this->getMessageTextShort();
-    }
-
-    /**
-     * Retrieve the HTML to use for this notification, e.g. for display on the
-     * website, can contain markup/links/buttons.
-     *
-     * @return string
-     */
-    public function getMessageHtml() : string
-    {
-        return $this->getMessageTextLong();
-    }
-
-    /**
-     * Retrieve the title to use for this notification, may be empty.
-     *
-     * @return string
-     */
-    public function getTitle() : string
-    {
-        $translate = $this->viewHelperManager->get('translate');
-        return $translate('message.system.notification');
-    }
-
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="mailable">
     /**
      * @var bool
@@ -180,6 +122,7 @@ class Notification extends Entity
 
     /**
      * Returns whether or not the message can be pulled via the API.
+     * Overridden by forceMail.
      *
      * @return bool
      */
@@ -190,14 +133,48 @@ class Notification extends Entity
 
     /**
      * Sets whether or not the message can be pulled via the API.
+     * Overridden by forceMail.
      *
      * @param bool $value
      *
      * @return self
      */
-    public function setMailable(bool $value)
+    public function setMailable(bool $value) : Notification
     {
         $this->mailable = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="mailForced">
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default" = false})
+     */
+    protected $mailForced = false;
+
+    /**
+     * Returns whether this notification will ignore if the user has email
+     * notifications disabled and will always be sent by email.
+     *
+     * @return bool
+     */
+    public function isMailForced() : bool
+    {
+        return $this->mailForced;
+    }
+
+    /**
+     * Sets whether this notification will ignore if the user has email
+     * notifications disabled and will always be sent by email.
+     *
+     * @param bool $value
+     *
+     * @return self
+     */
+    public function setMailForced(bool $value) : Notification
+    {
+        $this->mailForced = $value;
 
         return $this;
     }
@@ -226,13 +203,15 @@ class Notification extends Entity
     }
 
     /**
-     * Sets the previous field params.
+     * Sets the parameters used to construct the notification text.
+     * These can be entity IDs but the formatter should not rely on existence
+     * of these entities, instead all required parameters should be given.
      *
-     * @param mixed $params
+     * @param array $params
      *
      * @return self
      */
-    public function setParams(array $params)
+    public function setParams(array $params) : Notification
     {
         $this->params = $params;
 
@@ -263,7 +242,7 @@ class Notification extends Entity
      *
      * @return self
      */
-    public function setPullable(bool $value)
+    public function setPullable(bool $value) : Notification
     {
         $this->pullable = $value;
 
@@ -295,43 +274,9 @@ class Notification extends Entity
      *
      * @return self
      */
-    public function setPushable(bool $value)
+    public function setPushable(bool $value) : Notification
     {
         $this->pushable = $value;
-
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="dismissed">
-    /**
-     * @var bool
-     * @ORM\Column(type="boolean", options={"default" = false})
-     */
-    protected $dismissed = false;
-
-    /**
-     * Returns true if the user has dismissed the notification via the web interface.
-     * Dismissed status of notifications that are pulled via the API must be handled
-     * in the corresponding application.
-     *
-     * @return bool
-     */
-    public function isDismissed() : bool
-    {
-        return $this->dismissed;
-    }
-
-    /**
-     * Sets whether or not the user has dismissed the notification in the web
-     * interface.
-     *
-     * @param bool $dismissed
-     *
-     * @return self
-     */
-    public function setDismissed(bool $dismissed = true)
-    {
-        $this->dismissed = $dismissed;
 
         return $this;
     }
@@ -349,7 +294,7 @@ class Notification extends Entity
      *
      * @return \Vrok\Entity\User
      */
-    public function getUser()
+    public function getUser() : User
     {
         return $this->user;
     }
@@ -361,9 +306,137 @@ class Notification extends Entity
      *
      * @return self
      */
-    public function setUser(User $user)
+    public function setUser(User $user) : Notification
     {
         $this->user = $user;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="textLong">
+    /**
+     * @var string
+     * @ORM\Column(type="text", length=65535, nullable=true)
+     */
+    protected $textLong = null;
+
+    /**
+     * Returns the notification short text.
+     *
+     * @return string
+     */
+    public function getTextLong() : string
+    {
+        if (!$this->textLong) {
+            return $this->getTextShort();
+        }
+
+        return $this->textLong;
+    }
+
+    /**
+     * Sets the notification short text.
+     *
+     * @param string $value
+     *
+     * @return self
+     */
+    public function setTextLong(?string $value) : Notification
+    {
+        $this->textLong = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="textShort">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $textShort = '';
+
+    /**
+     * Returns the notification short text.
+     *
+     * @return string
+     */
+    public function getTextShort() : string
+    {
+        return $this->textShort;
+    }
+
+    /**
+     * Sets the notification short text.
+     *
+     * @param string $value
+     *
+     * @return self
+     */
+    public function setTextShort(string $value) : Notification
+    {
+        $this->textShort = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="title">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    protected $title = null;
+
+    /**
+     * Returns the notification title.
+     *
+     * @return string
+     */
+    public function getTitle() : string
+    {
+        return $this->title;
+    }
+
+    /**
+     * Sets the notification title.
+     *
+     * @param string $value
+     *
+     * @return self
+     */
+    public function setTitle(?string $value) : Notification
+    {
+        $this->title = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="type">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=50, nullable=false, options={"default" = "default"})
+     */
+    protected $type = 'default';
+
+    /**
+     * Returns the validation type.
+     *
+     * @return string
+     */
+    public function getType() : string
+    {
+        return $this->type;
+    }
+
+    /**
+     * Sets the validation type.
+     *
+     * @param string $value
+     *
+     * @return self
+     */
+    public function setType(string $value) : Notification
+    {
+        $this->type = $value;
 
         return $this;
     }

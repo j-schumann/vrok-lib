@@ -9,7 +9,6 @@
 namespace Vrok\I18n\Translator;
 
 use Interop\Container\ContainerInterface;
-use Zend\EventManager\EventManager;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 /**
@@ -34,9 +33,12 @@ class TranslatorServiceFactory implements FactoryInterface
 
         $translator = Translator::factory($trConfig);
 
-        // ZF3 does not automagically inject a SharedEventManager...
-        $sharedEvents = $container->get('SharedEventManager');
-        $events = new EventManager($sharedEvents);
+        // The base class Zend\I18n\Translator\Translator does not implement the
+        // EventManagerAwareInterface so the serviceManager won't inject the
+        // (shared) eventManager automagically -> do this here, as we trigger
+        // some events. If you dont need the EM, e.g you want to set
+        // isEventManagerEnabled to false, use a custom factory.
+        $events = $container->get('EventManager');
         $translator->setEventManager($events);
 
         return $translator;

@@ -36,6 +36,39 @@ class UserRepository extends EntityRepository
                 $spec['type'] = 'Zend\Form\Element\Email';
                 break;
 
+            case 'emailNotificationsEnabled':
+                $spec['options']['description'] =
+                    $this->getTranslationString('emailNotificationsEnabled')
+                    .'.description';
+                break;
+
+            case 'httpNotificationCertCheck':
+                $spec['options']['description'] =
+                    $this->getTranslationString('httpNotificationCertCheck')
+                    .'.description';
+                break;
+
+            /*
+             * @todo aktuell wird das Auth PW angezeigt, wenn wir hier den
+             * Feldtyp auf password setzen kann der Wert aber nicht mehr
+             * vorausgefüllt werden und das PW müsste jedes Mal neu eingegeben
+             * werden -> wenn leerer Wert gepostet wird aber in der DB einer
+             * steht den behalten und alles ist ok, nur wenn da keiner ist aber
+             * ein User angegeben wurde einen Fehler ausgeben? Irgendein hidden
+             * field einbauen in dem das alte PW mitgeschickt und ggf via JS
+             * ausgefüllt wird?
+             */
+            case 'httpNotificationPw':
+                //$spec['type'] = 'Zend\Form\Element\Password';
+                //$spec['attributes']['placeholder'] = '********';
+                break;
+
+            case 'httpNotificationsEnabled':
+                $spec['options']['description'] =
+                    $this->getTranslationString('httpNotificationsEnabled')
+                    .'.description';
+                break;
+
             case 'lastLogin':
                 // no break
             case 'lastSession':
@@ -154,6 +187,25 @@ class UserRepository extends EntityRepository
                         ],
                     ],
                 ];
+                break;
+
+            case 'httpNotificationPw':
+                //$spec['required']   = true;
+                //$spec['allowEmpty'] = false;
+                /*$spec['validators']['callback'] = [
+                    'name'                   => 'Zend\Validator\Callback',
+                    'break_chain_on_failure' => true,
+                    'options'                => [
+                        'messages' => [
+                            \Zend\Validator\Callback::INVALID_VALUE => $this->getTranslationString('httpNotification').'.incomplete',
+                        ],
+                        'callback' => function ($value, $context) {
+                var_dump(__METHOD__);
+                            return !(empty($value)
+                                xor empty($context['httpNotificationFalse']));
+                        },
+                    ],
+                ];*/
                 break;
 
             case 'username':
