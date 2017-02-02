@@ -2,7 +2,7 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
-## 4.0.0 - @todo
+## 4.0.0 - 2017-02-02
 ### Added
 - Vrok\Service\NotificationService that handles pushing/sending of notifications
   to the user
@@ -11,8 +11,8 @@ The project follows Semantic Versioning (http://semver.org/)
 - Vrok\Stdlib\ErrorHandler::shutdownHandler did not log all fatal errors
 
 ### Changed
-- reworked Vrok\Entity\Notification to now generate the messages itself, use
-  table inheritance for subclassing and differ between pullable/pushable/mailable
+- reworked Vrok\Entity\Notification to persist the notification text variants
+  that are created by formatters, @see Vrok\Notification\FormatterInterface
 - Vrok\Entity\User now has properties allowing the user to configure if he wants
   email notifications and to enable HTTP push notifications
 - moved getNotificationFilter & getNotificationRepository from UserManager to
