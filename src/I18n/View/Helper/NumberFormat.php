@@ -46,7 +46,7 @@ class NumberFormat extends ZendFormat
         if (null === $formatType) {
             $formatType = $this->getFormatType();
         }
-        if (!is_array($decimals) && $decimals < 0) {
+        if (!is_array($decimals) && (!is_int($decimals) || $decimals < 0)) {
             $decimals = $this->getDecimals();
         }
         if (!is_array($textAttributes)) {

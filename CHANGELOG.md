@@ -2,6 +2,14 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
+## 4.0.2 - @todo
+### Fixed
+- NumberFormat did not use preset decimals
+
+## 4.0.1 - 2017-02-02
+### Fixed
+- dependencies
+
 ## 4.0.0 - 2017-02-02
 ### Added
 - Vrok\Service\NotificationService that handles pushing/sending of notifications
