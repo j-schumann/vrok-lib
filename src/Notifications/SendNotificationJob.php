@@ -117,8 +117,6 @@ class SendNotificationJob extends AbstractJob
             'notification' => $notification->toArray(),
         ]));
 
-        $response = null; // else we would get a notice "undefined variable"
-                          // after the try when an exception was thrown
         try {
             $response = $client->send();
         }
@@ -127,9 +125,11 @@ class SendNotificationJob extends AbstractJob
                 'message' => 'message.notification.pushFailure',
                 'error'   => $e->getMessage(),
             ]);
+
+            return;
         }
 
-        if ($response && $response->getStatusCode() != 200) {
+        if ($response->getStatusCode() != 200) {
             $body = trim(strip_tags($response->getBody()), " \r\n");
             $this->createPushError($notification, [
                 'message' => 'message.notification.pushResponseFailure',
