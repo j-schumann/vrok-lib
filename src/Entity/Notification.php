@@ -92,7 +92,7 @@ class Notification extends Entity
      */
     public function getHtml() : string
     {
-        if (!$this->html) {
+        if (! $this->html) {
             return $this->getTextLong();
         }
 
@@ -195,7 +195,7 @@ class Notification extends Entity
      */
     public function getParams() : array
     {
-        if (!is_array($this->params)) {
+        if (! is_array($this->params)) {
             return [];
         }
 
@@ -327,7 +327,7 @@ class Notification extends Entity
      */
     public function getTextLong() : string
     {
-        if (!$this->textLong) {
+        if (! $this->textLong) {
             return $this->getTextShort();
         }
 

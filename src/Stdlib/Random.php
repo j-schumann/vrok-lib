@@ -112,11 +112,10 @@ class Random
         }
 
         $token = '';
+        // re-request bytes if our $length => $byteCount conversion was bad
         do {
             $token .= self::getRandomBytes($byteCount, $type);
-        }
-        // re-request bytes if our $length => $byteCount conversion was bad
-        while (strlen($token) < $length);
+        } while (strlen($token) < $length);
 
         return substr($token, 0, $length);
     }

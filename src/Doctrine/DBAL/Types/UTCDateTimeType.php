@@ -51,7 +51,7 @@ class UTCDateTimeType extends DateTimeType
 
         $val = \DateTime::createFromFormat($platform->getDateTimeFormatString(), $value, self::$utc);
 
-        if (!$val) {
+        if (! $val) {
             throw ConversionException::conversionFailed($value, $this->getName());
         }
 

@@ -30,11 +30,11 @@ class CalendarEntryFilter extends AbstractFilter
     public function byRange(\DateTime $startDate, \DateTime $endDate)
     {
         $this->qb->andWhere(
-                '('.$this->alias.'.startDate >= :startDate'
+            '('.$this->alias.'.startDate >= :startDate'
                 .' AND '.$this->alias.'.startDate <= :endDate'
                 .' OR '.$this->alias.'.endDate >= :startDate'
                 .' AND '.$this->alias.'.endDate <= :endDate)'
-            )
+        )
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate);
 

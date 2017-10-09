@@ -1,10 +1,17 @@
 <?php
 
+/**
+ * @copyright   (c) 2017, Vrok
+ * @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
+
 namespace VrokLibTest\Stdlib;
 
+use PHPUnit\Framework\TestCase;
 use Vrok\Stdlib\Random;
 
-class RandomTest extends \PHPUnit_Framework_TestCase
+class RandomTest extends TestCase
 {
     public function testReturnsPseudoRandomBytes()
     {

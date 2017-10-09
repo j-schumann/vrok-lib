@@ -9,7 +9,7 @@ use Zend\Stdlib\ArrayUtils;
 use RuntimeException;
 
 error_reporting(E_ALL | E_STRICT);
-chdir(__DIR__);
+define('APPLICATION_ENV', 'dev');
 
 class Bootstrap
 {
@@ -51,7 +51,9 @@ class Bootstrap
 
         $config = ArrayUtils::merge($baseConfig, $testConfig);
 
-        $serviceManager = new ServiceManager(new ServiceManagerConfig());
+        $smc = new ServiceManagerConfig();
+        $serviceManager = new ServiceManager();
+        $smc->configureServiceManager($serviceManager);
         $serviceManager->setService('ApplicationConfig', $config);
         $serviceManager->get('ModuleManager')->loadModules();
 
@@ -78,7 +80,7 @@ class Bootstrap
         } else {
             $zf2Path = getenv('ZF2_PATH') ?: (defined('ZF2_PATH') ? ZF2_PATH : (is_dir($vendorPath.'/ZF2/library') ? $vendorPath.'/ZF2/library' : false));
 
-            if (!$zf2Path) {
+            if (! $zf2Path) {
                 throw new RuntimeException('Unable to load ZF2. Run `php composer.phar install` or define a ZF2_PATH environment variable.');
             }
 
@@ -99,7 +101,7 @@ class Bootstrap
     {
         $dir         = __DIR__;
         $previousDir = '.';
-        while (!is_dir($dir.'/'.$path)) {
+        while (! is_dir($dir.'/'.$path)) {
             $dir = dirname($dir);
             if ($previousDir === $dir) {
                 return false;

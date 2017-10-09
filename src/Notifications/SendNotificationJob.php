@@ -52,9 +52,10 @@ class SendNotificationJob extends AbstractJob
         $payload = $this->getContent();
         $notification = $this->notificationService->getNotificationRepository()
                 ->find($payload['notificationId']);
-        if (!$notification) {
+        if (! $notification) {
             throw new \RuntimeException(
-                    'Item '.$payload['notificationId'].' not found!');
+                'Item '.$payload['notificationId'].' not found!'
+            );
         }
 
         $user = $notification->getUser();
@@ -95,7 +96,7 @@ class SendNotificationJob extends AbstractJob
         ];
 
         $user = $notification->getUser();
-        if (!$user->getHttpNotificationCertCheck()) {
+        if (! $user->getHttpNotificationCertCheck()) {
             $options['curloptions'][\CURLOPT_SSL_VERIFYPEER] = false;
             $options['curloptions'][\CURLOPT_SSL_VERIFYHOST] = false;
         }
@@ -119,8 +120,7 @@ class SendNotificationJob extends AbstractJob
 
         try {
             $response = $client->send();
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->createPushError($notification, [
                 'message' => 'message.notification.pushFailure',
                 'error'   => $e->getMessage(),
@@ -208,9 +208,15 @@ class SendNotificationJob extends AbstractJob
         $mail->addTo($user->getEmail(true), $user->getDisplayName());
 
         $htmlPart = $mail->getHtmlPart(
-                $formatter->getMailBodyHTML($notification), false, false);
+            $formatter->getMailBodyHTML($notification),
+            false,
+            false
+        );
         $textPart = $mail->getTextPart(
-                $formatter->getMailBodyText($notification), false, true);
+            $formatter->getMailBodyText($notification),
+            false,
+            true
+        );
         $mail->setAlternativeBody($textPart, $htmlPart);
 
         $this->emailService->sendMail($mail);

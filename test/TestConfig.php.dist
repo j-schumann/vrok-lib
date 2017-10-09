@@ -1,6 +1,7 @@
 <?php
 return array(
     'modules' => array(
+        'Zend\Router',
         'DoctrineModule',
         'DoctrineORMModule',
         'Vrok',

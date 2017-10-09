@@ -59,7 +59,7 @@ class Form extends ZendForm
         if ($data instanceof Traversable) {
             $data = ArrayUtils::iteratorToArray($data);
         }
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             throw new \Zend\Form\Exception\InvalidArgumentException(sprintf(
                 '%s expects an array or Traversable argument; received "%s"',
                 __METHOD__,
@@ -110,7 +110,7 @@ class Form extends ZendForm
      */
     protected function filterArrayData(ElementInterface $element, $data)
     {
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return $data;
         }
 
@@ -119,7 +119,7 @@ class Form extends ZendForm
             // Fieldsets are to be recursed
             foreach ($element->getIterator() as $child) {
                 $name = $child->getName();
-                if (!isset($data[$name])) {
+                if (! isset($data[$name])) {
                     continue;
                 }
                 $data[$name] = $this->filterArrayData($child, $data[$name]);

@@ -180,7 +180,7 @@ class EvalMath
             } // see if it can be converted to postfix
             for ($i = 0; $i < count($stack); ++$i) { // freeze the state of the non-argument variables
                 $token = $stack[$i];
-                if (preg_match('/^'.self::$namepat.'$/', $token) and !in_array($token, $args)) {
+                if (preg_match('/^'.self::$namepat.'$/', $token) and ! in_array($token, $args)) {
                     if (array_key_exists($token, $this->v)) {
                         $stack[$i] = $this->v[$token];
                     } else {
@@ -248,7 +248,7 @@ class EvalMath
             // find out if we're currently at the beginning of a number/variable/function/parenthesis/operand
             $ex = preg_match('/^('.self::$namepat.'\(?|\d+(?:\.\d*)?(?:(e[+-]?)\d*)?|\.\d+|\()/', substr($expr, $index), $match);
             //===============
-            if ($op == '-' and !$expecting_op) { // is it a negation instead of a minus?
+            if ($op == '-' and ! $expecting_op) { // is it a negation instead of a minus?
                 $stack->push('_'); // put a negation on the stack
                 ++$index;
             } elseif ($op == '_') { // we have to explicitly deny this, because it's legal on the stack
@@ -256,7 +256,7 @@ class EvalMath
             //===============
             } elseif ((in_array($op, $ops) or $ex) and $expecting_op) { // are we putting an operator on the stack?
                 if ($ex) { // are we expecting an operator but have a number/variable/function/opening parethesis?
-                    if (!$this->allowimplicitmultiplication) {
+                    if (! $this->allowimplicitmultiplication) {
                         return $this->trigger(get_string('implicitmultiplicationnotallowed', 'mathslib'));
                     } else {
                         // it's an implicit multiplication
@@ -297,7 +297,7 @@ class EvalMath
                     } elseif (array_key_exists($fnn, $this->fc)) {
                         $counts = $this->fc[$fnn];
                         if (in_array(-1, $counts) and $arg_count > 0) {
-                        } elseif (!in_array($arg_count, $counts)) {
+                        } elseif (! in_array($arg_count, $counts)) {
                             $a           = new stdClass();
                             $a->expected = implode('/', $this->fc[$fnn]);
                             $a->given    = $arg_count;
@@ -328,7 +328,7 @@ class EvalMath
                     } // pop the argument expression stuff and push onto the output
                 }
                 // make sure there was a function
-                if (!preg_match('/^('.self::$namepat.')\($/', $stack->last(2), $matches)) {
+                if (! preg_match('/^('.self::$namepat.')\($/', $stack->last(2), $matches)) {
                     return $this->trigger(get_string('unexpectedcomma', 'mathslib'));
                 }
                 $stack->push($stack->pop() + 1); // increment the argument count
@@ -336,12 +336,12 @@ class EvalMath
                 ++$index;
                 $expecting_op = false;
             //===============
-            } elseif ($op == '(' and !$expecting_op) {
+            } elseif ($op == '(' and ! $expecting_op) {
                 $stack->push('('); // that was easy
                 ++$index;
                 $allow_neg = true;
             //===============
-            } elseif ($ex and !$expecting_op) { // do we now have a function/variable/number?
+            } elseif ($ex and ! $expecting_op) { // do we now have a function/variable/number?
                 $expecting_op = true;
                 $val          = $match[1];
                 if (preg_match('/^('.self::$namepat.')\($/', $val, $matches)) { // may be func, or variable w/ implicit multiplication against parentheses...
@@ -370,7 +370,7 @@ class EvalMath
                     $fn     = $stack->pop();
                     $fnn    = $matches[1]; // get the function name
                     $counts = $this->fc[$fnn];
-                    if (!in_array(0, $counts)) {
+                    if (! in_array(0, $counts)) {
                         $a           = new stdClass();
                         $a->expected = $this->fc[$fnn];
                         $a->given    = 0;
@@ -384,7 +384,7 @@ class EvalMath
                     return $this->trigger(get_string('unexpectedclosingbracket', 'mathslib'));
                 }
             //===============
-            } elseif (in_array($op, $ops) and !$expecting_op) { // miscellaneous error checking
+            } elseif (in_array($op, $ops) and ! $expecting_op) { // miscellaneous error checking
                 return $this->trigger(get_string('unexpectedoperator', 'mathslib', $op));
             } else { // I don't even want to know what you did to get here
                 return $this->trigger(get_string('anunexpectederroroccured', 'mathslib'));
@@ -400,7 +400,7 @@ class EvalMath
                 ++$index;                             // into implicit multiplication if no operator is there)
             }
         }
-        while (!is_null($op = $stack->pop())) { // pop everything off the stack and push onto output
+        while (! is_null($op = $stack->pop())) { // pop everything off the stack and push onto output
             if ($op == '(') {
                 return $this->trigger(get_string('expectingaclosingbracket', 'mathslib'));
             } // if there are (s on the stack, ()s were unbalanced
@@ -467,18 +467,23 @@ class EvalMath
                 }
                 switch ($token) {
                     case '+':
-                        $stack->push($op1 + $op2); break;
+                        $stack->push($op1 + $op2);
+                        break;
                     case '-':
-                        $stack->push($op1 - $op2); break;
+                        $stack->push($op1 - $op2);
+                        break;
                     case '*':
-                        $stack->push($op1 * $op2); break;
+                        $stack->push($op1 * $op2);
+                        break;
                     case '/':
                         if ($op2 == 0) {
                             return $this->trigger(get_string('divisionbyzero', 'mathslib'));
                         }
-                        $stack->push($op1 / $op2); break;
+                        $stack->push($op1 / $op2);
+                        break;
                     case '^':
-                        $stack->push(pow($op1, $op2)); break;
+                        $stack->push(pow($op1, $op2));
+                        break;
                 }
             // if the token is a unary operator, pop one value off the stack, do the operation, and push it back on
             } elseif ($token == '_') {
@@ -508,7 +513,7 @@ class EvalMath
     public function trigger($msg)
     {
         $this->last_error = $msg;
-        if (!$this->suppress_errors) {
+        if (! $this->suppress_errors) {
             trigger_error($msg, E_USER_WARNING);
         }
 

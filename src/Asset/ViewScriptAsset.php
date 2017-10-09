@@ -50,9 +50,10 @@ class ViewScriptAsset extends BaseAsset
     public function getLastModified()
     {
         $realFile = $this->renderer->resolver($this->viewScript);
-        if (!is_file($realFile)) {
+        if (! is_file($realFile)) {
             throw new \RuntimeException(
-                    sprintf('The source file "%s" does not exist.', $realFile));
+                sprintf('The source file "%s" does not exist.', $realFile)
+            );
         }
 
         return filemtime($realFile);

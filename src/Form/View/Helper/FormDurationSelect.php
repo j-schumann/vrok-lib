@@ -48,7 +48,7 @@ class FormDurationSelect extends AbstractHelper
         ElementInterface $element = null,
         $pattern = '%hours% : %minutes%'
     ) {
-        if (!$element) {
+        if (! $element) {
             return $this;
         }
 
@@ -69,7 +69,7 @@ class FormDurationSelect extends AbstractHelper
      */
     public function render(ElementInterface $element)
     {
-        if (!$element instanceof DurationSelect) {
+        if (! $element instanceof DurationSelect) {
             throw new Exception\InvalidArgumentException(sprintf(
                 '%s requires that the element is of type Vrok\Form\Element\DurationSelect',
                 __METHOD__
@@ -98,10 +98,10 @@ class FormDurationSelect extends AbstractHelper
         }
 
         // ignore the pattern if only one element is shown
-        if (!$element->getShowHours()) {
+        if (! $element->getShowHours()) {
             return $selectHelper->render($minuteElement);
         }
-        if (!$element->getShowMinutes()) {
+        if (! $element->getShowMinutes()) {
             return $selectHelper->render($hourElement);
         }
 

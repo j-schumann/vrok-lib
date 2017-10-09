@@ -42,9 +42,9 @@ class ActionLogger
      * @param Info                           $clientInfo
      */
     public function __construct(
-            EntityManager $entityManager,
-            AuthenticationServiceInterface $authService,
-            Info $clientInfo
+        EntityManager $entityManager,
+        AuthenticationServiceInterface $authService,
+        Info $clientInfo
     ) {
         $this->entityManager = $entityManager;
         $this->authService   = $authService;

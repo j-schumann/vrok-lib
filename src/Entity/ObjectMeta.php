@@ -38,7 +38,7 @@ class ObjectMeta extends Entity implements HasReferenceInterface
      */
     public function getReference(\Doctrine\ORM\EntityManager $em)
     {
-        if (!$this->getReferenceClass() || !$this->getReferenceIdentifier()) {
+        if (! $this->getReferenceClass() || ! $this->getReferenceIdentifier()) {
             return;
         }
 

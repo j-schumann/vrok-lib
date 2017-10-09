@@ -51,7 +51,7 @@ abstract class Convert
      */
     public static function toIdna($value)
     {
-        if (!extension_loaded('intl')) {
+        if (! extension_loaded('intl')) {
             throw new RuntimeException('ext/intl required to convert to IDNA!');
         }
 

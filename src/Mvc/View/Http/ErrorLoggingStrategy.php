@@ -93,7 +93,7 @@ class ErrorLoggingStrategy extends AbstractListenerAggregate
             $message .= $exception->getTraceAsString();
         }
 
-        $environment = !empty($_SERVER['SERVER_ADDR'])
+        $environment = ! empty($_SERVER['SERVER_ADDR'])
             ? $_SERVER['SERVER_ADDR']
             : php_sapi_name();
         $month    = date('Y-m');

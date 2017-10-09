@@ -159,7 +159,7 @@ class Group extends Entity implements HierarchicalRoleInterface
      */
     public function removeMember(User $user)
     {
-        if (!$this->members->contains($user)) {
+        if (! $this->members->contains($user)) {
             return false;
         }
 

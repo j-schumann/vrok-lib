@@ -56,7 +56,7 @@ class Interval extends AbstractValidator
         // using our Interval form element
         if (isset($value['amount'])) {
             $amount = $value['amount'];
-            if (!is_numeric($amount) || (int) $amount != $amount || $amount <= 0) {
+            if (! is_numeric($amount) || (int) $amount != $amount || $amount <= 0) {
                 $this->error(self::INVALID_AMOUNT);
 
                 return false;

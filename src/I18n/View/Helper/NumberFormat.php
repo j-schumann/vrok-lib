@@ -35,7 +35,7 @@ class NumberFormat extends ZendFormat
         $formatType = null,
         $locale = null,
         $decimals = null,
-        array $textAttributes = NULL
+        array $textAttributes = null
     ) {
         if (null === $locale) {
             $locale = $this->getLocale();
@@ -46,10 +46,10 @@ class NumberFormat extends ZendFormat
         if (null === $formatType) {
             $formatType = $this->getFormatType();
         }
-        if (!is_array($decimals) && (!is_int($decimals) || $decimals < 0)) {
+        if (! is_array($decimals) && (! is_int($decimals) || $decimals < 0)) {
             $decimals = $this->getDecimals();
         }
-        if (!is_array($textAttributes)) {
+        if (! is_array($textAttributes)) {
             $textAttributes = $this->getTextAttributes();
         }
 
@@ -58,7 +58,7 @@ class NumberFormat extends ZendFormat
             . md5(serialize($textAttributes))
         );
 
-        if (!isset($this->formatters[$formatterId])) {
+        if (! isset($this->formatters[$formatterId])) {
             $formatter = new NumberFormatter($locale, $formatStyle);
 
             if ($decimals !== null) {

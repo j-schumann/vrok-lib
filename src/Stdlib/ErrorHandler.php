@@ -171,7 +171,7 @@ class ErrorHandler
 
         // do nothing if there was no error
         $err = error_get_last();
-        if (!$err || !in_array($err['type'], $fatals)) {
+        if (! $err || ! in_array($err['type'], $fatals)) {
             return;
         }
 
@@ -202,7 +202,7 @@ class ErrorHandler
      */
     protected function logMessage($message)
     {
-        $environment = !empty($_SERVER['SERVER_ADDR'])
+        $environment = ! empty($_SERVER['SERVER_ADDR'])
             ? $_SERVER['SERVER_ADDR']
             : php_sapi_name();
         $month    = date('Y-m');
@@ -228,13 +228,13 @@ class ErrorHandler
         }
 
         // prevent redirect loops
-        if (!empty($_SERVER['REQUEST_URI'])
+        if (! empty($_SERVER['REQUEST_URI'])
             && $_SERVER['REQUEST_URI'] === $this->redirectUrl
         ) {
             return;
         }
 
-        if (!headers_sent()) {
+        if (! headers_sent()) {
             header('Location: '.$this->redirectUrl);
         } else {
             // @todo auf XHR prüfen und ggf JSON zurückgeben

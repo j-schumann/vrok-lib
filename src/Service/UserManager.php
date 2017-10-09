@@ -191,7 +191,7 @@ class UserManager implements
         }
 
         $user = $validation->getReference($this->getEntityManager());
-        if (!$user) {
+        if (! $user) {
             return;
         }
         /* @var $user UserEntity */
@@ -233,7 +233,7 @@ class UserManager implements
         }
 
         $user = $validation->getReference($this->getEntityManager());
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -263,7 +263,7 @@ class UserManager implements
         // failsave, do not delete if meanwhile validated (e.g. validation
         // was not deleted or validated by admin)
         $user = $validation->getReference($this->getEntityManager());
-        if (!$user || $user->getIsValidated()) {
+        if (! $user || $user->getIsValidated()) {
             return;
         }
         /* @var $user UserEntity */
@@ -312,7 +312,7 @@ class UserManager implements
 
         $filter = $repository->getInputFilter();
         $filter->setData($data);
-        if (!$filter->isValid()) {
+        if (! $filter->isValid()) {
             return $filter->getMessages();
         }
 
@@ -370,7 +370,7 @@ class UserManager implements
     public function deleteAccount()
     {
         $user = $this->getCurrentUser();
-        if (!$user) {
+        if (! $user) {
             throw new Exception\RuntimeException('Not logged in!');
         }
 
@@ -488,7 +488,7 @@ class UserManager implements
     public function login($username, $password, $rememberMe = false)
     {
         $validator = $this->getAuthValidator();
-        if (!$validator->isValid($password, ['username' => $username])) {
+        if (! $validator->isValid($password, ['username' => $username])) {
             return $validator->getMessages();
         }
 
@@ -517,7 +517,7 @@ class UserManager implements
     public function logout($global = false)
     {
         $authService = $this->getAuthService();
-        if (!$authService->hasIdentity()) {
+        if (! $authService->hasIdentity()) {
             return false;
         }
 
@@ -549,12 +549,12 @@ class UserManager implements
      */
     public function checkAuthCookie()
     {
-        if (!$this->cookieLoginEnabled || $this->getCurrentUser()) {
+        if (! $this->cookieLoginEnabled || $this->getCurrentUser()) {
             return;
         }
 
         $credential = $this->getAuthCookie();
-        if (!$credential) {
+        if (! $credential) {
             return;
         }
 
@@ -614,8 +614,7 @@ class UserManager implements
             $current->setToken(\Vrok\Stdlib\Random::getRandomToken(64));
             $current->setUser($user);
             $em->persist($current);
-        }
-        // remaining entry is the current key
+        } // remaining entry is the current key
         else {
             $current = $keys[0];
         }
@@ -640,7 +639,7 @@ class UserManager implements
      */
     protected function getAuthCookie()
     {
-        if(empty($_COOKIE['authToken'])) {
+        if (empty($_COOKIE['authToken'])) {
             return null;
         }
 
@@ -661,7 +660,7 @@ class UserManager implements
      */
     protected function setAuthCookie(UserEntity $user)
     {
-        if(headers_sent()) {
+        if (headers_sent()) {
             return;
         }
 
@@ -690,7 +689,7 @@ class UserManager implements
      */
     protected function deleteAuthCookie()
     {
-        if(headers_sent()) {
+        if (headers_sent()) {
             return;
         }
 
@@ -828,7 +827,7 @@ class UserManager implements
             : $config['user_manager']['post_login_route'];
 
         $user = $this->getCurrentUser();
-        if (!$user) {
+        if (! $user) {
             return $route;
         }
 
@@ -1103,22 +1102,22 @@ class UserManager implements
      */
     public function setConfig($config)
     {
-        if (!empty($config['admin_route'])) {
+        if (! empty($config['admin_route'])) {
             $this->setUserAdminRoute($config['admin_route']);
         }
-        if (!empty($config['search_route'])) {
+        if (! empty($config['search_route'])) {
             $this->setUserAdminRoute($config['search_route']);
         }
-        if (!empty($config['loginkey_timeout'])) {
+        if (! empty($config['loginkey_timeout'])) {
             $this->setLoginKeyTimeout($config['loginkey_timeout']);
         }
-        if (!empty($config['cookie_domain'])) {
+        if (! empty($config['cookie_domain'])) {
             $this->setCookieDomain($config['cookie_domain']);
         }
-        if (!empty($config['cookielogin_enabled'])) {
+        if (! empty($config['cookielogin_enabled'])) {
             $this->setCookieLoginEnabled($config['cookielogin_enabled']);
         }
-        if (!empty($config['password_strength_thresholds'])) {
+        if (! empty($config['password_strength_thresholds'])) {
             $this->setPasswordStrengthThresholds($config['password_strength_thresholds']);
         }
     }

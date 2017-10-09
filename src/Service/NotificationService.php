@@ -24,8 +24,7 @@ use Zend\EventManager\ListenerAggregateTrait;
 /**
  * Formats and sends notifications for the user.
  */
-class NotificationService
-    implements EventManagerAwareInterface, ListenerAggregateInterface
+class NotificationService implements EventManagerAwareInterface, ListenerAggregateInterface
 {
     use EventManagerAwareTrait;
     use ListenerAggregateTrait;
@@ -79,7 +78,8 @@ class NotificationService
     {
         if (isset($config['http_notifications_enabled'])) {
             $this->setHttpNotificationsEnabled(
-                    (bool)$config['http_notifications_enabled']);
+                (bool)$config['http_notifications_enabled']
+            );
         }
     }
 
@@ -112,7 +112,7 @@ class NotificationService
 
         $this->listeners[] = $sharedEvents->attach(
             NotificationListener::class, // the prePersist event is triggered
-                // by the Listener instead of the entity class itself
+            // by the Listener instead of the entity class itself
             NotificationListener::EVENT_NOTIFICATION_PREPERSIST,
             [$this, 'onNotificationPrePersist'],
             $priority
@@ -120,7 +120,7 @@ class NotificationService
 
         $this->listeners[] = $sharedEvents->attach(
             NotificationListener::class, // the postPersist event is triggered
-                // by the Listener instead of the entity class itself
+            // by the Listener instead of the entity class itself
             NotificationListener::EVENT_NOTIFICATION_POSTPERSIST,
             [$this, 'onNotificationPostPersist'],
             $priority
@@ -157,7 +157,8 @@ class NotificationService
         }
 
         throw new Exception\RuntimeException(
-                'No notification formatter for type "'.$type.'" found!');
+            'No notification formatter for type "'.$type.'" found!'
+        );
     }
 
     /**

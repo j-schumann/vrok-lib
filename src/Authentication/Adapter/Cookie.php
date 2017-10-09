@@ -22,7 +22,7 @@ class Cookie extends Doctrine
      */
     public function authenticate()
     {
-        if (!is_array($this->credential) || count($this->credential) !== 3) {
+        if (! is_array($this->credential) || count($this->credential) !== 3) {
             return $this->getResult(self::MSG_INVALIDCREDENTIAL);
         }
 
@@ -30,15 +30,15 @@ class Cookie extends Doctrine
         $user = $repository->find((int)$this->credential[0]);
         /* @var $user UserEntity */
 
-        if (!$user) {
+        if (! $user) {
             return $this->getResult(self::MSG_IDENTITYNOTFOUND);
         }
 
-        if (!$user->getIsActive()) {
+        if (! $user->getIsActive()) {
             return $this->getResult(self::MSG_USERNOTACTIVE, $user->getId());
         }
 
-        if (!$user->getIsValidated()) {
+        if (! $user->getIsValidated()) {
             return $this->getResult(self::MSG_USERNOTVALIDATED, $user->getId());
         }
 
@@ -51,7 +51,7 @@ class Cookie extends Doctrine
 
         $found = null;
         $now = new DateTime();
-        foreach($user->getLoginKeys() as $loginKey) {
+        foreach ($user->getLoginKeys() as $loginKey) {
             if ($loginKey->getExpirationDate() <= $now) {
                 continue;
             }
@@ -64,7 +64,7 @@ class Cookie extends Doctrine
             }
         }
 
-        if (!$found) {
+        if (! $found) {
             return $this->getResult(self::MSG_INVALIDCREDENTIAL, $user->getId());
         }
 

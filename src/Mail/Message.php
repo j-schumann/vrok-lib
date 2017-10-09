@@ -72,8 +72,7 @@ class Message extends ZendMessage
     {
         return parent::setSubject($translate
             ? $this->translate($subject)
-            : $subject
-        );
+            : $subject);
     }
 
     /*
@@ -152,7 +151,7 @@ class Message extends ZendMessage
      */
     public function getTextPart($text, $translate = true, $appendSignature = true)
     {
-        if (!is_string($text) && !is_array($text)) {
+        if (! is_string($text) && ! is_array($text)) {
             throw new Exception\InvalidArgumentException('$text must be a string or array');
         }
 
@@ -183,7 +182,7 @@ class Message extends ZendMessage
      */
     public function getHtmlPart($html, $translate = true, $appendSignature = false)
     {
-        if (!is_string($html) && !is_array($html)) {
+        if (! is_string($html) && ! is_array($html)) {
             throw new InvalidArgumentException('$html must be a string or array');
         }
 

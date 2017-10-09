@@ -27,7 +27,7 @@ trait ObjectGuardTrait
         $dataName = 'Argument',
         $exceptionClass = 'Zend\Stdlib\Exception\InvalidArgumentException'
     ) {
-        if (!is_object($data)) {
+        if (! is_object($data)) {
             $message = sprintf(
                 '%s must be an object, [%s] given',
                 $dataName,

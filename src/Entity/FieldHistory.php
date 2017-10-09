@@ -56,7 +56,7 @@ class FieldHistory extends Entity implements HasReferenceInterface
      */
     public function getReference(\Doctrine\ORM\EntityManager $em)
     {
-        if (!$this->getReferenceClass() || !$this->getReferenceIdentifier()) {
+        if (! $this->getReferenceClass() || ! $this->getReferenceIdentifier()) {
             return;
         }
 
@@ -199,7 +199,7 @@ class FieldHistory extends Entity implements HasReferenceInterface
     {
         // the datatype for the history field is json array so NULL is returned as array
         // -> fix here, there is most probably no semantic difference
-        if (is_array($this->value) && !count($this->value)) {
+        if (is_array($this->value) && ! count($this->value)) {
             return;
         }
 

@@ -155,15 +155,15 @@ class Module implements
                     // @todo implement setOptions() and move the config check
                     // there
                     $config = $sm->get('Config');
-                    if (!empty($config['general'])
-                        && !empty($config['general']['log_dir'])
+                    if (! empty($config['general'])
+                        && ! empty($config['general']['log_dir'])
                     ) {
                         $s->setLogDir($config['general']['log_dir']);
                     }
 
                     return $s;
                 },
-                'Vrok\Notifications\DefaultFormatter' => function($sm) {
+                'Vrok\Notifications\DefaultFormatter' => function ($sm) {
                     $vhm = $sm->get('ViewHelperManager');
                     $formatter = new Notifications\DefaultFormatter($vhm);
                     return $formatter;
@@ -173,7 +173,7 @@ class Module implements
                     $service = new Service\Email($vhm);
 
                     $config = $sm->get('Config');
-                    if (!empty($config['email_service'])) {
+                    if (! empty($config['email_service'])) {
                         $service->setOptions($config['email_service']);
                     }
 
@@ -186,7 +186,7 @@ class Module implements
                     // @todo implement setOptions() and move the config check
                     // there
                     $config = $sm->get('Config');
-                    if (!empty($config['meta_service']['defaults'])) {
+                    if (! empty($config['meta_service']['defaults'])) {
                         $service->setDefaults($config['meta_service']['defaults']);
                     }
 
@@ -215,7 +215,7 @@ class Module implements
                     // @todo implement setOptions() and move the config check
                     // there
                     $config = $sm->get('Config');
-                    if (!empty($config['owner_service']['allowed_owners'])) {
+                    if (! empty($config['owner_service']['allowed_owners'])) {
                         $allowedOwners = $config['owner_service']['allowed_owners'];
                         $service->setAllowedOwners($allowedOwners);
                     }
@@ -231,7 +231,7 @@ class Module implements
                     // @todo implement setOptions() and move the config check
                     // there
                     $config = $sm->get('Config');
-                    if (!empty($config['todo_service']['timeouts'])) {
+                    if (! empty($config['todo_service']['timeouts'])) {
                         $service->setTimeouts($config['todo_service']['timeouts']);
                     }
 
@@ -241,7 +241,7 @@ class Module implements
                     $manager = new Service\UserManager($sm);
 
                     $config = $sm->get('Config');
-                    if (!empty($config['user_manager'])) {
+                    if (! empty($config['user_manager'])) {
                         $manager->setConfig($config['user_manager']);
                     }
 
@@ -256,7 +256,7 @@ class Module implements
                     // @todo implement setOptions() and move the config check
                     // there
                     $config = $sm->get('Config');
-                    if (!empty($config['validation_manager']['timeouts'])) {
+                    if (! empty($config['validation_manager']['timeouts'])) {
                         $manager->setTimeouts($config['validation_manager']['timeouts']);
                     }
 
@@ -330,7 +330,7 @@ class Module implements
             // @todo strategy nicht via event laden sondern über config?
             // @todo strategy als service einrichten?
             $classes = $e->getParam('classes');
-            if (!in_array('Vrok\Entity\User', $classes)) {
+            if (! in_array('Vrok\Entity\User', $classes)) {
                 return;
             }
 
@@ -348,7 +348,7 @@ class Module implements
         $em->getSharedManager()->attach(
             'Vrok\Service\NotificationService',
             'getNotificationFormatter',
-            function() use ($sm) {
+            function () use ($sm) {
                 return $sm->get(Notifications\DefaultFormatter::class);
             },
             -5000

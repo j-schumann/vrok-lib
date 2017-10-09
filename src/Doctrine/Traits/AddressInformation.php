@@ -22,7 +22,7 @@ trait AddressInformation
     {
         $address = '';
 
-        if (!$anonymous) {
+        if (! $anonymous) {
             $address = $this->street;
             if ($this->street && $this->houseNumber) {
                 $address .= ' '.$this->houseNumber;

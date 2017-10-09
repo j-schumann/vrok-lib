@@ -125,7 +125,7 @@ class Owner implements EventManagerAwareInterface
         }
 
         // check for exists or class_parents will trigger a warning
-        if (!class_exists($ownerClass)) {
+        if (! class_exists($ownerClass)) {
             if ($throwException) {
                 throw new Exception\RuntimeException("Class $ownerClass does not exist!");
             }
@@ -173,7 +173,7 @@ class Owner implements EventManagerAwareInterface
     public function isAllowedOwner(HasReferenceInterface $entity, EntityInterface $owner)
     {
         foreach ($this->allowedOwners as $entityClass => $owners) {
-            if (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass)) {
+            if (! $entity instanceof $entityClass && ! is_subclass_of($entity, $entityClass)) {
                 continue;
             }
 
@@ -210,7 +210,7 @@ class Owner implements EventManagerAwareInterface
      */
     public function addAllowedOwner($entityClass, $ownerClass)
     {
-        if (!isset($this->allowedOwners[$entityClass])) {
+        if (! isset($this->allowedOwners[$entityClass])) {
             $this->allowedOwners[$entityClass] = [];
         }
 

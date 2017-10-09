@@ -103,7 +103,7 @@ class UserFilter extends AbstractFilter
      */
     public function joinGroups()
     {
-        if (!$this->groupJoin) {
+        if (! $this->groupJoin) {
             $this->qb->join($this->alias.'.groups', 'g')->select($this->alias.', g');
             $this->groupJoin = true;
         }

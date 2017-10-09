@@ -265,7 +265,7 @@ class DateInterval extends BaseInterval
 
         $i = $this->getMinutes(false, self::OPTION_FULL);
         if ($i) {
-            if (!$h) {
+            if (! $h) {
                 $spec .= 'T';
             }
             $spec .= $i.'M';
@@ -273,7 +273,7 @@ class DateInterval extends BaseInterval
 
         $s = $this->getSeconds(false);
         if ($s) {
-            if (!$h && !$i) {
+            if (! $h && ! $i) {
                 $spec .= 'T';
             }
             $spec .= $s.'M';

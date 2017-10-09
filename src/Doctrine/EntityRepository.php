@@ -216,7 +216,7 @@ class EntityRepository extends DoctrineRepository implements InputFilterProvider
      */
     public function getFormHelper()
     {
-        if (!$this->formHelper) {
+        if (! $this->formHelper) {
             $this->formHelper = new FormHelper($this->_class, $this->getEntityManager());
         }
 

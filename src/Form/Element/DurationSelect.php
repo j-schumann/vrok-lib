@@ -339,10 +339,10 @@ class DurationSelect extends Select implements
     public function setValue($value)
     {
         if (is_array($value)) {
-            if (!isset($value['hours'])) {
+            if (! isset($value['hours'])) {
                 $value['hours'] = isset($value[0]) ? $value[0] : 0;
             }
-            if (!isset($value['minutes'])) {
+            if (! isset($value['minutes'])) {
                 $value['minutes'] = isset($value[1]) ? $value[1] : 0;
             }
         } elseif (is_null($value)) {
@@ -355,7 +355,8 @@ class DurationSelect extends Select implements
             ];
         } else {
             throw new InvalidArgumentException(
-                    $value.' is a invalid duration!');
+                $value.' is a invalid duration!'
+            );
         }
 
         $this->hourElement->setValue($value['hours']);
@@ -455,15 +456,15 @@ class DurationSelect extends Select implements
     public function validate($value)
     {
         if ($this->showHours
-            && (!isset($value['hours'])
-            || !in_array((int) $value['hours'], $this->getHourValueOptions()))
+            && (! isset($value['hours'])
+            || ! in_array((int) $value['hours'], $this->getHourValueOptions()))
         ) {
             return false;
         }
 
         if ($this->showMinutes
-            && (!isset($value['minutes'])
-            || !in_array((int) $value['minutes'], $this->getMinuteValueOptions()))
+            && (! isset($value['minutes'])
+            || ! in_array((int) $value['minutes'], $this->getMinuteValueOptions()))
         ) {
             return false;
         }

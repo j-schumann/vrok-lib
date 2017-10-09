@@ -49,7 +49,8 @@ class TodoFilter extends AbstractFilter
     {
         if (is_array($status)) {
             $this->qb->andWhere(
-                    $this->qb->expr()->in($this->alias.'.status', ':todoStatus'));
+                $this->qb->expr()->in($this->alias.'.status', ':todoStatus')
+            );
         } else {
             $this->qb->andWhere($this->alias.'.status = :todoStatus');
         }

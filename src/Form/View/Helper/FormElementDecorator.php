@@ -46,7 +46,7 @@ class FormElementDecorator extends AbstractHelper
     {
         $this->options = $options;
 
-        if (!$element) {
+        if (! $element) {
             return $this;
         }
 
@@ -64,7 +64,7 @@ class FormElementDecorator extends AbstractHelper
     {
         // unify elements, we also need the ID for the labels "for" attribute
         // and the container IDs
-        if (!$element->getAttribute('id')) {
+        if (! $element->getAttribute('id')) {
             $id = str_replace(['[', ']'], ['-', ''], $element->getName());
             $element->setAttribute('id', $id);
         }
@@ -72,7 +72,7 @@ class FormElementDecorator extends AbstractHelper
         $ph = $this->getPartialHelper();
 
         $partial = 'vrok/partials/form/element';
-        if (!empty($this->options['partial'])) {
+        if (! empty($this->options['partial'])) {
             $partial = $this->options['partial'];
         }
 
@@ -96,7 +96,7 @@ class FormElementDecorator extends AbstractHelper
             $this->partialHelper = $this->view->plugin('partial');
         }
 
-        if (!$this->partialHelper instanceof Partial) {
+        if (! $this->partialHelper instanceof Partial) {
             $this->partialHelper = new Partial();
             $this->partialHelper->setView($this->view);
         }

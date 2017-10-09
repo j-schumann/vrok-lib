@@ -72,7 +72,7 @@ class DateSelect extends AbstractFilter
      */
     public function filter($value)
     {
-        if (!is_array($value) || empty($value['year']) || empty($value['month'])
+        if (! is_array($value) || empty($value['year']) || empty($value['month'])
             || empty($value['day'])) {
             return;
         }

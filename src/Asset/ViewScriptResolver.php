@@ -82,7 +82,7 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
      */
     public function setMap($map)
     {
-        if (!is_array($map) && !$map instanceof Traversable) {
+        if (! is_array($map) && ! $map instanceof Traversable) {
             throw new Exception\InvalidArgumentException(sprintf(
                 '%s: expects an array or Traversable, received "%s"',
                 __METHOD__,
@@ -112,7 +112,7 @@ class ViewScriptResolver implements ResolverInterface, MimeResolverAwareInterfac
      */
     public function resolve($name)
     {
-        if (!isset($this->map[$name])) {
+        if (! isset($this->map[$name])) {
             return;
         }
 

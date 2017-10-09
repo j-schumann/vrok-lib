@@ -29,7 +29,7 @@ trait InstanceOfGuardTrait
         $dataName = 'Argument',
         $exceptionClass = 'Zend\Stdlib\Exception\InvalidArgumentException'
     ) {
-        if (!($data instanceof $className)) {
+        if (! ($data instanceof $className)) {
             $message = sprintf(
                 '%s must be an instance of %s, [%s] given',
                 $dataName,

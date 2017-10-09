@@ -51,25 +51,25 @@ class Doctrine extends AbstractAdapter
         $user = $repository->findOneBy(['username' => $this->identity]);
         /* @var $user UserEntity */
 
-        if (!$user) {
+        if (! $user) {
             // fallback to email address
             $user = $repository->findOneBy(['email' => $this->identity]);
-            if (!$user) {
+            if (! $user) {
                 return $this->getResult(self::MSG_IDENTITYNOTFOUND);
             }
         }
 
-        if (!$user->getIsActive()) {
+        if (! $user->getIsActive()) {
             return $this->getResult(self::MSG_USERNOTACTIVE, $user->getId());
         }
 
-        if (!$user->getIsValidated()) {
+        if (! $user->getIsValidated()) {
             return $this->getResult(self::MSG_USERNOTVALIDATED, $user->getId());
         }
 
         // @todo TempBans checken
 
-        if (!$user->checkPassword($this->credential)) {
+        if (! $user->checkPassword($this->credential)) {
             return $this->getResult(self::MSG_INVALIDCREDENTIAL, $user->getId());
         }
 
