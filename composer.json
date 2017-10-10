@@ -44,6 +44,11 @@
             "Vrok\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "VrokLibTest\\": "test/"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-dev": "5.0.x-dev",

@@ -2,7 +2,7 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
-# 5.0.0 - tbd
+## 5.0.0 - tbd
 ### Removed
 - Vrok\RandomLib\Source\Mcrypt - mcrypt is deprecated and removed with PHP 7.2
 
@@ -16,7 +16,7 @@ The project follows Semantic Versioning (http://semver.org/)
 
 ### Changed
 - updated ZF and other dependencies
-- do not automatically use deprecated RandomLib mcrypt source
+- replace RandomLib with random_bytes() in StdLib\Random
 - applied code style fixer
 - upgraded phpunit tests
 - NumberFormatterStrategy::hydrate now rounds values
