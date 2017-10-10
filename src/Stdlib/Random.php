@@ -8,9 +8,6 @@
 
 namespace Vrok\Stdlib;
 
-use RandomLib\Factory;
-use RandomLib\Generator;
-
 /**
  * Helper for generating random bytes / numbers, utilizes the RandomLib to
  * use multiple sources and mix them.
@@ -19,27 +16,6 @@ class Random
 {
     const OUTPUT_HEX   = 'hex';
     const OUTPUT_ALNUM = 'base62';
-
-    /**
-     * @var Generator
-     */
-    protected static $generator = null;
-
-    /**
-     * Retrieve the secure PRNG instance.
-     *
-     * @return Generator
-     */
-    protected static function getGenerator()
-    {
-        if (null !== static::$generator) {
-            return static::$generator;
-        }
-
-        $factory = new Factory();
-        static::$generator = $factory->getMediumStrengthGenerator();
-        return static::$generator;
-    }
 
     /**
      * Returns secure random bytes using the OS random source(s). If multiple
@@ -54,8 +30,7 @@ class Random
      */
     public static function getRandomBytes($byteCount, $outputType = null)
     {
-        $generator = self::getGenerator();
-        $result = $generator->generate($byteCount);
+        $result = random_bytes($byteCount);
 
         switch (strtolower($outputType)) {
             case null:
@@ -107,10 +82,11 @@ class Random
         }
 
         $token = '';
+
+        // re-request bytes if our $length => $byteCount conversion was bad
         do {
             $token .= self::getRandomBytes($byteCount, $type);
         }
-        // re-request bytes if our $length => $byteCount conversion was bad
         while (strlen($token) < $length);
 
         return substr($token, 0, $length);
