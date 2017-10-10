@@ -16,7 +16,7 @@ The project follows Semantic Versioning (http://semver.org/)
 
 ### Changed
 - updated ZF and other dependencies
-- do not automatically use deprecated RandomLib mcrypt source
+- replace RandomLib with random_bytes() in StdLib\Random
 - applied code style fixer
 - upgraded phpunit tests
 - NumberFormatterStrategy::hydrate now rounds values
