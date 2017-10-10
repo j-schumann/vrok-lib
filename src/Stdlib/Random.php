@@ -37,11 +37,6 @@ class Random
         }
 
         $factory = new Factory();
-
-        // register additional sources not available in RandomLib v1.2.0
-        // @todo check if implemented in a new version
-        $factory->registerSource('Mcrypt', 'Vrok\RandomLib\Source\Mcrypt');
-
         static::$generator = $factory->getMediumStrengthGenerator();
         return static::$generator;
     }
@@ -112,10 +107,11 @@ class Random
         }
 
         $token = '';
-        // re-request bytes if our $length => $byteCount conversion was bad
         do {
             $token .= self::getRandomBytes($byteCount, $type);
-        } while (strlen($token) < $length);
+        }
+        // re-request bytes if our $length => $byteCount conversion was bad
+        while (strlen($token) < $length);
 
         return substr($token, 0, $length);
     }

@@ -2,13 +2,28 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
-## 4.0.2 - @todo
+# 5.0.0 - tbd
+### Removed
+- Vrok\RandomLib\Source\Mcrypt - mcrypt is deprecated and removed with PHP 7.2
+
+## 4.1.0 - 2017-10-10
+### Added
+- Travis config
+- code style config
+
 ### Fixed
 - NumberFormat did not use preset decimals
 
+### Changed
+- updated ZF and other dependencies
+- do not automatically use deprecated RandomLib mcrypt source
+- applied code style fixer
+- upgraded phpunit tests
+- NumberFormatterStrategy::hydrate now rounds values
+
 ## 4.0.1 - 2017-02-02
 ### Fixed
-- dependencies
+- updated ZF and other dependencies
 
 ## 4.0.0 - 2017-02-02
 ### Added
