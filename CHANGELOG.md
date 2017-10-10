@@ -2,7 +2,7 @@
 
 The project follows Semantic Versioning (http://semver.org/)
 
-# 5.0.0 - tbd
+## 5.0.0 - tbd
 ### Removed
 - Vrok\RandomLib\Source\Mcrypt - mcrypt is deprecated and removed with PHP 7.2
 
