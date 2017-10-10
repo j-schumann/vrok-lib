@@ -1,14 +1,11 @@
 <?php
+// @codingStandardsIgnoreFile
 
 namespace VrokLibTest;
 
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
-
-error_reporting(E_ALL | E_STRICT);
-define('APPLICATION_ENV', 'dev');
-require __DIR__ . '/../vendor/autoload.php';
 
 class Bootstrap
 {
@@ -85,4 +82,6 @@ class Bootstrap
     }
 }
 
+error_reporting(E_ALL | E_STRICT);
+require __DIR__ . '/../vendor/autoload.php';
 Bootstrap::init();
