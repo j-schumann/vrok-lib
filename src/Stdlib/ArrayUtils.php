@@ -24,6 +24,7 @@ abstract class ArrayUtils
      *
      * @return array
      */
+    // @codingStandardsIgnoreLine
     public static function array_unshift_assoc(&$arr, $key, $val)
     {
         $arr       = array_reverse($arr, true);
@@ -40,6 +41,7 @@ abstract class ArrayUtils
      *
      * @return float
      */
+    // @codingStandardsIgnoreLine
     public static function array_average(array $array)
     {
         return count($array)
@@ -56,6 +58,7 @@ abstract class ArrayUtils
      *
      * @throws \DomainException if the array is empty
      */
+    // @codingStandardsIgnoreLine
     public static function array_median(array $array)
     {
         // @todo perhaps all non numeric values should filtered out of $array here?

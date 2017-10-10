@@ -8,6 +8,7 @@
 
 namespace Vrok\Entity;
 
+use DoctrineModule\Validator\UniqueObject;
 use Vrok\Doctrine\EntityRepository;
 
 /**
@@ -90,7 +91,8 @@ class GroupRepository extends EntityRepository
                         'fields'            => 'name',
                         'object_manager'    => $this->getEntityManager(),
                         'messages'          => [
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('name').'.notUnique',
+                            UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('name').'.notUnique',
                         ],
                     ],
                 ];

@@ -19,11 +19,22 @@ use Vrok\Doctrine\Entity;
  */
 class UserTodo extends Entity
 {
-    const STATUS_OPEN        = 'open';        // steht diesem Benutzer zur Übernahme/Erledigung zur Verfügung
-    const STATUS_ASSIGNED    = 'assigned';    // ist diesem Benutzer zugewiesen (evtl auch weiteren)
-    const STATUS_COMPLETED   = 'completed';   // ist für/durch diesen Benutzer erledigt
-    const STATUS_UNCONFIRMED = 'unconfirmed'; // Eine Statusänderung muss von diesem Benutzer noch zur Kenntnis genommen/bestätigt werden
-    const STATUS_CONFIRMED   = 'confirmed';   // Eine Statusänderung (durch einen anderen Nutzer) muss von diesem Nutzer noch zur Kenntnis genommen/bestätigt werden
+    // steht diesem Benutzer zur Übernahme/Erledigung zur Verfügung
+    const STATUS_OPEN        = 'open';
+
+    // ist diesem Benutzer zugewiesen (evtl auch weiteren)
+    const STATUS_ASSIGNED    = 'assigned';
+
+    // ist für/durch diesen Benutzer erledigt
+    const STATUS_COMPLETED   = 'completed';
+
+    // Eine Statusänderung muss von diesem Benutzer noch zur Kenntnis genommen/
+    // bestätigt werden
+    const STATUS_UNCONFIRMED = 'unconfirmed';
+
+    // Eine Statusänderung (durch einen anderen Nutzer) muss von diesem Nutzer
+    // noch zur Kenntnis genommen/bestätigt werden
+    const STATUS_CONFIRMED   = 'confirmed';
 
 // <editor-fold defaultstate="collapsed" desc="todo">
     /**

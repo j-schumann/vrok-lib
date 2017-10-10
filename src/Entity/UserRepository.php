@@ -8,6 +8,7 @@
 
 namespace Vrok\Entity;
 
+use DoctrineModule\Validator\UniqueObject;
 use Vrok\Doctrine\EntityRepository;
 
 /**
@@ -111,8 +112,10 @@ class UserRepository extends EntityRepository
                 $spec['validators']['stringLength']['options']['min']      = 3;
                 $spec['validators']['stringLength']['options']['messages'] =
                     [
-                        \Zend\Validator\StringLength::TOO_LONG  => $this->getTranslationString('displayName').'.tooLong',
-                        \Zend\Validator\StringLength::TOO_SHORT => $this->getTranslationString('displayName').'.tooShort',
+                        \Zend\Validator\StringLength::TOO_LONG  =>
+                            $this->getTranslationString('displayName').'.tooLong',
+                        \Zend\Validator\StringLength::TOO_SHORT =>
+                            $this->getTranslationString('displayName').'.tooShort',
                     ];
 
                 // a displayName may not be in use as email, username or
@@ -125,7 +128,8 @@ class UserRepository extends EntityRepository
                         'fields'            => 'username',
                         'object_manager'    => $this->getEntityManager(),
                         'messages'          => [
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('displayName').'.notUnique',
+                            UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('displayName').'.notUnique',
                         ],
                     ],
                 ];
@@ -137,7 +141,8 @@ class UserRepository extends EntityRepository
                         'fields'            => 'email',
                         'object_manager'    => $this->getEntityManager(),
                         'messages'          => [
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('displayName').'.notUnique',
+                            UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('displayName').'.notUnique',
                         ],
                     ],
                 ];
@@ -149,7 +154,8 @@ class UserRepository extends EntityRepository
                         'fields'            => 'displayName',
                         'object_manager'    => $this->getEntityManager(),
                         'messages'          => [
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('displayName').'.notUnique',
+                            UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('displayName').'.notUnique',
                         ],
                     ],
                 ];
@@ -162,7 +168,8 @@ class UserRepository extends EntityRepository
                 $spec['validators']['email'] =
                     $this->getFormHelper()->getEmailValidatorSpecification();
                 $spec['validators']['stringLength']['options']['messages'] =
-                    [\Zend\Validator\StringLength::TOO_LONG => $this->getTranslationString('email').'.tooLong'];
+                    [\Zend\Validator\StringLength::TOO_LONG =>
+                        $this->getTranslationString('email').'.tooLong'];
                 $spec['validators']['uniqueObject1'] = [
                     'name'    => 'DoctrineModule\Validator\UniqueObject',
                     'options' => [
@@ -171,7 +178,8 @@ class UserRepository extends EntityRepository
                         'fields'            => 'email',
                         'object_manager'    => $this->getEntityManager(),
                         'messages'          => [
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('email').'.notUnique',
+                            UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('email').'.notUnique',
                         ],
                     ],
                 ];
@@ -183,7 +191,8 @@ class UserRepository extends EntityRepository
                         'fields'            => 'username',
                         'object_manager'    => $this->getEntityManager(),
                         'messages'          => [
-                            \DoctrineModule\Validator\UniqueObject::ERROR_OBJECT_NOT_UNIQUE => $this->getTranslationString('email').'.notUnique',
+                            UniqueObject::ERROR_OBJECT_NOT_UNIQUE =>
+                                $this->getTranslationString('email').'.notUnique',
                         ],
                     ],
                 ];
@@ -197,7 +206,8 @@ class UserRepository extends EntityRepository
                     'break_chain_on_failure' => true,
                     'options'                => [
                         'messages' => [
-                            \Zend\Validator\Callback::INVALID_VALUE => $this->getTranslationString('httpNotification').'.incomplete',
+                            \Zend\Validator\Callback::INVALID_VALUE =>
+                               $this->getTranslationString('httpNotification').'.incomplete',
                         ],
                         'callback' => function ($value, $context) {
                 var_dump(__METHOD__);
