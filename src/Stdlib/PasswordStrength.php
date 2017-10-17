@@ -10,7 +10,7 @@ namespace Vrok\Stdlib;
 
 /**
  * Allows to calculate the strength of a password with a variant of a NIST
- * proposal developed by Thomas Hruska,.
+ * proposal developed by Thomas Hruska.
  *
  * @link http://en.wikipedia.org/wiki/Password_strength#NIST_Special_Publication_800-63
  * @link http://cubicspot.blogspot.de/2011/11/how-to-calculate-password-strength.html

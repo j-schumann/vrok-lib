@@ -8,8 +8,9 @@ The project follows Semantic Versioning (http://semver.org/)
 
 ## 4.2.0 - tbd
 ### Added
+- Vrok\Stdlib\FileUtils - open files, delete files and directories(recursively)
+- Vrok\Stdlib\StringUtils::slugify - create slugs from string input
 - Vrok\View\Helper\TexEscape - to escape string to be used in LaTeX documents
-- Vrok\StdLib\StringUtils::slugify - create slugs from string input
 
 ## 4.1.0 - 2017-10-10
 ### Added
@@ -21,7 +22,7 @@ The project follows Semantic Versioning (http://semver.org/)
 
 ### Changed
 - updated ZF and other dependencies
-- replace RandomLib with random_bytes() in StdLib\Random
+- replace RandomLib with random_bytes() in Stdlib\Random
 - applied code style fixer
 - upgraded phpunit tests
 - NumberFormatterStrategy::hydrate now rounds values

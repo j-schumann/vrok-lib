@@ -9,8 +9,7 @@
 namespace Vrok\Stdlib;
 
 /**
- * Helper for generating random bytes / numbers, utilizes the RandomLib to
- * use multiple sources and mix them.
+ * Helper for generating random bytes / numbers, utilizes random_bytes().
  */
 class Random
 {
@@ -18,8 +17,7 @@ class Random
     const OUTPUT_ALNUM = 'base62';
 
     /**
-     * Returns secure random bytes using the OS random source(s). If multiple
-     * sources are available they are mixed using XOR.
+     * Returns secure random bytes using random_bytes().
      *
      * @param int    $byteCount  the number of bytes to return
      * @param string $outputType one of the OUTPUT_* constants
