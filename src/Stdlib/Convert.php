@@ -27,12 +27,12 @@ abstract class Convert
      *
      * @link http://stackoverflow.com/a/3243949/1341762
      *
-     * @param type $instance
-     * @param type $className
+     * @param object $instance
+     * @param string $className
      *
-     * @return type
+     * @return object
      */
-    public static function objectToObject($instance, $className)
+    public static function objectToObject($instance, string $className)
     {
         return unserialize(sprintf(
             'O:%d:"%s"%s',
@@ -49,7 +49,7 @@ abstract class Convert
      * @return string
      * @throws RuntimeException if the intl extension is not installed
      */
-    public static function toIdna($value)
+    public static function toIdna(string $value) : string
     {
         if (! extension_loaded('intl')) {
             throw new RuntimeException('ext/intl required to convert to IDNA!');

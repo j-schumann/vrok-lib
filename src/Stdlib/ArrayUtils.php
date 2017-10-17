@@ -81,7 +81,7 @@ abstract class ArrayUtils
         return ($low + $high) / 2;
     }
 
-/**
+    /**
      * Removes the given value from the given array. If the value exists multiple times,
      * all instances are removed.
      *
