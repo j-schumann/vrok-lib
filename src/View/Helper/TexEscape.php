@@ -26,8 +26,10 @@ class TexEscape extends AbstractHelper
     {
         return str_replace(
             // backslash first to prevent double replace
-            array('\\',             '&',  '%',  '$',  '#',  '_',  '{',  '}',  '~',               '^',                "\n",   "\r"),
-            array('\textbackslash', '\&', '\%', '\$', '\#', '\_', '\{', '\}', '\textasciitilde', '\textasciicircum', '\\\\', ''),
+            ['\\',             '&',  '%',  '$',  '#',  '_',  '{',  '}',
+                '~',               '^',                "\n",   "\r"],
+            ['\textbackslash', '\&', '\%', '\$', '\#', '\_', '\{', '\}',
+                '\textasciitilde', '\textasciicircum', '\\\\', ''],
             $subject
         );
     }
