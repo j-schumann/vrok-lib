@@ -138,6 +138,7 @@ return [
         'aliases' => [
             'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
             'highlightText'  => 'Vrok\View\Helper\HighlightText',
+            'texEscape'      => 'Vrok\View\Helper\TexEscape',
 
             'currencyFormat'  => 'Vrok\I18n\View\Helper\CurrencyFormat',
             'durationFormat'  => 'Vrok\I18n\View\Helper\DurationFormat',
@@ -152,6 +153,7 @@ return [
         'factories' => [
             'Vrok\View\Helper\FlashMessenger' => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\View\Helper\HighlightText'  => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\View\Helper\TexEscape'      => 'Zend\ServiceManager\Factory\InvokableFactory',
 
             'Vrok\I18n\View\Helper\CurrencyFormat'  => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\I18n\View\Helper\DurationFormat'  => 'Zend\ServiceManager\Factory\InvokableFactory',

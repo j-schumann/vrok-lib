@@ -6,6 +6,11 @@ The project follows Semantic Versioning (http://semver.org/)
 ### Removed
 - Vrok\RandomLib\Source\Mcrypt - mcrypt is deprecated and removed with PHP 7.2
 
+## 4.2.0 - tbd
+### Added
+- Vrok\View\Helper\TexEscape - to escape string to be used in LaTeX documents
+- Vrok\StdLib\StringUtils::slugify - create slugs from string input
+
 ## 4.1.0 - 2017-10-10
 ### Added
 - Travis config
