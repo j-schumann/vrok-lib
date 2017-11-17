@@ -162,8 +162,7 @@ class Message extends ZendMessage
         /*string|array*/ $text,
         bool $translate = true,
         bool $appendSignature = true
-    ) : MimePart
-    {
+    ) : MimePart {
         if (! is_string($text) && ! is_array($text)) {
             throw new Exception\InvalidArgumentException('$text must be a string or array');
         }
@@ -197,8 +196,7 @@ class Message extends ZendMessage
         /*string|array*/ $html,
         bool $translate = true,
         bool $appendSignature = false
-    ) : MimePart
-    {
+    ) : MimePart {
         if (! is_string($html) && ! is_array($html)) {
             throw new InvalidArgumentException('$html must be a string or array');
         }
@@ -237,8 +235,7 @@ class Message extends ZendMessage
         string $filename,
         string $mimeType,
         string $customName = null
-    ) : MimePart
-    {
+    ) : MimePart {
         $attachment = new MimePart(fopen($filename, 'r'));
         $attachment->type = $mimeType;
         $attachment->encoding    = Mime::ENCODING_BASE64;
