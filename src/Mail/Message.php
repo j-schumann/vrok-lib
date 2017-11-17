@@ -8,10 +8,12 @@
 
 namespace Vrok\Mail;
 
+use Zend\I18n\View\Helper\Translate;
 use Zend\Mail\Message as ZendMessage;
 use Zend\Mime\Message as MimeMessage;
 use Zend\Mime\Mime;
 use Zend\Mime\Part as MimePart;
+use Zend\View\Helper\Partial;
 use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
@@ -64,12 +66,12 @@ class Message extends ZendMessage
      * Translates and sets the subject.
      *
      * @todo no typehint for subject to be compatible with Zend\Mail\Message
-     * @param string $subject
+     * @param string|array $subject
      * @param bool   $translate will try to translate the $html if true
      *
      * @return self
      */
-    public function setSubject(/*string*/ $subject, bool $translate = true)
+    public function setSubject(/*string|array*/ $subject, bool $translate = true)
     {
         return parent::setSubject($translate
             ? $this->translate($subject)
@@ -160,7 +162,8 @@ class Message extends ZendMessage
         /*string|array*/ $text,
         bool $translate = true,
         bool $appendSignature = true
-    ) {
+    ) : MimePart
+    {
         if (! is_string($text) && ! is_array($text)) {
             throw new Exception\InvalidArgumentException('$text must be a string or array');
         }
@@ -194,7 +197,8 @@ class Message extends ZendMessage
         /*string|array*/ $html,
         bool $translate = true,
         bool $appendSignature = false
-    ) {
+    ) : MimePart
+    {
         if (! is_string($html) && ! is_array($html)) {
             throw new InvalidArgumentException('$html must be a string or array');
         }
@@ -233,7 +237,8 @@ class Message extends ZendMessage
         string $filename,
         string $mimeType,
         string $customName = null
-    ) {
+    ) : MimePart
+    {
         $attachment = new MimePart(fopen($filename, 'r'));
         $attachment->type = $mimeType;
         $attachment->encoding    = Mime::ENCODING_BASE64;
@@ -254,7 +259,6 @@ class Message extends ZendMessage
     protected function translate(/*string|array*/ $message) : string
     {
         $translator = $this->getTranslateHelper();
-
         return $translator($message, $this->textDomain, $this->locale);
     }
 
@@ -302,7 +306,7 @@ class Message extends ZendMessage
      *
      * @return self
      */
-    public function setLayout(string $layout)
+    public function setLayout(string $layout) : self
     {
         $this->layout = $layout;
 
@@ -326,7 +330,7 @@ class Message extends ZendMessage
      *
      * @return self
      */
-    public function setLocale(string $locale)
+    public function setLocale(string $locale) : self
     {
         $this->locale = $locale;
 
@@ -338,7 +342,7 @@ class Message extends ZendMessage
      *
      * @return string
      */
-    public function getTextDomain()
+    public function getTextDomain() : string
     {
         return $this->textDomain;
     }
@@ -350,7 +354,7 @@ class Message extends ZendMessage
      *
      * @return self
      */
-    public function setTextDomain($textDomain)
+    public function setTextDomain(string $textDomain) : self
     {
         $this->textDomain = $textDomain;
 
@@ -358,17 +362,17 @@ class Message extends ZendMessage
     }
 
     /**
-     * @return \Zend\View\Helper\Partial
+     * @return Partial
      */
-    protected function getPartialHelper()
+    protected function getPartialHelper() : Partial
     {
         return $this->viewHelperManager->get('partial');
     }
 
     /**
-     * @return \Zend\I18n\View\Helper\Translate
+     * @return Translate
      */
-    protected function getTranslateHelper()
+    protected function getTranslateHelper() : Translate
     {
         return $this->viewHelperManager->get('translate');
     }
