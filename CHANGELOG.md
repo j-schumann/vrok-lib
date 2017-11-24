@@ -12,6 +12,10 @@ The project follows Semantic Versioning (http://semver.org/)
 - Vrok\Stdlib\StringUtils::slugify - create slugs from string input
 - Vrok\View\Helper\TexEscape - to escape string to be used in LaTeX documents
 
+### Fixed
+- additional untranslated message showed up for invalid emails with invalid
+  local name
+
 ## 4.1.0 - 2017-10-10
 ### Added
 - Travis config
