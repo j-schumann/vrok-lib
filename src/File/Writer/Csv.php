@@ -79,12 +79,12 @@ class Csv extends CsvFile
     protected function toFileDescriptor($resource)
     {
         // @todo use Guard
-        if (!is_resource($resource)) {
+        if (! is_resource($resource)) {
             throw new Exception\InvalidArgumentException('$resource is not valid!');
         }
 
         $header = $this->getHeader();
-        if (!count($header)) {
+        if (! count($header)) {
             return false;
         }
 
@@ -93,7 +93,7 @@ class Csv extends CsvFile
         }
 
         foreach ($this->data as $row) {
-            if (!is_array($row)) {
+            if (! is_array($row)) {
                 continue;
             }
 
@@ -128,11 +128,11 @@ class Csv extends CsvFile
             return $this->map;
         }
 
-        if (!count($this->data)) {
+        if (! count($this->data)) {
             return [];
         }
 
-        if (!is_array($this->data[0])) {
+        if (! is_array($this->data[0])) {
             return [];
         }
 

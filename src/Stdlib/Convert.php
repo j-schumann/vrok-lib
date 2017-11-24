@@ -8,6 +8,8 @@
 
 namespace Vrok\Stdlib;
 
+use DateTime;
+
 /**
  * Utility class for converting objects and types.
  *
@@ -25,12 +27,12 @@ abstract class Convert
      *
      * @link http://stackoverflow.com/a/3243949/1341762
      *
-     * @param type $instance
-     * @param type $className
+     * @param object $instance
+     * @param string $className
      *
-     * @return type
+     * @return object
      */
-    public static function objectToObject($instance, $className)
+    public static function objectToObject($instance, string $className)
     {
         return unserialize(sprintf(
             'O:%d:"%s"%s',
@@ -47,9 +49,9 @@ abstract class Convert
      * @return string
      * @throws RuntimeException if the intl extension is not installed
      */
-    public static function toIdna($value)
+    public static function toIdna(string $value) : string
     {
-        if (!extension_loaded('intl')) {
+        if (! extension_loaded('intl')) {
             throw new RuntimeException('ext/intl required to convert to IDNA!');
         }
 
@@ -75,5 +77,25 @@ abstract class Convert
             IDNA_NONTRANSITIONAL_TO_ASCII,
             INTL_IDNA_VARIANT_UTS46
         ) ?: $value;
+    }
+
+    /**
+     * Converts the given (unix) timestamp into a DateTime object.
+     * Can detect if milliseconds are used, they are stripped before creating
+     * the DateTime.
+     *
+     * @param string $timestamp
+     * @return DateTime|false
+     */
+    public static function timestampToDateTime(string $timestamp)
+    {
+        // detect milliseconds
+        // max seconds      =  99999999999 = 16 Nov 5138
+        // min milliseconds = 100000000000 = 03 Mar 1973
+        if (strlen($timestamp) >= 12) {
+            $timestamp = floor($timestamp / 1000);
+        }
+
+        return DateTime::createFromFormat('U', $timestamp);
     }
 }

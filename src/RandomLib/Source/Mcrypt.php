@@ -29,7 +29,7 @@ class Mcrypt implements Source
      */
     public function generate($size)
     {
-        if (!self::isSupported() || $size < 1) {
+        if (! self::isSupported() || $size < 1) {
             return str_repeat(chr(0), $size);
         }
 
@@ -41,6 +41,6 @@ class Mcrypt implements Source
     {
         // Don't use the mcrypt function on http://en.wikipedia.org/wiki/Phalanger
         // as /dev/[u]random is not available
-        return function_exists('mcrypt_create_iv') && !defined('PHALANGER');
+        return function_exists('mcrypt_create_iv') && ! defined('PHALANGER');
     }
 }

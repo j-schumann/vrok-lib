@@ -104,7 +104,7 @@ class Todo implements EventManagerAwareInterface
         User $creator = null
     ) {
         $classMeta = $this->entityManager->getClassMetadata('Vrok\Entity\AbstractTodo');
-        if (!isset($classMeta->discriminatorMap[$type])) {
+        if (! isset($classMeta->discriminatorMap[$type])) {
             throw new \RuntimeException('Requested Todo type '.$type.' not found!');
         }
 

@@ -44,8 +44,8 @@ class EntityListenerResolver extends DefaultEntityListenerResolver
 
     /**
      * Retrieve the requested entity listener.
-     * Checks the service locator for a service by the given name, if none found falls
-     * back to try instantiation of the name as class.
+     * Checks the service locator for a service by the given name, if none found
+     * falls back to try instantiation of the name as class.
      *
      * @param string $name
      *

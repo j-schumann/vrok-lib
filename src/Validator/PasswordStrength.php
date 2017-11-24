@@ -44,7 +44,7 @@ class PasswordStrength extends AbstractValidator
      */
     public function __construct($options = [])
     {
-        if (!is_array($options)) {
+        if (! is_array($options)) {
             $temp['threshold'] = array_shift(func_get_args());
             $options           = $temp;
         }
@@ -81,7 +81,7 @@ class PasswordStrength extends AbstractValidator
      */
     public function isValid($value)
     {
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             $this->error(self::INVALID);
 
             return false;

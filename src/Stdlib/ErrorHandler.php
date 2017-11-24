@@ -1,7 +1,7 @@
 <?php
 
 /*
- *  @copyright   (c) 2014-2015, Vrok
+ *  @copyright   (c) 2014-2016, Vrok
  *  @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
  *  @author      Jakob Schumann <schumann@vrok.de>
  */
@@ -112,7 +112,7 @@ class ErrorHandler
             : new Exception(''); // empty Exception just for the backtrace
 
         $errname = $this->errorLevels[$errno];
-        $message = "$errname in $errfile:$errline - $errstr\n";
+        $message = "\n$errname in $errfile:$errline - $errstr\n";
         if (isset($_SERVER['REQUEST_URI'])) {
             $message .= 'URI: '.$_SERVER['REQUEST_URI']."\n";
         }
@@ -166,9 +166,12 @@ class ErrorHandler
      */
     public function shutdownHandler()
     {
+        $fatals = [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING,
+            E_COMPILE_ERROR, E_COMPILE_WARNING];
+
         // do nothing if there was no error
         $err = error_get_last();
-        if (!$err || $err['type'] != E_ERROR) {
+        if (! $err || ! in_array($err['type'], $fatals)) {
             return;
         }
 
@@ -181,7 +184,7 @@ class ErrorHandler
 
         // there is no backtrace available in the shutdown_handler so we can
         // only get file and line number and eventually the URL
-        $message = 'Shutdown on E_ERROR in '.$err['file'].':'.$err['line'].' - '
+        $message = "\nShutdown on fatal ERROR in ".$err['file'].':'.$err['line'].' - '
             .$err['message'];
         if (isset($_SERVER['REQUEST_URI'])) {
             $message .= ' - URI: '.$_SERVER['REQUEST_URI'];
@@ -199,7 +202,7 @@ class ErrorHandler
      */
     protected function logMessage($message)
     {
-        $environment = isset($_SERVER['SERVER_ADDR'])
+        $environment = ! empty($_SERVER['SERVER_ADDR'])
             ? $_SERVER['SERVER_ADDR']
             : php_sapi_name();
         $month    = date('Y-m');
@@ -225,13 +228,13 @@ class ErrorHandler
         }
 
         // prevent redirect loops
-        if (!empty($_SERVER['REQUEST_URI'])
+        if (! empty($_SERVER['REQUEST_URI'])
             && $_SERVER['REQUEST_URI'] === $this->redirectUrl
         ) {
             return;
         }
 
-        if (!headers_sent()) {
+        if (! headers_sent()) {
             header('Location: '.$this->redirectUrl);
         } else {
             // @todo auf XHR prüfen und ggf JSON zurückgeben

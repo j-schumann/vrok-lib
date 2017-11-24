@@ -52,7 +52,7 @@ class FormDecorator extends AbstractHelper
      */
     public function __invoke(FormInterface $form)
     {
-        if (!$form) {
+        if (! $form) {
             return $this;
         }
 
@@ -105,7 +105,7 @@ class FormDecorator extends AbstractHelper
             $this->elementHelper = $this->view->plugin('formElementDecorator');
         }
 
-        if (!$this->elementHelper instanceof FormElementDecorator) {
+        if (! $this->elementHelper instanceof FormElementDecorator) {
             $this->elementHelper = new FormElementDecorator();
             $this->elementHelper->setView($this->view);
         }
@@ -135,7 +135,7 @@ class FormDecorator extends AbstractHelper
             $this->fieldsetHelper = $this->view->plugin('form_collection');
         }
 
-        if (!$this->fieldsetHelper instanceof FormCollection) {
+        if (! $this->fieldsetHelper instanceof FormCollection) {
             $this->fieldsetHelper = new FormCollection();
         }
 
@@ -166,7 +166,7 @@ class FormDecorator extends AbstractHelper
             $this->formHelper = $this->view->plugin('form');
         }
 
-        if (!$this->formHelper instanceof Form) {
+        if (! $this->formHelper instanceof Form) {
             $this->formHelper = new Form();
         }
 

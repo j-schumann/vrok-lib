@@ -8,10 +8,12 @@
 
 namespace Vrok\Mail;
 
+use Zend\I18n\View\Helper\Translate;
 use Zend\Mail\Message as ZendMessage;
 use Zend\Mime\Message as MimeMessage;
 use Zend\Mime\Mime;
 use Zend\Mime\Part as MimePart;
+use Zend\View\Helper\Partial;
 use Zend\View\HelperPluginManager as ViewHelperManager;
 
 /**
@@ -63,17 +65,17 @@ class Message extends ZendMessage
     /**
      * Translates and sets the subject.
      *
-     * @param string $subject
+     * @todo no typehint for subject to be compatible with Zend\Mail\Message
+     * @param string|array $subject
      * @param bool   $translate will try to translate the $html if true
      *
      * @return self
      */
-    public function setSubject($subject, $translate = true)
+    public function setSubject(/*string|array*/ $subject, bool $translate = true)
     {
         return parent::setSubject($translate
             ? $this->translate($subject)
-            : $subject
-        );
+            : $subject);
     }
 
     /*
@@ -86,8 +88,11 @@ class Message extends ZendMessage
      * @param bool $translate   will try to translate the $html if true
      * @return self
      */
-    public function setTextBody($text, $appendSignature = true, $translate = true)
-    {
+    public function setTextBody(
+        /*string|array*/ $text,
+        bool $appendSignature = true,
+        bool $translate = true
+    ) {
         $part = $this->getTextPart($text, $translate, $appendSignature);
 
         $message = new MimeMessage();
@@ -106,8 +111,11 @@ class Message extends ZendMessage
      * @param bool $appendSignature
      * @return self
      */
-    public function setHtmlBody($html, $translate = true, $appendSignature = false)
-    {
+    public function setHtmlBody(
+        /*string|array*/ $html,
+        bool $translate = true,
+        bool $appendSignature = false
+    ) {
         $part = $this->getHtmlPart($html, $translate, $appendSignature);
 
         $message = new MimeMessage();
@@ -150,9 +158,12 @@ class Message extends ZendMessage
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function getTextPart($text, $translate = true, $appendSignature = true)
-    {
-        if (!is_string($text) && !is_array($text)) {
+    public function getTextPart(
+        /*string|array*/ $text,
+        bool $translate = true,
+        bool $appendSignature = true
+    ) : MimePart {
+        if (! is_string($text) && ! is_array($text)) {
             throw new Exception\InvalidArgumentException('$text must be a string or array');
         }
 
@@ -181,9 +192,12 @@ class Message extends ZendMessage
      *
      * @throws InvalidArgumentException
      */
-    public function getHtmlPart($html, $translate = true, $appendSignature = false)
-    {
-        if (!is_string($html) && !is_array($html)) {
+    public function getHtmlPart(
+        /*string|array*/ $html,
+        bool $translate = true,
+        bool $appendSignature = false
+    ) : MimePart {
+        if (! is_string($html) && ! is_array($html)) {
             throw new InvalidArgumentException('$html must be a string or array');
         }
 
@@ -210,6 +224,28 @@ class Message extends ZendMessage
     }
 
     /**
+     * Create a mimePart with the given file.
+     *
+     * @param string $filename
+     * @param string $mimeType
+     *
+     * @return MimePart
+     */
+    public function getAttachmentPart(
+        string $filename,
+        string $mimeType,
+        string $customName = null
+    ) : MimePart {
+        $attachment = new MimePart(fopen($filename, 'r'));
+        $attachment->type = $mimeType;
+        $attachment->encoding    = Mime::ENCODING_BASE64;
+        $attachment->disposition = Mime::DISPOSITION_ATTACHMENT;
+        $attachment->filename = $customName ?: basename($filename);
+
+        return $attachment;
+    }
+
+    /**
      * Translates the given message, replacing placeholders with the given
      * parameters.
      *
@@ -217,10 +253,9 @@ class Message extends ZendMessage
      *
      * @return string
      */
-    protected function translate($message)
+    protected function translate(/*string|array*/ $message) : string
     {
         $translator = $this->getTranslateHelper();
-
         return $translator($message, $this->textDomain, $this->locale);
     }
 
@@ -231,7 +266,7 @@ class Message extends ZendMessage
      *
      * @return string
      */
-    public function getSignature($type = 'text')
+    public function getSignature(string $type = 'text') : string
     {
         switch ($type) {
             case 'html':
@@ -256,7 +291,7 @@ class Message extends ZendMessage
      *
      * @return string
      */
-    public function getLayout()
+    public function getLayout() : string
     {
         return $this->layout;
     }
@@ -268,7 +303,7 @@ class Message extends ZendMessage
      *
      * @return self
      */
-    public function setLayout($layout)
+    public function setLayout(string $layout) : self
     {
         $this->layout = $layout;
 
@@ -280,7 +315,7 @@ class Message extends ZendMessage
      *
      * @return string
      */
-    public function getLocale()
+    public function getLocale() : string
     {
         return $this->locale;
     }
@@ -292,7 +327,7 @@ class Message extends ZendMessage
      *
      * @return self
      */
-    public function setLocale($locale)
+    public function setLocale(string $locale) : self
     {
         $this->locale = $locale;
 
@@ -304,7 +339,7 @@ class Message extends ZendMessage
      *
      * @return string
      */
-    public function getTextDomain()
+    public function getTextDomain() : string
     {
         return $this->textDomain;
     }
@@ -316,7 +351,7 @@ class Message extends ZendMessage
      *
      * @return self
      */
-    public function setTextDomain($textDomain)
+    public function setTextDomain(string $textDomain) : self
     {
         $this->textDomain = $textDomain;
 
@@ -324,17 +359,17 @@ class Message extends ZendMessage
     }
 
     /**
-     * @return \Zend\View\Helper\Partial
+     * @return Partial
      */
-    protected function getPartialHelper()
+    protected function getPartialHelper() : Partial
     {
         return $this->viewHelperManager->get('partial');
     }
 
     /**
-     * @return \Zend\I18n\View\Helper\Translate
+     * @return Translate
      */
-    protected function getTranslateHelper()
+    protected function getTranslateHelper() : Translate
     {
         return $this->viewHelperManager->get('translate');
     }

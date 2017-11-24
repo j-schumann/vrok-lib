@@ -117,7 +117,7 @@ class Meta
      */
     public function getValue($name, $decode = true, $skipInternal = false)
     {
-        if (!$skipInternal && isset($this->internalCache[$name])) {
+        if (! $skipInternal && isset($this->internalCache[$name])) {
             $value = $this->internalCache[$name];
 
             return $decode ? json_decode($value, true) : $value;
@@ -143,13 +143,13 @@ class Meta
      */
     public function setValue($name, $value, $encoded = false)
     {
-        if (!$encoded) {
+        if (! $encoded) {
             $value = json_encode($value);
         }
 
         $sr = $this->getSystemRepository();
         $sm = $sr->find($name);
-        if (!$sm) {
+        if (! $sm) {
             $sm = new SystemMeta($name);
             $this->entityManager->persist($sm);
         }
@@ -180,7 +180,7 @@ class Meta
         $class          = get_class($entity);
         $jsonIdentifier = json_encode($entity->getIdentifiers($this->entityManager));
 
-        if (!$skipInternal && isset($this->internalCache[$class][$jsonIdentifier][$name])) {
+        if (! $skipInternal && isset($this->internalCache[$class][$jsonIdentifier][$name])) {
             $value = $this->internalCache[$class][$jsonIdentifier][$name];
 
             return $decode ? json_decode($value, true) : $value;
@@ -215,7 +215,7 @@ class Meta
         $class          = get_class($entity);
         $jsonIdentifier = json_encode($entity->getIdentifiers($this->entityManager));
 
-        if (!$encoded) {
+        if (! $encoded) {
             $value = json_encode($value);
         }
 
@@ -224,7 +224,7 @@ class Meta
         $filter->byName($name);
         $om = $filter->getQuery()->getOneOrNullResult();
 
-        if (!$om) {
+        if (! $om) {
             $om = new ObjectMeta();
             $om->setReference($this->entityManager, $entity);
             $om->setName($name);

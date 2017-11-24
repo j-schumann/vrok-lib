@@ -56,14 +56,16 @@ class Csv extends CsvFile
      */
     public function __construct($filename)
     {
-        if (!is_string($filename) || !strlen($filename)) {
+        if (! is_string($filename) || ! strlen($filename)) {
             throw new Exception\InvalidArgumentException(
-                "Given file name is invalid or empty: '$filename'");
+                "Given file name is invalid or empty: '$filename'"
+            );
         }
 
-        if (!file_exists($filename) || !is_readable($filename)) {
+        if (! file_exists($filename) || ! is_readable($filename)) {
             throw new Exception\RuntimeException(
-                "CSV file for parsing doesn't exist or is not readable: '$filename'");
+                "CSV file for parsing doesn't exist or is not readable: '$filename'"
+            );
         }
 
         $this->filename = $filename;
@@ -85,8 +87,13 @@ class Csv extends CsvFile
         $this->file = fopen($this->filename, 'r');
         $lineCount  = 0;
 
-        while (($line = fgetcsv($this->file, 0, $this->delimiter, $this->enclosure,
-            $this->escape)) !== false) {
+        while (($line = fgetcsv(
+            $this->file,
+            0,
+            $this->delimiter,
+            $this->enclosure,
+            $this->escape
+        )) !== false) {
             if ($lineCount++ == 0) {
                 $line[0] = StringUtils::removeBOM($line[0]);
                 $this->setHeader($line);
@@ -120,7 +127,7 @@ class Csv extends CsvFile
     protected function setHeader(array $line = null)
     {
         // The CSV file has no header => simply use the map as header
-        if (!$this->hasHeader || !$line) {
+        if (! $this->hasHeader || ! $line) {
             $this->header = $this->map;
 
             return;
@@ -129,7 +136,7 @@ class Csv extends CsvFile
         $this->header = $line;
 
         // CSV Header set but no map found => all done
-        if (!count($this->map)) {
+        if (! count($this->map)) {
             return;
         }
 
@@ -155,7 +162,7 @@ class Csv extends CsvFile
 
             // if we only use mapped values we check if the assigned index is also
             // within the map, else we skip this column
-            if ($this->mappedOnly && !in_array($index, $this->map)) {
+            if ($this->mappedOnly && ! in_array($index, $this->map)) {
                 continue;
             }
 

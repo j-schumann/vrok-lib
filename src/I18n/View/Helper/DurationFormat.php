@@ -41,7 +41,7 @@ class DurationFormat extends AbstractTranslatorHelper
      */
     public function __invoke($value = null, array $options = [], $locale = null)
     {
-        if (!$value) {
+        if (! $value) {
             return $this;
         }
 
@@ -91,7 +91,7 @@ class DurationFormat extends AbstractTranslatorHelper
             $value = VrokInterval::fromArray($value);
         }
 
-        if (!$value instanceof VrokInterval) {
+        if (! $value instanceof VrokInterval) {
             if ($value instanceof DateInterval) {
                 $value = VrokInterval::convert($value);
             } else {
@@ -121,31 +121,31 @@ class DurationFormat extends AbstractTranslatorHelper
             ? $value->getYears($fullYearsOnly ? 'full' : 'round')
             : 0;
 
-        $allMonths      = !$showYears;
+        $allMonths      = ! $showYears;
         $fullMonthsOnly = $showDays || $showHours || $showMinutes || showSeconds;
         $m              = $showMonths
             ? $value->getMonths($allMonths, $fullMonthsOnly ? 'full' : 'round')
             : 0;
 
-        $allDays      = !$showYears && !$showMonths;
+        $allDays      = ! $showYears && ! $showMonths;
         $fullDaysOnly = $showHours || $showMinutes || showSeconds;
         $d            = $showDays
             ? $value->getDays($allDays, $fullDaysOnly ? 'full' : 'round')
             : 0;
 
-        $allHours      = !$showYears && !$showMonths && !$showDays;
+        $allHours      = ! $showYears && ! $showMonths && ! $showDays;
         $fullHoursOnly = $showMinutes || showSeconds;
         $h             = $showHours
             ? $value->getHours($allHours, $fullHoursOnly ? 'full' : 'round')
             : 0;
 
-        $allMinutes      = !$showYears && !$showMonths && !$showDays && !$showHours;
+        $allMinutes      = ! $showYears && ! $showMonths && ! $showDays && ! $showHours;
         $fullMinutesOnly = $showSeconds;
         $i               = $showMinutes
             ? $value->getMinutes($allMinutes, $fullMinutesOnly ? 'full' : 'round')
             : 0;
 
-        $allSeconds = !$showYears && !$showMonths && !$showDays && !$showHours && !$showMinutes;
+        $allSeconds = ! $showYears && ! $showMonths && ! $showDays && ! $showHours && ! $showMinutes;
         $s          = $showSeconds
             ? $value->getSeconds($allSeconds, 'full')
             : 0;
@@ -176,7 +176,7 @@ class DurationFormat extends AbstractTranslatorHelper
         }
 
         // show "0 seconds" if nothing else would be displayed
-        if ($s || !$string) {
+        if ($s || ! $string) {
             $string .= ', '.$s.' '.$this->translate(['second', 'seconds'], $s);
         }
 

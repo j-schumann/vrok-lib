@@ -62,6 +62,15 @@ class NumberFormatterStrategy implements StrategyInterface
      */
     public function hydrate($value)
     {
-        return $this->parser->filter($value);
+        $result = $this->parser->filter($value);
+
+        // re-use the formatters decimals here.
+        // For cases where the database allows more decimals but we want to
+        // restrict them anyways
+        if (is_int($this->formatter->getDecimals())) {
+            $result = round($result, $this->formatter->getDecimals());
+        }
+
+        return $result;
     }
 }

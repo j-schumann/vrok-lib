@@ -49,7 +49,8 @@ class Translator extends ZendTranslator
         $translation = $this->getTranslatedMessage($message, $locale, $textDomain);
 
         // the original code checked for $translation !== '',
-        // for us an empty string is perfectly valid
+        // for us an empty string is perfectly valid, maybe we don't want to
+        // show some texts in some languages.
         if ($translation !== null) {
             // additionally replace the parameters in the message, we don't
             // want to implement this functionality in all view helpers etc
@@ -84,7 +85,7 @@ class Translator extends ZendTranslator
      */
     protected function loadMessages($textDomain, $locale)
     {
-        if (!isset($this->messages[$textDomain])) {
+        if (! isset($this->messages[$textDomain])) {
             $this->messages[$textDomain] = [];
         }
 
@@ -107,25 +108,28 @@ class Translator extends ZendTranslator
         // one of the default loaders, e.g. because it uses multiple files per
         // locale.
         // We also need to ensure our translations get loaded after all module
-        // default translations so instead of implementing a new function
+        // default translations, so instead of implementing a new function
         // "loadMessagesCustom" and to be as open as possible we use a new event
         // for this use case.
         if ($this->isEventManagerEnabled()) {
             $results = $this->getEventManager()->trigger(
-                self::EVENT_LOAD_MESSAGES, $this, [
+                self::EVENT_LOAD_MESSAGES,
+                $this,
+                [
                     'locale'     => $locale,
                     'textDomain' => $textDomain,
-            ]);
+                ]
+            );
 
             // no listener should stop the event: if the event is stopped all
             // previous messages in the results are ignored
-            if (!$results->stopped()) {
+            if (! $results->stopped()) {
                 $messagesLoaded |=
                     $this->addTextDomains($results, $textDomain, $locale);
             }
         }
 
-        if (!$messagesLoaded) {
+        if (! $messagesLoaded) {
             // ZF would normally set NULL here but this causes isset() to fail
             // in getTranslatedMessage() and to trigger loadMessages() again
             // for each single message so we use an empty TextDomain here to
@@ -169,12 +173,12 @@ class Translator extends ZendTranslator
      */
     public function getTextDomain($textDomain, $locale = null)
     {
-        if (!isset($this->messages[$textDomain])) {
+        if (! isset($this->messages[$textDomain])) {
             $this->messages[$textDomain] = [];
         }
         $locale = $locale ?: $this->getLocale();
 
-        if (!isset($this->messages[$textDomain][$locale])) {
+        if (! isset($this->messages[$textDomain][$locale])) {
             $this->loadMessages($textDomain, $locale);
         }
 
@@ -220,7 +224,7 @@ class Translator extends ZendTranslator
      */
     public function addTextDomain(TextDomain $textDomain, $domainName, $locale)
     {
-        if (!isset($this->messages[$domainName])) {
+        if (! isset($this->messages[$domainName])) {
             $this->messages[$domainName] = [];
         }
 

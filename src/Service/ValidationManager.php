@@ -139,7 +139,7 @@ class ValidationManager implements EventManagerAwareInterface
     public function confirmValidation($id, $token)
     {
         $validation = $this->getValidationRepository()->find($id);
-        if (!$validation) {
+        if (! $validation) {
             $this->triggerFail();
 
             return false;
@@ -210,7 +210,7 @@ class ValidationManager implements EventManagerAwareInterface
     public function getConfirmationUrl(ValidationEntity $validation = null)
     {
         $url = $this->viewHelperManager->get('url');
-        if (!$validation) {
+        if (! $validation) {
             return $url($this->confirmationRoute);
         }
 
@@ -275,7 +275,7 @@ class ValidationManager implements EventManagerAwareInterface
      */
     protected function removeIfExpired(ValidationEntity $validation)
     {
-        if (!$this->isExpiredValidation($validation)) {
+        if (! $this->isExpiredValidation($validation)) {
             return false;
         }
 
@@ -303,7 +303,7 @@ class ValidationManager implements EventManagerAwareInterface
     public function isExpiredValidation(ValidationEntity $validation)
     {
         $timeout = $this->getTimeout($validation->getType());
-        if (!$timeout) {
+        if (! $timeout) {
             return false;
         }
 

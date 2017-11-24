@@ -36,7 +36,7 @@ trait SharedFunctions
     {
         return $this->entityManager;
     }
-    
+
     /**
      * Sets the EM instance to use.
      *

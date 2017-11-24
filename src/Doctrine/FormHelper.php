@@ -70,7 +70,7 @@ class FormHelper implements InputFilterProviderInterface
             return $this->getAssociationElement($fieldName);
         }
 
-        if (!$this->metadata->hasField($fieldName)) {
+        if (! $this->metadata->hasField($fieldName)) {
             throw \Doctrine\ORM\ORMException::unrecognizedField($fieldName);
         }
 
@@ -97,7 +97,7 @@ class FormHelper implements InputFilterProviderInterface
                 $definition['options']['year_attributes'] = [
                     'class' => 'dateselect-year',
                 ];
-                if (!$this->elementIsRequired($mapping)) {
+                if (! $this->elementIsRequired($mapping)) {
                     $definition['options']['create_empty_option'] = true;
                 }
                 break;
@@ -242,7 +242,9 @@ class FormHelper implements InputFilterProviderInterface
     protected function getLabel($fieldName)
     {
         return Common::getEntityTranslationString(
-                $this->metadata->getName(), $fieldName).'.label';
+            $this->metadata->getName(),
+            $fieldName
+        ).'.label';
     }
 
     /**
@@ -349,7 +351,7 @@ class FormHelper implements InputFilterProviderInterface
         $spec = [
             'name'       => $associationName,
             'required'   => $required,
-            'allowEmpty' => !$required,
+            'allowEmpty' => ! $required,
             'filters'    => [
                 'null' => [
                     'name'    => 'Zend\Filter\ToNull',
@@ -503,7 +505,7 @@ class FormHelper implements InputFilterProviderInterface
         }
 
         return $mapping['nullable'] === false
-                && !isset($mapping['options']['default']);
+                && ! isset($mapping['options']['default']);
     }
 
     /**

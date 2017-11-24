@@ -32,10 +32,16 @@ class HighlightText extends AbstractHelper
     public function __invoke($subject, $pattern, $caseSensitive = false)
     {
         return $caseSensitive
-            ? str_replace($pattern,
-                    $this->openString.$pattern.$this->closeString, $subject)
-            : preg_replace("/".preg_quote($pattern)."/i",
-                    $this->openString."\$0".$this->closeString, $subject);
+            ? str_replace(
+                $pattern,
+                $this->openString.$pattern.$this->closeString,
+                $subject
+            )
+            : preg_replace(
+                "/".preg_quote($pattern)."/i",
+                $this->openString."\$0".$this->closeString,
+                $subject
+            );
     }
 
     /**

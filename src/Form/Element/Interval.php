@@ -204,10 +204,10 @@ class Interval extends Element implements
             }
         }
         if (is_array($value)) {
-            if (!isset($value['amount'])) {
+            if (! isset($value['amount'])) {
                 $value['amount'] = isset($value[0]) ? $value[0] : '';
             }
-            if (!isset($value['intervaltype'])) {
+            if (! isset($value['intervaltype'])) {
                 $value['intervaltype'] = isset($value[1]) ? $value[1] : '';
             }
         } elseif (is_null($value)) {
@@ -222,7 +222,8 @@ class Interval extends Element implements
             ];
         } else {
             throw new InvalidArgumentException(
-                    $value.' is an invalid interval!');
+                $value.' is an invalid interval!'
+            );
         }
 
         $this->amountElement->setValue($value['amount']);

@@ -50,7 +50,7 @@ class LoginRedirector extends AbstractPlugin
      */
     protected function getSession()
     {
-        if (!$this->session) {
+        if (! $this->session) {
             $this->session = new SessionContainer(__CLASS__);
             $this->session->setExpirationHops(2);
         }

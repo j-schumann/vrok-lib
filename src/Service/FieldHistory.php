@@ -38,8 +38,8 @@ class FieldHistory
      * @param AuthenticationServiceInterface $authService
      */
     public function __construct(
-            EntityManager $entityManager,
-            AuthenticationServiceInterface $authService
+        EntityManager $entityManager,
+        AuthenticationServiceInterface $authService
     ) {
         $this->entityManager = $entityManager;
         $this->authService   = $authService;
@@ -60,7 +60,7 @@ class FieldHistory
         $filter->byField($field);
 
         $log = $filter->getQuery()->getOneOrNullResult();
-        if (!$log) {
+        if (! $log) {
             $log = new HistoryEntity();
             $log->setReference($this->entityManager, $entity);
             $log->setField($field);

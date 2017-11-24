@@ -10,7 +10,7 @@ namespace Vrok\Stdlib;
 
 /**
  * Allows to calculate the strength of a password with a variant of a NIST
- * proposal developed by Thomas Hruska,.
+ * proposal developed by Thomas Hruska.
  *
  * @link http://en.wikipedia.org/wiki/Password_strength#NIST_Special_Publication_800-63
  * @link http://cubicspot.blogspot.de/2011/11/how-to-calculate-password-strength.html
@@ -105,7 +105,7 @@ class PasswordStrength
         for ($i = 0; $i < $y; ++$i) {
             $code = ord($password[$i]);
 
-            if (!isset($mult[$code])) {
+            if (! isset($mult[$code])) {
                 $mult[$code] = 1;
             }
 
@@ -128,7 +128,7 @@ class PasswordStrength
         $upper   = preg_match('/[A-Z]/', $password);
         $numeric = preg_match('/\d/', $password);
         $space   = preg_match('/ /', $password);
-        $other   = !preg_match('/^[A-Za-z0-9 ]*$/', $password);
+        $other   = ! preg_match('/^[A-Za-z0-9 ]*$/', $password);
 
         $extrabits = 0;
         if ($upper) {
@@ -147,10 +147,10 @@ class PasswordStrength
         }
 
         // malus if only special characters or only numeric
-        if (!$lower && !$upper) {
+        if (! $lower && ! $upper) {
             $extrabits -= 2;
 
-            if (!$other && !$space) {
+            if (! $other && ! $space) {
                 $extrabits -= 4;
             }
         }

@@ -43,7 +43,7 @@ class FormInterval extends AbstractHelper
      */
     public function __invoke(ElementInterface $element = null)
     {
-        if (!$element) {
+        if (! $element) {
             return $this;
         }
 
@@ -62,7 +62,7 @@ class FormInterval extends AbstractHelper
      */
     public function render(ElementInterface $element)
     {
-        if (!$element instanceof Interval) {
+        if (! $element instanceof Interval) {
             throw new Exception\InvalidArgumentException(sprintf(
                 '%s requires that the element is of type Vrok\Form\Element\Interval',
                 __METHOD__

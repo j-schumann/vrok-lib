@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   (c) 2014-16, Vrok
+ * @copyright   (c) 2017, Vrok
  * @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
  * @author      Jakob Schumann <schumann@vrok.de>
  */
@@ -24,7 +24,7 @@ abstract class StringUtils
      *
      * @return string
      */
-    public static function escapeString($str)
+    public static function escapeString(string $str) : string
     {
         //All regex special chars
         // \ ^ . $ | ( ) [ ]
@@ -43,16 +43,43 @@ abstract class StringUtils
      * Removes the UTF8 BOM from the given string if there is one.
      * Used when parsing files.
      *
-     * @param type $string
+     * @param string $string
      *
      * @return string
      */
-    public static function removeBOM($string)
+    public static function removeBOM(string $string) : string
     {
         if (substr($string, 0, 3) == pack('CCC', 0xef, 0xbb, 0xbf)) {
             $string = substr($string, 3);
         }
 
         return $string;
+    }
+
+    /**
+     * Create a human readable, as URL usable string from the given input.
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function slugify(string $string) : string
+    {
+        // replace non letter or digits by -
+        $noSpecials = preg_replace('~[^\\pL\d]+~u', '-', $string);
+
+        $trimmed = trim($noSpecials, '-');
+
+        // transliterate
+        if (function_exists('iconv')) {
+            $transliterated = iconv('utf-8', 'us-ascii//TRANSLIT', $trimmed);
+        }
+
+        $lower = strtolower($transliterated);
+
+        // remove unwanted characters
+        $cleaned = preg_replace('~[^-\w]+~', '', $lower);
+
+        return $cleaned;
     }
 }

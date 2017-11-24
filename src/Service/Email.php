@@ -66,7 +66,7 @@ class Email
      *
      * @return ViewHelperManager
      */
-    public function getViewHelperManager()
+    public function getViewHelperManager() : ViewHelperManager
     {
         return $this->viewHelperManager;
     }
@@ -80,7 +80,7 @@ class Email
      *
      * @return Message
      */
-    public function createMail($useLayout = true)
+    public function createMail(bool $useLayout = true) : Message
     {
         $mail = new Message($this->viewHelperManager);
         $mail->setFrom($this->defaultSenderAddress, $this->defaultSenderName);
@@ -98,8 +98,8 @@ class Email
      */
     public function sendMail(ZendMessage $mail)
     {
-        // when we send a mail and after a long time (e.g. in a background queue
-        // process) another mail it probably fails with exceptions like
+        // when we send a mail and after a long time another mail (e.g. in a
+        // background queue process), it probably fails with exceptions like
         // "Could not read from in-v3.mailjet.com" because the server closed
         // the connection. Zend\Mail\Protocol\Smtp->rset() is called when using
         // SMTP but does not reopen a closed connection, so we always use a new
@@ -112,10 +112,8 @@ class Email
      *
      * @param array $options
      */
-    public function setOptions($options)
+    public function setOptions(array $options)
     {
-        // @todo use Zend guards to check argument
-
         if (isset($options['default_sender_address'])) {
             $this->setDefaultSenderAddress($options['default_sender_address']);
         }
@@ -135,7 +133,7 @@ class Email
      *
      * @return array
      */
-    public function getTransportOptions()
+    public function getTransportOptions() : array
     {
         return $this->transportOptions;
     }
@@ -155,7 +153,7 @@ class Email
      *
      * @return TransportInterface
      */
-    public function getTransport()
+    public function getTransport() : TransportInterface
     {
         return \Zend\Mail\Transport\Factory::create($this->transportOptions);
     }
@@ -165,7 +163,7 @@ class Email
      *
      * @return string
      */
-    public function getDefaultSenderAddress()
+    public function getDefaultSenderAddress() : string
     {
         return $this->defaultSenderAddress;
     }
@@ -177,7 +175,7 @@ class Email
      *
      * @return self
      */
-    public function setDefaultSenderAddress($address)
+    public function setDefaultSenderAddress(string $address)
     {
         $this->defaultSenderAddress = $address;
 
@@ -189,7 +187,7 @@ class Email
      *
      * @return string
      */
-    public function getDefaultSenderName()
+    public function getDefaultSenderName() : string
     {
         return $this->defaultSenderName;
     }
@@ -201,7 +199,7 @@ class Email
      *
      * @return self
      */
-    public function setDefaultSenderName($name)
+    public function setDefaultSenderName(string $name)
     {
         $this->defaultSenderName = $name;
 
@@ -213,7 +211,7 @@ class Email
      *
      * @return string
      */
-    public function getLayout()
+    public function getLayout() : string
     {
         return $this->layout;
     }
@@ -225,7 +223,7 @@ class Email
      *
      * @return self
      */
-    public function setLayout($layout)
+    public function setLayout(string $layout)
     {
         $this->layout = $layout;
 

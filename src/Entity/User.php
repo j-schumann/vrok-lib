@@ -123,69 +123,6 @@ class User extends Entity implements RoleProviderInterface
         return false;
     }
 
-// <editor-fold defaultstate="collapsed" desc="username">
-    /**
-     * @var string
-     * @ORM\Column(type="string", unique=true)
-     */
-    protected $username;
-
-    /**
-     * Returns the users username (for login, semi-anonymous presentation etc.).
-     *
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    /**
-     * Sets the users username.
-     * Must be unique.
-     *
-     * @param string $username
-     *
-     * @return self
-     */
-    public function setUsername($username)
-    {
-        $this->username = (string) $username;
-
-        return $this;
-    }
-// </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="displayName">
-    /**
-     * @var string
-     * @ORM\Column(type="string", unique=false, nullable=true)
-     */
-    protected $displayName;
-
-    /**
-     * Returns the users displayName.
-     *
-     * @return string
-     */
-    public function getDisplayName()
-    {
-        return $this->displayName;
-    }
-
-    /**
-     * Sets the users displayName.
-     *
-     * @param string $displayName
-     *
-     * @return self
-     */
-    public function setDisplayName($displayName)
-    {
-        $this->displayName = (string) $displayName;
-
-        return $this;
-    }
-// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="email">
     /**
      * @var string
@@ -223,47 +160,108 @@ class User extends Entity implements RoleProviderInterface
         return $this;
     }
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="password">
+// <editor-fold defaultstate="collapsed" desc="emailNotificationsEnabled">
     /**
      * @var string
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="boolean", nullable=false, options={"default" = false})
      */
-    protected $password;
+    protected $emailNotificationsEnabled = false;
 
     /**
-     * Returns the users (encrypted) password.
+     * Returns wether email notifications are enabled or not.
      *
-     * @return string
+     * @return bool
      */
-    public function getPassword()
+    public function getEmailNotificationsEnabled()
     {
-        return $this->password;
+        return $this->emailNotificationsEnabled;
     }
 
     /**
-     * Encrypts and stores the given password.
-     * Sets the isRandomPassword flag to false.
+     * Sets wether email notifications are enabled or not.
      *
-     * @param string $password
+     * @param bool $value
      *
      * @return self
      */
-    public function setPassword($password)
+    public function setEmailNotificationsEnabled(bool $value)
     {
-        $this->password = password_hash($password, PASSWORD_DEFAULT);
-        $this->setIsRandomPassword(false);
-        $this->setPasswordDate(new \DateTime());
+        $this->emailNotificationsEnabled = $value;
 
         return $this;
     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="groups">
+    /**
+     * @ORM\ManyToMany(targetEntity="Group", mappedBy="members", cascade={"persist"}, fetch="EXTRA_LAZY")
+     **/
+    protected $groups;
 
     /**
-     * Removes the users password.
-     * Used for soft-deletion.
+     * Returns the list of all groups this user is a member of.
+     *
+     * @return Group[]
      */
-    public function removePassword()
+    public function getGroups()
     {
-        $this->password = '';
+        return $this->groups;
+    }
+
+    /**
+     * Required for the hydrator.
+     *
+     * @param Collection $groups
+     */
+    public function addGroups(Collection $groups)
+    {
+        foreach ($groups as $group) {
+            $group->addMember($this); // update owning side
+            $this->groups->add($group);
+        }
+    }
+
+    /**
+     * Required for the hydrator.
+     *
+     * @param Collection $groups
+     */
+    public function removeGroups(Collection $groups)
+    {
+        foreach ($groups as $group) {
+            $group->removeMember($this); // update owning side
+            $this->groups->removeElement($group);
+        }
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="isActive">
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false, options={"default" = false})
+     */
+    protected $isActive = false;
+
+    /**
+     * Gets whether the user is active or not.
+     *
+     * @return bool
+     */
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * Sets whether the user is active or not.
+     *
+     * @param bool $isActive
+     *
+     * @return self
+     */
+    public function setIsActive($isActive)
+    {
+        $this->isActive = (bool) $isActive;
+
+        return $this;
     }
 // </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="isRandomPassword">
@@ -294,6 +292,37 @@ class User extends Entity implements RoleProviderInterface
     public function setIsRandomPassword($isRandomPassword = true)
     {
         $this->isRandomPassword = (bool) $isRandomPassword;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="isValidated">
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", nullable=false, options={"default" = false})
+     */
+    protected $isValidated = false;
+
+    /**
+     * Gets whether the user is validated or not.
+     *
+     * @return bool
+     */
+    public function getIsValidated()
+    {
+        return $this->isValidated;
+    }
+
+    /**
+     * Sets whether the user is validated or not.
+     *
+     * @param bool $isValidated
+     *
+     * @return self
+     */
+    public function setIsValidated($isValidated)
+    {
+        $this->isValidated = (bool) $isValidated;
 
         return $this;
     }
@@ -376,6 +405,80 @@ class User extends Entity implements RoleProviderInterface
         return $this->loginKeys;
     }
 // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="displayName">
+    /**
+     * @var string
+     * @ORM\Column(type="string", unique=false, nullable=true)
+     */
+    protected $displayName;
+
+    /**
+     * Returns the users displayName.
+     *
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return $this->displayName;
+    }
+
+    /**
+     * Sets the users displayName.
+     *
+     * @param string $displayName
+     *
+     * @return self
+     */
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = (string) $displayName;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="password">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $password;
+
+    /**
+     * Returns the users (encrypted) password.
+     *
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * Encrypts and stores the given password.
+     * Sets the isRandomPassword flag to false.
+     *
+     * @param string $password
+     *
+     * @return self
+     */
+    public function setPassword($password)
+    {
+        $this->password = password_hash($password, PASSWORD_DEFAULT);
+        $this->setIsRandomPassword(false);
+        $this->setPasswordDate(new \DateTime());
+
+        return $this;
+    }
+
+    /**
+     * Removes the users password.
+     * Used for soft-deletion.
+     */
+    public function removePassword()
+    {
+        $this->password = '';
+    }
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="passwordDate">
     /**
      * @var DateTime
@@ -407,108 +510,191 @@ class User extends Entity implements RoleProviderInterface
         return $this;
     }
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="isActive">
+// <editor-fold defaultstate="collapsed" desc="httpNotificationsEnabled">
     /**
-     * @var bool
+     * @var string
      * @ORM\Column(type="boolean", nullable=false, options={"default" = false})
      */
-    protected $isActive = false;
+    protected $httpNotificationsEnabled = false;
 
     /**
-     * Gets whether the user is active or not.
+     * Returns wether http notifications are enabled or not.
      *
      * @return bool
      */
-    public function getIsActive()
+    public function getHttpNotificationsEnabled()
     {
-        return $this->isActive;
+        return $this->httpNotificationsEnabled;
     }
 
     /**
-     * Sets whether the user is active or not.
+     * Sets wether http notifications are enabled or not.
      *
-     * @param bool $isActive
+     * @param bool $value
      *
      * @return self
      */
-    public function setIsActive($isActive)
+    public function setHttpNotificationsEnabled(bool $value)
     {
-        $this->isActive = (bool) $isActive;
+        $this->httpNotificationsEnabled = $value;
 
         return $this;
     }
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="isValidated">
+// <editor-fold defaultstate="collapsed" desc="httpNotificationCertCheck">
     /**
-     * @var bool
-     * @ORM\Column(type="boolean", nullable=false, options={"default" = false})
+     * @var string
+     * @ORM\Column(type="boolean", nullable=false, options={"default" = true})
      */
-    protected $isValidated = false;
+    protected $httpNotificationCertCheck = true;
 
     /**
-     * Gets whether the user is validated or not.
+     * Returns wether http notification checks the certificate.
      *
      * @return bool
      */
-    public function getIsValidated()
+    public function getHttpNotificationCertCheck()
     {
-        return $this->isValidated;
+        return $this->httpNotificationCertCheck;
     }
 
     /**
-     * Sets whether the user is validated or not.
+     * Sets wether http notification checks the certificate.
      *
-     * @param bool $isValidated
+     * @param bool $value
      *
      * @return self
      */
-    public function setIsValidated($isValidated)
+    public function setHttpNotificationCertCheck(bool $value)
     {
-        $this->isValidated = (bool) $isValidated;
+        $this->httpNotificationCertCheck = $value;
 
         return $this;
     }
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="groups">
+// <editor-fold defaultstate="collapsed" desc="httpNotificationPw">
     /**
-     * @ORM\ManyToMany(targetEntity="Group", mappedBy="members", cascade={"persist"}, fetch="EXTRA_LAZY")
-     **/
-    protected $groups;
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $httpNotificationPw = null;
 
     /**
-     * Returns the list of all groups this user is a member of.
+     * Returns the http notification auth pw.
      *
-     * @return Group[]
+     * @return string
      */
-    public function getGroups()
+    public function getHttpNotificationPw()
     {
-        return $this->groups;
+        return $this->httpNotificationPw;
     }
 
     /**
-     * Required for the hydrator.
+     * Sets the http notification auth pw.
      *
-     * @param Collection $groups
+     * @param string $value
+     *
+     * @return self
      */
-    public function addGroups(Collection $groups)
+    public function setHttpNotificationPw(string $value = null)
     {
-        foreach ($groups as $group) {
-            $group->addMember($this); // update owning side
-            $this->groups->add($group);
-        }
+        $this->httpNotificationPw = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="httpNotificationUrl">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $httpNotificationUrl = null;
+
+    /**
+     * Returns the http notification URL.
+     *
+     * @return string
+     */
+    public function getHttpNotificationUrl()
+    {
+        return $this->httpNotificationUrl;
     }
 
     /**
-     * Required for the hydrator.
+     * Sets the http notification URL.
      *
-     * @param Collection $groups
+     * @param string $value
+     *
+     * @return self
      */
-    public function removeGroups(Collection $groups)
+    public function setHttpNotificationUrl(string $value = null)
     {
-        foreach ($groups as $group) {
-            $group->removeMember($this); // update owning side
-            $this->groups->removeElement($group);
-        }
+        $this->httpNotificationUrl = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="httpNotificationUser">
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $httpNotificationUser = null;
+
+    /**
+     * Returns the http notification auth user.
+     *
+     * @return string
+     */
+    public function getHttpNotificationUser()
+    {
+        return $this->httpNotificationUser;
+    }
+
+    /**
+     * Sets the http notification auth user.
+     *
+     * @param string $value
+     *
+     * @return self
+     */
+    public function setHttpNotificationUser(string $value = null)
+    {
+        $this->httpNotificationUser = $value;
+
+        return $this;
+    }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="username">
+    /**
+     * @var string
+     * @ORM\Column(type="string", unique=true)
+     */
+    protected $username;
+
+    /**
+     * Returns the users username (for login, semi-anonymous presentation etc.).
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * Sets the users username.
+     * Must be unique.
+     *
+     * @param string $username
+     *
+     * @return self
+     */
+    public function setUsername($username)
+    {
+        $this->username = (string) $username;
+
+        return $this;
     }
 // </editor-fold>
 }

@@ -79,7 +79,7 @@ class CurrencyFormat extends ZendFormat
     ) {
         $formatterId = md5($locale);
 
-        if (!isset($this->formatters[$formatterId])) {
+        if (! isset($this->formatters[$formatterId])) {
             $this->formatters[$formatterId] = new NumberFormatter(
                 $locale,
                 NumberFormatter::CURRENCY

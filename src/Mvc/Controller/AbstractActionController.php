@@ -81,7 +81,7 @@ abstract class AbstractActionController extends ZendController
     public function getEntityFromParam($entityClass, $param = 'id', $field = 'id')
     {
         $value = $this->params($param);
-        if (!$value) {
+        if (! $value) {
             return [self::MESSAGE_PARAM_MISSING, $param];
         }
 
@@ -102,7 +102,7 @@ abstract class AbstractActionController extends ZendController
     public function getEntityFromQuery($entityClass, $param = 'id', $field = 'id')
     {
         $value = $this->params()->fromQuery($param);
-        if (!$value) {
+        if (! $value) {
             return [self::MESSAGE_PARAM_MISSING, $param];
         }
 
@@ -162,9 +162,13 @@ abstract class AbstractActionController extends ZendController
      *
      * @return JsonModel
      */
-    public function getAjaxResponse($partial, $model = [],
-            $javascript = null, $module = null)
-    {
+    public function getAjaxResponse(
+        $partial,
+        $model = [],
+        $javascript = null,
+        $module = null
+    ) {
+
         $html = $this->renderPartial($partial, $model, $module);
 
         $data = ['html' => $html];

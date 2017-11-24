@@ -14,8 +14,7 @@ use Zend\Form\Element\Text;
 use Zend\Form\ElementPrepareAwareInterface;
 
 // @todo used? complete?
-class MultiText extends \Zend\Form\Element\Text
-    implements \Vrok\Form\ElementInterface, ElementPrepareAwareInterface
+class MultiText extends \Zend\Form\Element\Text implements \Vrok\Form\ElementInterface, ElementPrepareAwareInterface
 {
     /**
      * The number of inputs to render.
@@ -74,7 +73,8 @@ class MultiText extends \Zend\Form\Element\Text
         if ($number > $this->inputCount) {
             throw new OutOfBoundsException(
                 'Only '.$this->inputCount
-                .' elements configured, cannot return #'.(int) $number);
+                .' elements configured, cannot return #'.(int) $number
+            );
         }
 
         return $this->elements[$number - 1];
@@ -93,7 +93,7 @@ class MultiText extends \Zend\Form\Element\Text
     {
         if ($options instanceof Traversable) {
             $options = ArrayUtils::iteratorToArray($options);
-        } elseif (!is_array($options)) {
+        } elseif (! is_array($options)) {
             throw new \Zend\Form\Exception\InvalidArgumentException(
                 'The options parameter must be an array or a Traversable'
             );

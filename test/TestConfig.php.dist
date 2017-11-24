@@ -1,6 +1,9 @@
 <?php
+define('APPLICATION_ENV', 'dev');
+
 return array(
     'modules' => array(
+        'Zend\Router',
         'DoctrineModule',
         'DoctrineORMModule',
         'Vrok',

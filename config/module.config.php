@@ -78,16 +78,17 @@ return [
 // <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => [
         'delegators' => [
-            'ControllerPluginManager'        => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'ViewHelperManager'              => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\ActionLogger'      => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\Email'             => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\FieldHistory'      => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\Meta'              => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\Owner'             => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\Todo'              => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\UserManager'       => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\ValidationManager' => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'ControllerPluginManager'          => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'ViewHelperManager'                => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\ActionLogger'        => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Email'               => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\FieldHistory'        => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Meta'                => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\NotificationService' => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Owner'               => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\Todo'                => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\UserManager'         => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
+            'Vrok\Service\ValidationManager'   => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
             'Zend\Authentication\AuthenticationService' => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
 
         ],
@@ -96,22 +97,28 @@ return [
             'Vrok\Service\ActionLogger' => 'Vrok\Service\ActionLoggerServiceFactory',
             'Vrok\Service\FieldHistory' => 'Vrok\Service\FieldHistoryServiceFactory',
 
+            // the listeners need the shared eventmanager -> use the factory,
+            // else they would be instantiated without applying the initializers
+            'Vrok\Entity\Listener\NotificationListener' => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\Entity\Listener\TodoListener'         => 'Zend\ServiceManager\Factory\InvokableFactory',
+
             // overwritten to use our extended controller guard
             'BjyAuthorize\Guard\Controller' => 'Vrok\BjyAuthorize\ControllerGuardServiceFactory',
         ],
 
         'lazy_services' => [
             'class_map' => [
-                'ControllerPluginManager'        => 'Zend\Mvc\Controller\PluginManager',
-                'ViewHelperManager'              => 'Zend\View\HelperPluginManager',
-                'Vrok\Service\ActionLogger'      => 'Vrok\Service\ActionLogger',
-                'Vrok\Service\Email'             => 'Vrok\Service\Email',
-                'Vrok\Service\FieldHistory'      => 'Vrok\Service\FieldHistory',
-                'Vrok\Service\Meta'              => 'Vrok\Service\Meta',
-                'Vrok\Service\Owner'             => 'Vrok\Service\Owner',
-                'Vrok\Service\Todo'              => 'Vrok\Service\Todo',
-                'Vrok\Service\UserManager'       => 'Vrok\Service\UserManager',
-                'Vrok\Service\ValidationManager' => 'Vrok\Service\ValidationManager',
+                'ControllerPluginManager'          => 'Zend\Mvc\Controller\PluginManager',
+                'ViewHelperManager'                => 'Zend\View\HelperPluginManager',
+                'Vrok\Service\ActionLogger'        => 'Vrok\Service\ActionLogger',
+                'Vrok\Service\Email'               => 'Vrok\Service\Email',
+                'Vrok\Service\FieldHistory'        => 'Vrok\Service\FieldHistory',
+                'Vrok\Service\Meta'                => 'Vrok\Service\Meta',
+                'Vrok\Service\NotificationService' => 'Vrok\Service\NotificationService',
+                'Vrok\Service\Owner'               => 'Vrok\Service\Owner',
+                'Vrok\Service\Todo'                => 'Vrok\Service\Todo',
+                'Vrok\Service\UserManager'         => 'Vrok\Service\UserManager',
+                'Vrok\Service\ValidationManager'   => 'Vrok\Service\ValidationManager',
                 'Zend\Authentication\AuthenticationService' => 'Zend\Authentication\AuthenticationService',
             ],
         ],
@@ -131,6 +138,7 @@ return [
         'aliases' => [
             'flashMessenger' => 'Vrok\View\Helper\FlashMessenger',
             'highlightText'  => 'Vrok\View\Helper\HighlightText',
+            'texEscape'      => 'Vrok\View\Helper\TexEscape',
 
             'currencyFormat'  => 'Vrok\I18n\View\Helper\CurrencyFormat',
             'durationFormat'  => 'Vrok\I18n\View\Helper\DurationFormat',
@@ -145,6 +153,7 @@ return [
         'factories' => [
             'Vrok\View\Helper\FlashMessenger' => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\View\Helper\HighlightText'  => 'Zend\ServiceManager\Factory\InvokableFactory',
+            'Vrok\View\Helper\TexEscape'      => 'Zend\ServiceManager\Factory\InvokableFactory',
 
             'Vrok\I18n\View\Helper\CurrencyFormat'  => 'Zend\ServiceManager\Factory\InvokableFactory',
             'Vrok\I18n\View\Helper\DurationFormat'  => 'Zend\ServiceManager\Factory\InvokableFactory',

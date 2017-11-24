@@ -24,7 +24,7 @@ class Interval extends AbstractFilter
      */
     public function filter($value)
     {
-        if (!is_array($value) || empty($value['intervaltype'])) {
+        if (! is_array($value) || empty($value['intervaltype'])) {
             return $value;
         }
 
@@ -35,11 +35,11 @@ class Interval extends AbstractFilter
             return;
         }
 
-        if (!is_numeric($amount) || (int) $amount != $amount || $amount <= 0) {
+        if (! is_numeric($amount) || (int) $amount != $amount || $amount <= 0) {
             return $value;
         }
 
-        if (!in_array($type, ['S', 'M', 'H', 'D'])) {
+        if (! in_array($type, ['S', 'M', 'H', 'D'])) {
             return $value;
         }
 
