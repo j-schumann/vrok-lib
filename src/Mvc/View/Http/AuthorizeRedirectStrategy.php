@@ -96,7 +96,7 @@ class AuthorizeRedirectStrategy implements
             MvcEvent::EVENT_ROUTE,
             [$this, 'onRoute'],
             5000 // to run *before* BjyAuthorize, so the user is already logged
-                 // out when the permissions are checked
+            // out when the permissions are checked
         );
         $this->listeners[] = $events->attach(
             MvcEvent::EVENT_DISPATCH,
@@ -149,7 +149,7 @@ class AuthorizeRedirectStrategy implements
         $identityRoles = $provider->getIdentityRoles();
 
         // no logged in user -> nothing to log out
-        if (!in_array($provider->getAuthenticatedRole(), $identityRoles)) {
+        if (! in_array($provider->getAuthenticatedRole(), $identityRoles)) {
             return;
         }
 
@@ -197,8 +197,8 @@ class AuthorizeRedirectStrategy implements
         $routeMatch = $event->getRouteMatch();
 
         // Do nothing if the result is a response object or not valid
-        if ($result instanceof ResponseInterface || !$routeMatch
-            || ($response && !$response instanceof HttpResponse)
+        if ($result instanceof ResponseInterface || ! $routeMatch
+            || ($response && ! $response instanceof HttpResponse)
         ) {
             return;
         }
@@ -220,7 +220,7 @@ class AuthorizeRedirectStrategy implements
                 break;
 
             case Application::ERROR_EXCEPTION:
-                if (!($event->getParam('exception') instanceof UnAuthorizedException)) {
+                if (! ($event->getParam('exception') instanceof UnAuthorizedException)) {
                     return;
                 }
 
@@ -238,7 +238,7 @@ class AuthorizeRedirectStrategy implements
                 return;
         }
 
-        if (!$response) {
+        if (! $response) {
             $response = new HttpResponse();
         }
 
@@ -317,7 +317,7 @@ class AuthorizeRedirectStrategy implements
      */
     public function getTtl()
     {
-        if (!$this->ttl) {
+        if (! $this->ttl) {
             $config = $this->getServiceLocator()->get('Config');
             $this->ttl = isset($config['user_manager']['activity_timeout'])
                 ? (int)$config['user_manager']['activity_timeout']
