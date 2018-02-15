@@ -510,11 +510,21 @@ class UserManager implements
      *
      * @param bool $global  if true the users loginkeys will be deleted, logging
      *     him out on other devices too
-     *
      * @return bool
-     * @todo how can active sessions on other devices be logged out too?
      */
     public function logout($global = false)
+    {
+        return $global ? $this->logoutGlobal() : $this->logoutLocal();
+    }
+
+    /**
+     * Logs the user out on the current devices and invalidates his remember-me
+     * cookies on all other devices.
+     *
+     * @return boolean
+     * @todo how can active sessions on other devices be logged out too?
+     */
+    public function logoutGlobal()
     {
         $authService = $this->getAuthService();
         if (! $authService->hasIdentity()) {
@@ -523,14 +533,60 @@ class UserManager implements
 
         $user = $authService->getIdentity();
         $authService->clearIdentity();
+        $this->deleteAuthCookie();
+        $this->clearUserLoginKeys($user);
 
-        if ($this->cookieLoginEnabled) {
-            $this->deleteAuthCookie();
+        $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
 
-            if ($global) {
-                $this->clearUserLoginKeys($user);
-            }
+        // when using destroy() we could not set any messenger notifications afterwarss
+        \Zend\Session\Container::getDefaultManager()->getStorage()->clear();
+        \Zend\Session\Container::getDefaultManager()->regenerateId();
+
+        return true;
+    }
+
+    /**
+     * Logs the user out from the current session and removes the remember-me
+     * cookie.
+     *
+     * @return boolean
+     */
+    public function logoutLocal()
+    {
+        $authService = $this->getAuthService();
+        if (! $authService->hasIdentity()) {
+            return false;
         }
+
+        $user = $authService->getIdentity();
+        $authService->clearIdentity();
+        $this->deleteAuthCookie();
+
+        $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
+
+        // when using destroy() we could not set any messenger notifications afterwarss
+        \Zend\Session\Container::getDefaultManager()->getStorage()->clear();
+        \Zend\Session\Container::getDefaultManager()->regenerateId();
+
+        return true;
+    }
+
+    /**
+     * Logs the user out from the current session but keeps any local cookies
+     * and his loginkeys for cookies on other devices.
+     * Used when the session times out.
+     *
+     * @return boolean
+     */
+    public function logoutSession()
+    {
+        $authService = $this->getAuthService();
+        if (! $authService->hasIdentity()) {
+            return false;
+        }
+
+        $user = $authService->getIdentity();
+        $authService->clearIdentity();
 
         $this->getEventManager()->trigger(self::EVENT_LOGOUT, $user);
 

@@ -44,11 +44,16 @@ abstract class FileUtils
      * @param string $name  the path to delete
      *
      * @return bool     true when the file/dir was deleted, else false
+     * @throws RuntimeException when no filename was given
      */
     public static function delete(string $name) : bool
     {
         if (empty($name)) {
-            RuntimeException('File/directory not given!');
+            throw new RuntimeException('File/directory name cannot be empty!');
+        }
+
+        if (! file_exists($name)) {
+            return true;
         }
 
         if (is_dir($name)) {
@@ -61,8 +66,7 @@ abstract class FileUtils
             }
 
             rmdir($name);
-        }
-        else {
+        } else {
             unlink($name);
         }
 

@@ -6,11 +6,18 @@ The project follows Semantic Versioning (http://semver.org/)
 ### Removed
 - Vrok\RandomLib\Source\Mcrypt - mcrypt is deprecated and removed with PHP 7.2
 
-## 4.2.0 - tbd
+## 4.2.0 - 2018-02-15
 ### Added
 - Vrok\Stdlib\FileUtils - open files, delete files and directories(recursively)
 - Vrok\Stdlib\StringUtils::slugify - create slugs from string input
 - Vrok\View\Helper\TexEscape - to escape string to be used in LaTeX documents
+- UserManager: Allow to logout from session only, keeping the remember-me cookie
+
+### Fixed
+- additional untranslated message showed up for invalid emails with invalid
+  local name
+- AuthorizationRedirectStrategy: logout from session only so remember-me is
+  respected
 
 ## 4.1.0 - 2017-10-10
 ### Added
