@@ -54,8 +54,6 @@ class Bootstrap
 
         static::$serviceManager = $app->getServiceManager();
         static::$config         = $config;
-        $c = static::$serviceManager->get('Config');
-        //\Doctrine\Common\Util\Debug::dump($c['doctrine'], 4);exit;
 
         static::primeDatabase();
     }

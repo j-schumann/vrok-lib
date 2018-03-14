@@ -3,8 +3,18 @@
 The project follows Semantic Versioning (http://semver.org/)
 
 ## 5.0.0 - tbd
+### Added
+- Vrok\EntityLink - functionality to search, display and link to entities, replaces
+  Vrok\Service\Owner in combination with the new vrok/ref-helper
+### Changed
+- moved the Vrok\Service\Exception classes to the more general Vrok\Exception
+### Fixed
+- use Router directly instead of url() controller plugin in UserManager
+- unique index names, SQLite requires uniqueness across the database, not only table
+- phpunit bootstrap to include the testconfig correctly and prime the SQLite memory db
 ### Removed
 - Vrok\RandomLib\Source\Mcrypt - mcrypt is deprecated and removed with PHP 7.2
+- Vrok\Service\Owner and related classes - use Vrok\EntityLink and vrok/ref-helper instead
 
 ## 4.2.0 - 2018-02-15
 ### Added

@@ -223,20 +223,6 @@ class Module implements
 
                     return $service;
                 },
-                'Vrok\Service\Owner' => function ($sm) {
-                    $em = $sm->get('Doctrine\ORM\EntityManager');
-                    $service = new Service\Owner($em);
-
-                    // @todo implement setOptions() and move the config check
-                    // there
-                    $config = $sm->get('Config');
-                    if (! empty($config['owner_service']['allowed_owners'])) {
-                        $allowedOwners = $config['owner_service']['allowed_owners'];
-                        $service->setAllowedOwners($allowedOwners);
-                    }
-
-                    return $service;
-                },
                 'Vrok\Service\Todo' => function ($sm) {
                     $service = new Service\Todo();
                     $service->setAuthenticationService($sm->get('Zend\Authentication\AuthenticationService'));
@@ -338,21 +324,6 @@ class Module implements
 
         $em = $application->getEventManager();
         /* @var $em EventManager */
-
-        // we want to lazy load the strategy object only when needed, so we use a
-        // closure here
-        $em->getSharedManager()->attach('OwnerService', 'getOwnerStrategy', function ($e) use ($sm) {
-            // @todo strategy nicht via event laden sondern über config?
-            // @todo strategy als service einrichten?
-            $classes = $e->getParam('classes');
-            if (! in_array('Vrok\Entity\User', $classes)) {
-                return;
-            }
-
-            $userManager = $sm->get(Service\UserManager::class);
-
-            return new Owner\UserStrategy($userManager);
-        });
 
         // simply create Notifications anywhere in the app, they will be mailed/
         // pushed automatically by the service

@@ -75,15 +75,6 @@ return [
         'Vrok\Service\UserManager',
     ],
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="owner_service">
-    'owner_service' => [
-        'allowed_owners' => [
-            'Vrok\Entity\Validation' => [
-                'Vrok\Entity\User',
-            ],
-        ],
-    ],
-// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="service_manager">
     'service_manager' => [
         'delegators' => [
@@ -94,7 +85,6 @@ return [
             'Vrok\Service\FieldHistory'        => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
             'Vrok\Service\Meta'                => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
             'Vrok\Service\NotificationService' => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
-            'Vrok\Service\Owner'               => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
             'Vrok\Service\Todo'                => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
             'Vrok\Service\UserManager'         => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
             'Vrok\Service\ValidationManager'   => ['Zend\ServiceManager\Proxy\LazyServiceFactory'],
@@ -124,7 +114,6 @@ return [
                 'Vrok\Service\FieldHistory'        => 'Vrok\Service\FieldHistory',
                 'Vrok\Service\Meta'                => 'Vrok\Service\Meta',
                 'Vrok\Service\NotificationService' => 'Vrok\Service\NotificationService',
-                'Vrok\Service\Owner'               => 'Vrok\Service\Owner',
                 'Vrok\Service\Todo'                => 'Vrok\Service\Todo',
                 'Vrok\Service\UserManager'         => 'Vrok\Service\UserManager',
                 'Vrok\Service\ValidationManager'   => 'Vrok\Service\ValidationManager',
