@@ -7,6 +7,7 @@ The project follows Semantic Versioning (http://semver.org/)
 - Vrok\EntityLink - functionality to search, display and link to entities, replaces
   Vrok\Service\Owner in combination with the new vrok/ref-helper
 ### Changed
+- require PHP 7.2+
 - moved the Vrok\Service\Exception classes to the more general Vrok\Exception
 ### Fixed
 - use Router directly instead of url() controller plugin in UserManager
