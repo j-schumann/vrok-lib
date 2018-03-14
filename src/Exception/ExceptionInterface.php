@@ -6,7 +6,7 @@
  * @author      Jakob Schumann <schumann@vrok.de>
  */
 
-namespace Vrok\Service\Exception;
+namespace Vrok\Exception;
 
 interface ExceptionInterface
 {

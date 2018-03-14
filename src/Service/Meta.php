@@ -8,7 +8,7 @@
 
 namespace Vrok\Service;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Vrok\Doctrine\EntityInterface;
 use Vrok\Entity\ObjectMeta;
 use Vrok\Entity\SystemMeta;
@@ -22,7 +22,7 @@ class Meta
     const EXCEPTION_NO_OBJECT = 'The parameter "object" must be an object!';
 
     /**
-     * @var \Doctrine\Orm\EntityManager
+     * @var EntityManagerInterface
      */
     protected $entityManager = null;
 
@@ -46,9 +46,9 @@ class Meta
     /**
      * Sets the required dependency.
      *
-     * @param EntityManager $entityManager
+     * @param EntityManagerInterface $entityManager
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
     }

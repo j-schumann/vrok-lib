@@ -13,6 +13,7 @@ use SlmQueue\Controller\Plugin\QueuePlugin;
 use Vrok\Entity\Notification;
 use Vrok\Entity\Filter\NotificationFilter;
 use Vrok\Entity\Listener\NotificationListener;
+use Vrok\Exception;
 use Vrok\Notifications\FormatterInterface;
 use Zend\EventManager\EventInterface;
 use Zend\EventManager\EventManagerAwareInterface;

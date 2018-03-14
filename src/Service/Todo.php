@@ -16,6 +16,7 @@ use Vrok\Entity\User;
 use Vrok\Entity\AbstractTodo as TodoEntity;
 use Vrok\Entity\UserTodo;
 use Vrok\Entity\Filter\TodoFilter;
+use Vrok\Exception;
 use Zend\Authentication\AuthenticationServiceInterface;
 use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\EventManagerAwareTrait;
@@ -105,7 +106,7 @@ class Todo implements EventManagerAwareInterface
     ) {
         $classMeta = $this->entityManager->getClassMetadata('Vrok\Entity\AbstractTodo');
         if (! isset($classMeta->discriminatorMap[$type])) {
-            throw new \RuntimeException('Requested Todo type '.$type.' not found!');
+            throw new Exception\RuntimeException('Requested Todo type '.$type.' not found!');
         }
 
         $className = $classMeta->discriminatorMap[$type];

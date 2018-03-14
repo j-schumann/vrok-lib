@@ -61,6 +61,15 @@ return [
         ],
     ],
 // </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="entity_link">
+    'entity_link' => [
+        'strategies' => [
+            'Vrok\EntityLink\UserStrategy' => [
+                'Vrok\Entity\User',
+            ],
+        ],
+    ],
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="listeners">
     'listeners' => [
         'Vrok\Service\UserManager',

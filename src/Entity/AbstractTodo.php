@@ -23,7 +23,7 @@ use Vrok\Doctrine\Traits\ObjectReference;
  * when it is completed.
  *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
- * @ORM\Table(name="todo", indexes={@ORM\Index(name="status_idx", columns={"status"})})
+ * @ORM\Table(name="todo", indexes={@ORM\Index(name="todo_status_idx", columns={"status"})})
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  * @ORM\EntityListeners({"Vrok\Entity\Listener\TodoListener"})

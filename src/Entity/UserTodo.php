@@ -15,7 +15,7 @@ use Vrok\Doctrine\Entity;
  * References a single user that can be assigned the Todo.
  *
  * @ORM\Entity(repositoryClass="Vrok\Doctrine\EntityRepository")
- * @ORM\Table(name="todo_users", indexes={@ORM\Index(name="status_idx", columns={"status"})})
+ * @ORM\Table(name="todo_users", indexes={@ORM\Index(name="todo_users_status_idx", columns={"status"})})
  */
 class UserTodo extends Entity
 {

@@ -3,7 +3,8 @@
 
 namespace VrokLibTest;
 
-use Zend\Mvc\Service\ServiceManagerConfig;
+use Doctrine\ORM\Tools\SchemaTool;
+use Zend\Mvc\Application;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
 
@@ -15,11 +16,13 @@ class Bootstrap
 
     public static function init()
     {
+        define('APPLICATION_ENV', 'dev');
+
         // Load the user-defined test configuration file, if it exists; otherwise, load
-        if (is_readable(__DIR__.'/TestConfig.php')) {
-            $testConfig = include __DIR__.'/TestConfig.php';
+        if (is_readable(__DIR__.'/TestConfig.local.php')) {
+            $testConfig = include __DIR__.'/TestConfig.local.php';
         } else {
-            $testConfig = include __DIR__.'/TestConfig.php.dist';
+            $testConfig = include __DIR__.'/TestConfig.php';
         }
 
         $zf2ModulePaths = [];
@@ -46,16 +49,20 @@ class Bootstrap
 
         $config = ArrayUtils::merge($baseConfig, $testConfig);
 
-        $smc = new ServiceManagerConfig();
-        $serviceManager = new ServiceManager();
-        $smc->configureServiceManager($serviceManager);
-        $serviceManager->setService('ApplicationConfig', $config);
-        $serviceManager->get('ModuleManager')->loadModules();
+        // ensure Module::onBootstrap is called
+        $app = Application::init($config);
 
-        static::$serviceManager = $serviceManager;
+        static::$serviceManager = $app->getServiceManager();
         static::$config         = $config;
+        $c = static::$serviceManager->get('Config');
+        //\Doctrine\Common\Util\Debug::dump($c['doctrine'], 4);exit;
+
+        static::primeDatabase();
     }
 
+    /**
+     * @return ServiceManager
+     */
     public static function getServiceManager()
     {
         return static::$serviceManager;
@@ -80,8 +87,20 @@ class Bootstrap
 
         return $dir.'/'.$path;
     }
+
+    protected static function primeDatabase()
+    {
+        $entityManager = static::$serviceManager->get('Doctrine\ORM\EntityManager');
+
+        // Run the schema update tool using our entity metadata
+        $metadatas = $entityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool = new SchemaTool($entityManager);
+        $schemaTool->updateSchema($metadatas);
+    }
 }
 
 error_reporting(E_ALL | E_STRICT);
+ini_set('display_errors', 'on');
+
 require __DIR__ . '/../vendor/autoload.php';
 Bootstrap::init();

@@ -16,6 +16,7 @@ use Vrok\Entity\Group as GroupEntity;
 use Vrok\Entity\LoginKey;
 use Vrok\Entity\User as UserEntity;
 use Vrok\Entity\Validation;
+use Vrok\Exception;
 use Vrok\Stdlib\DateInterval;
 use Vrok\Stdlib\PasswordStrength;
 use Zend\Authentication\Validator\Authentication as AuthValidator;
@@ -402,7 +403,7 @@ class UserManager implements
             );
 
             $em->getConnection()->commit();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $em->getConnection()->rollBack();
             throw $e;
         }
@@ -928,9 +929,8 @@ class UserManager implements
      */
     public function getUserSearchUrl()
     {
-        $url = $this->getServiceLocator()->get('ControllerPluginManager')->get('url');
-
-        return $url->fromRoute($this->getUserSearchRoute());
+        $router = $this->getServiceLocator()->get('HttpRouter');
+        return $router->assemble([], ['name' => $this->getUserSearchRoute()]);
     }
 
     /**
@@ -967,9 +967,8 @@ class UserManager implements
      */
     public function getUserAdminUrl($userId)
     {
-        $url = $this->getServiceLocator()->get('ControllerPluginManager')->get('url');
-
-        return $url->fromRoute($this->getUserAdminRoute(), ['id' => $userId]);
+        $router = $this->getServiceLocator()->get('HttpRouter');
+        return $router->assemble(['id' => $userId], ['name' => $this->getUserAdminRoute()]);
     }
 
     /**

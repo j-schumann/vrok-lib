@@ -145,6 +145,21 @@ class Module implements
                     // inject the parent service locator
                     return new Doctrine\ORM\Mapping\EntityListenerResolver($sm);
                 },
+                'Vrok\EntityLink\Helper' => function ($sm) {
+                    $em = $sm->get('Doctrine\ORM\EntityManager');
+                    $helper = new EntityLink\Helper($em, $sm);
+
+                    $config = $sm->get('Config');
+                    if (! empty($config['entity_link'])) {
+                        $helper->setOptions($config['entity_link']);
+                    }
+
+                    return $helper;
+                },
+                'Vrok\EntityLink\UserStrategy' => function ($sm) {
+                    $um = $sm->get('Vrok\Service\UserManager');
+                    return new EntityLink\UserStrategy($um);
+                },
                 'Vrok\Mvc\View\Http\AuthorizeRedirectStrategy' => function ($sm) {
                     // @todo refactor to avoid injecting the serviceManager
                     return new Mvc\View\Http\AuthorizeRedirectStrategy($sm);
