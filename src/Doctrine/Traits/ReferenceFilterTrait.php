@@ -25,7 +25,7 @@ trait ReferenceFilterTrait
     public function byReference(array $filterValues)
     {
         $conditions = [];
-        foreach($filterValues as $column => $value) {
+        foreach ($filterValues as $column => $value) {
             if ($value) {
                 $conditions[] = "$this->alias.$column = :$column";
                 $this->qb->setParameter($column, $value);
