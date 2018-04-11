@@ -28,7 +28,7 @@ interface StrategyInterface
      *
      * @return string
      */
-    public function getEditUrl(/*object*/ $entity) : string;
+    public function getEditUrl(object $entity) : string;
 
     /**
      * Returns a string with identifying information about the object,
@@ -38,7 +38,7 @@ interface StrategyInterface
      *
      * @return object
      */
-    public function getPresentation(/*object*/ $entity) : string;
+    public function getPresentation(object $entity) : string;
 
     /**
      * Checks if the given object is a valid entity supported by this strategy.
@@ -47,5 +47,5 @@ interface StrategyInterface
      *
      * @return bool
      */
-    public function isSupported(/*object*/ $entity) : bool;
+    public function isSupported(object $entity) : bool;
 }

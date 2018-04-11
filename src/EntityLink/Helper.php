@@ -75,7 +75,7 @@ class Helper
      *
      * @return string
      */
-    public function getEditUrl(/*object*/ $entity) : string
+    public function getEditUrl(object $entity) : string
     {
         $strategy = $this->getStrategy(get_class($entity), true);
 
@@ -90,7 +90,7 @@ class Helper
      *
      * @return string
      */
-    public function getPresentation(/*object*/ $entity) : string
+    public function getPresentation(object $entity) : string
     {
         $strategy = $this->getStrategy(get_class($entity), true);
 

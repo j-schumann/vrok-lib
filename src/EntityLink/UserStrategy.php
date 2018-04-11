@@ -89,7 +89,7 @@ class UserStrategy implements StrategyInterface
      *
      * @return bool
      */
-    public function isSupported(/*object*/ $user) : bool
+    public function isSupported(object $user) : bool
     {
         return $user instanceof User;
     }

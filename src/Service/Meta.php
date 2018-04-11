@@ -134,7 +134,7 @@ class Meta
 
     /**
      * Sets the given meta property.
-     * Attention: does not flush the entityManager to avoid too much DB queries.
+     * Attention: does not flush the entityManager to avoid too many DB queries.
      *
      * @param string $name    meta value name
      * @param mixed  $value   the value to store, will be JSON encoded, make sure no
