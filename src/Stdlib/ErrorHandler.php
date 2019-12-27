@@ -103,6 +103,7 @@ class ErrorHandler
             case E_STRICT:
             case E_RECOVERABLE_ERROR:
             case E_DEPRECATED:
+            case E_USER_DEPRECATED:
                 $return = true;
                 break;
         }
